@@ -71,7 +71,7 @@ At least 50 MB must be collected by us, with evidence. `collect/scrape/` does it
 python collect/scrape/probe.py                                    # Phase A: robots, sitemaps, sample pages, terms per candidate
 python collect/scrape/crawl.py --site voa_urdu --limit 50 --max-sitemaps 1   # smoke test
 python collect/scrape/crawl.py --site voa_urdu --target-mb 70     # full crawl; resumable, rerun after an interruption
-python collect/scrape/crawl.py --site humsub --target-mb 20
+python collect/scrape/crawl.py --site humsub --target-mb 20 --max-hours 7   # stops at whichever comes first
 python collect/scrape/crawl.py --site voa_urdu --reextract        # rebuild articles.jsonl from the HTML cache, no requests
 python collect/scrape/report.py                                   # Phase C: evidence/scrape_report.md and sources.json
 ```

@@ -213,3 +213,14 @@ def test_partial_last_line_is_ignored_then_cut(tmp_path: Path) -> None:
 def test_min_interval_below_one_second_is_refused_outside_tests() -> None:
     with pytest.raises(SystemExit):
         crawl.parse_args(["--site", "voa_urdu", "--min-interval", "0.2"])
+
+
+def test_max_hours_stops_discovery_and_crawl(fake_site, tmp_path: Path) -> None:
+    assert run(tmp_path, "--max-sitemaps", "1", "--limit", "1") == 0
+    fake_site.requests.clear()
+    assert run(tmp_path, "--max-hours", "0") == 0  # the budget is spent before the first request
+    assert [r for r in paths_requested(fake_site) if r != "/robots.txt"] == []
+    assert len(crawl.read_rows(own(tmp_path).articles)) == 1
+    assert run(tmp_path, "--max-hours", "1") == 0  # a real budget: discovery finishes, the crawl continues
+    assert "/post-sitemap2.xml" in paths_requested(fake_site)
+    assert len(crawl.read_rows(own(tmp_path).articles)) == 8

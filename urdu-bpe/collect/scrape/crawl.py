@@ -1,7 +1,7 @@
 """Phase B crawler: polite, resumable collection of one site's articles.
 
     python collect/scrape/crawl.py --site voa_urdu --target-mb 70
-    python collect/scrape/crawl.py --site humsub --target-mb 20
+    python collect/scrape/crawl.py --site humsub --target-mb 20 --max-hours 7   # whichever comes first
     python collect/scrape/crawl.py --site voa_urdu --limit 50 --max-sitemaps 1   # smoke test
     python collect/scrape/crawl.py --site voa_urdu --reextract                   # rebuild from cache, no requests
 
@@ -23,7 +23,8 @@ Retry-After. A bot challenge or 20 consecutive 403s stop the site.
    Pages the adapter rejects (media pages, reprints, too little text) and
    duplicate canonical URLs are recorded in skips.jsonl.
 4. Stop at --target-mb of extracted UTF-8 text (MB = 10^6 bytes, default 70),
-   at --limit kept articles, or when the URLs run out.
+   when --max-hours of wall-clock time have passed since the start of this run
+   (discovery included), at --limit kept articles, or when the URLs run out.
 
 Resumable: URLs already kept or skipped are passed over; URLs fetched with
 status 200 are re-extracted from the cache instead of fetched again; 404s,
@@ -167,7 +168,7 @@ class Discovery:
 
 
 def discover(client: ScrapeClient, adapter: SiteAdapter, paths: SitePaths, *, max_sitemaps: int | None,
-             rediscover: bool, log: logging.Logger) -> Discovery:
+             rediscover: bool, log: logging.Logger, deadline: float | None = None) -> Discovery:
     """Read sitemaps breadth-first and return every article URL found so far (this run and earlier ones)."""
     done = {} if rediscover else {r["url"]: r for r in read_rows(paths.sitemaps) if r["outcome"] == "ok"}
     found: dict[str, None] = dict.fromkeys(r["url"] for r in read_rows(paths.urls))
@@ -192,6 +193,10 @@ def discover(client: ScrapeClient, adapter: SiteAdapter, paths: SitePaths, *, ma
             if max_sitemaps is not None and url_lists >= max_sitemaps:
                 result.complete = False
                 log.info("--max-sitemaps %d reached; discovery continues on the next run", max_sitemaps)
+                break
+            if deadline is not None and time.monotonic() >= deadline:
+                result.complete = False
+                log.info("--max-hours reached during discovery; discovery continues on the next run")
                 break
             r = client.fetch(sm_url, kind="sitemap", allow_url=adapter.allow_url)
             result.sitemaps_read += 1
@@ -260,7 +265,7 @@ def article_row(url: str, meta: dict[str, Any], e: Any, adapter: SiteAdapter) ->
 
 
 def crawl(client: ScrapeClient, adapter: SiteAdapter, paths: SitePaths, order: Sequence[str], *,
-          target_bytes: int, limit: int | None, log: logging.Logger) -> CrawlSummary:
+          target_bytes: int, limit: int | None, log: logging.Logger, deadline: float | None = None) -> CrawlSummary:
     s = CrawlSummary()
     fetched = {r["url"]: r for r in read_rows(paths.fetched)}  # the last row for a URL wins
     articles = read_rows(paths.articles)
@@ -281,6 +286,9 @@ def crawl(client: ScrapeClient, adapter: SiteAdapter, paths: SitePaths, order: S
                 break
             if limit is not None and s.kept >= limit:
                 s.stop_reason = f"--limit {limit} articles reached"
+                break
+            if deadline is not None and time.monotonic() >= deadline:
+                s.stop_reason = f"--max-hours reached ({s.text_bytes / 1e6:.2f} MB kept)"
                 break
             if url in done:
                 continue
@@ -401,6 +409,8 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     p.add_argument("--site", required=True, choices=sorted(ADAPTERS), help="site adapter to use")
     p.add_argument("--target-mb", type=float, default=70.0, metavar="MB",
                    help="stop at this much extracted UTF-8 text in articles.jsonl (MB = 10^6 bytes; default 70)")
+    p.add_argument("--max-hours", type=float, metavar="H",
+                   help="stop this run after H hours of wall-clock time, discovery included (rerun to continue)")
     p.add_argument("--limit", type=int, metavar="N", help="stop after N articles kept in this run (smoke tests)")
     p.add_argument("--max-sitemaps", type=int, metavar="N",
                    help="read at most N URL-list sitemaps in this run (smoke tests); the next run continues")
@@ -418,6 +428,8 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     args = p.parse_args(argv)
     if args.min_interval < 1.0 and args.user_agent is None:
         p.error("--min-interval below 1.0 s is only for tests")
+    if args.max_hours is not None and args.max_hours < 0:
+        p.error("--max-hours must be >= 0")
     return args
 
 
@@ -434,17 +446,19 @@ def run(args: argparse.Namespace, client_kwargs: dict[str, Any] | None = None) -
     except MissingContact as e:
         log.error("%s", e)
         return 2
-    log.info("start %s at %s: target %.1f MB, limit %s, seed %d", adapter.site_id, utc_now_ms(), args.target_mb,
-             args.limit, args.seed)
+    deadline = time.monotonic() + args.max_hours * 3600 if args.max_hours is not None else None
+    log.info("start %s at %s: target %.1f MB, max hours %s, limit %s, seed %d", adapter.site_id, utc_now_ms(),
+             args.target_mb, args.max_hours, args.limit, args.seed)
     with EvidenceLog(args.evidence_dir / f"crawl_log_{adapter.site_id}.jsonl.gz", {"site": adapter.site_id}) as ev:
         client = ScrapeClient(ua, evidence=ev, min_interval=args.min_interval, jitter=args.jitter, logger=log,
                               **(client_kwargs or {}))
         try:
-            d = discover(client, adapter, paths, max_sitemaps=args.max_sitemaps, rediscover=args.rediscover, log=log)
+            d = discover(client, adapter, paths, max_sitemaps=args.max_sitemaps, rediscover=args.rediscover, log=log,
+                         deadline=deadline)
             log.info("discovery %s: %d article URLs (%d new), %d sitemaps read this run",
                      "complete" if d.complete else "partial", len(d.urls), d.new_urls, d.sitemaps_read)
             s = crawl(client, adapter, paths, crawl_order(d.urls, args.seed),
-                      target_bytes=int(args.target_mb * 1e6), limit=args.limit, log=log)
+                      target_bytes=int(args.target_mb * 1e6), limit=args.limit, log=log, deadline=deadline)
         except (BotChallenge, SiteBlocked) as e:
             log.error("STOPPED %s: %s. Nothing more is fetched from this site; see the evidence log.",
                       adapter.site_id, e)

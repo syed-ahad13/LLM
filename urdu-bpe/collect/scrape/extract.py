@@ -6,9 +6,10 @@ Unicode normalization belongs to normalize.py (CLAUDE.md, hard rule 4).
 
 - soup_of: parse HTML with lxml through BeautifulSoup.
 - block_text / text_blocks: the text of <p>, <h2>, <h3>, <li> elements in
-  document order. A block nested inside another selected block is not
-  counted twice. Inline tags are joined without a separator, so
-  <p>اردو<b>زبان</b></p> stays one word as written.
+  document order, plus loose text outside them (runs of text and inline
+  elements, broken at <br> and block edges). A block nested inside another
+  selected block is not counted twice. Inline tags are joined without a
+  separator, so <p>اردو<b>زبان</b></p> stays one word as written.
 - drop_elements: remove junk (GENERIC_DROP_SELECTORS plus site selectors).
 - largest_text_block: the probe's site-independent body heuristic.
 - published_date, canonical_url, page_title: metadata from meta tags and JSON-LD.
@@ -34,7 +35,7 @@ GENERIC_DROP_SELECTORS: tuple[str, ...] = (
     "figure", "figcaption", "button", "svg", "video", "audio", "picture", "object", "embed",
     "[class*=share]", "[class*=social]", "[class*=related]", "[class*=newsletter]", "[class*=subscribe]",
     "[class*=comment]", "[id*=comment]", "[class*=author]", "[class*=byline]", "[rel=author]",
-    "[class*=read-more]", "[class*=readmore]", "[class*=advert]", "[id*=advert]", "[class*=ad-slot]",
+    "[class*=read-more]", "[class*=readmore]", "[class*=also-read]", "[class*=read-also]", "[class*=advert]", "[id*=advert]", "[class*=ad-slot]",
 )
 
 ARABIC_LETTER = regex.compile(r"[\p{Arabic}&&\p{L}]", regex.V1)
@@ -85,15 +86,68 @@ def _nested_in_block(el: Tag, container: Tag, tags: Sequence[str]) -> bool:
     return False
 
 
-def text_blocks(container: Tag, tags: Sequence[str] = BLOCK_TAGS) -> list[str]:
-    """Non-empty block texts in document order, outermost selected blocks only."""
-    out = []
-    for el in container.find_all(list(tags)):
-        if _nested_in_block(el, container, tags):
+# Inline elements: their text joins the surrounding run of loose text.
+INLINE_TAGS = frozenset({"a", "abbr", "b", "bdi", "bdo", "cite", "code", "em", "font", "i", "kbd", "mark", "q", "s",
+                         "samp", "small", "span", "strong", "sub", "sup", "time", "u", "var", "wbr"})
+
+
+def _raw_text(el: Tag) -> str:
+    """Text of an inline element as written, with <br> as the line marker (whitespace not collapsed)."""
+    parts = []
+    for node in el.descendants:
+        if isinstance(node, Comment):
             continue
-        text = block_text(el)
-        if text:
-            out.append(text)
+        if isinstance(node, Tag):
+            if node.name == "br":
+                parts.append(_BR)
+        elif isinstance(node, str):
+            parts.append(str(node))
+    return "".join(parts)
+
+
+def text_blocks(container: Tag, tags: Sequence[str] = BLOCK_TAGS) -> list[str]:
+    """Text blocks of a container in document order.
+
+    Each element in `tags` (outermost only) is one block. Text outside those
+    elements also counts: runs of text nodes and inline elements (span, b, a,
+    ...) become blocks, broken at <br> and at the edges of block-level elements.
+    Some pages carry the story as <span>s separated by <br><br> or as bare text
+    in a <div>, with no <p> at all.
+    """
+    out: list[str] = []
+    run: list[str] = []
+
+    def flush() -> None:
+        for line in "".join(run).split(_BR):
+            line = collapse_ws(line)
+            if line:
+                out.append(line)
+        run.clear()
+
+    def walk(node: Tag) -> None:
+        for child in node.children:
+            if isinstance(child, Comment):
+                continue
+            if not isinstance(child, Tag):
+                if isinstance(child, str):
+                    run.append(str(child))
+                continue
+            if child.name in tags:
+                flush()
+                text = block_text(child)
+                if text:
+                    out.append(text)
+            elif child.name == "br":
+                run.append(_BR)
+            elif child.name in INLINE_TAGS and child.find(lambda t: t.name not in INLINE_TAGS and t.name != "br") is None:
+                run.append(_raw_text(child))
+            else:  # block-level element (div, ul, blockquote, table, h4, ...) or inline wrapping blocks
+                flush()
+                walk(child)
+                flush()
+
+    walk(container)
+    flush()
     return out
 
 

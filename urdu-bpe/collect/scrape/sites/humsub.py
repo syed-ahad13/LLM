@@ -31,7 +31,7 @@ class HumSub(SiteAdapter):
     home_url: ClassVar[str] = "https://www.humsub.com.pk/"
     domain: ClassVar[str] = "humsub.com.pk"
     genre: ClassVar[str] = "opinion/blogs"
-    extractor_version: ClassVar[str] = "humsub/1"
+    extractor_version: ClassVar[str] = "humsub/2"
     terms_url: ClassVar[str | None] = None
     terms_summary: ClassVar[str] = (
         "No terms of use or privacy page is linked from the home page or article pages (probe, 2026-10-11). "
@@ -46,7 +46,7 @@ class HumSub(SiteAdapter):
     container_selectors: ClassVar[tuple[str, ...]] = ("article.post .entry-content",)
     drop_selectors: ClassVar[tuple[str, ...]] = (
         ".heateor_sss_sharing_container", ".heateorSssClear", "ins.adsbygoogle", ".ai-viewports", "[class*=ai-insert]",
-        ".fb-comments", "[id^=wpdevar_comment]", ".wp-caption", ".sharedaddy", ".jp-relatedposts",
+        ".fb-comments", "[id^=wpdevar_comment]", ".wp-caption", ".sharedaddy", ".jp-relatedposts", "[class*=code-block]",
     )
     title_selector: ClassVar[str | None] = "h1.entry-title"
 

@@ -4,8 +4,11 @@ Page structure (Pangea CMS, checked on the probe's sample pages, 2026-10-11):
 - Articles have <body class="pg-article ...">; the story is #article-content .wsw.
 - Video, audio and listener-letter pages share the /a/<slug>/<id>.html URL form but have
   <body class="pg-media ...">, og:type video.other, and no .wsw: skipped.
+- Older stories (about 2012-2014) have no <p> in .wsw: the text is <span>s separated by
+  <br><br>, or a bare <div>. text_blocks() reads that loose text too (extractor v2).
 - Bylines (ul.authors-highlights), share boxes and category links sit outside .wsw.
-  Inside .wsw: embedded media (.wsw__embed), infographics and tweet snippets are dropped.
+  Inside .wsw: embedded media (.wsw__embed), infographics, tweet snippets, "SEE ALSO" cards
+  (.also-read in div[data-owner-ct]) and stand-alone datelines are dropped.
 - Discovery: sitemap.xml lists sitemap_445_<n>.xml.gz (the archive, ~20,000 URLs each)
   plus videos, sections, latest and news sitemaps, which are not followed.
 """
@@ -24,7 +27,7 @@ class VoaUrdu(SiteAdapter):
     home_url: ClassVar[str] = "https://www.urduvoa.com/"
     domain: ClassVar[str] = "urduvoa.com"
     genre: ClassVar[str] = "news"
-    extractor_version: ClassVar[str] = "voa_urdu/1"
+    extractor_version: ClassVar[str] = "voa_urdu/2"
     terms_url: ClassVar[str | None] = "https://www.urduvoa.com/p/7823.html"
     terms_summary: ClassVar[str] = (
         "VOA's terms (https://www.urduvoa.com/p/7823.html, copyright section): all text, audio and video produced "
@@ -39,6 +42,8 @@ class VoaUrdu(SiteAdapter):
     container_selectors: ClassVar[tuple[str, ...]] = ("#article-content .wsw",)
     drop_selectors: ClassVar[tuple[str, ...]] = (
         ".wsw__embed", ".infgraphicsAttach", ".twitterSnippet", ".snippetLoading", ".media-download", ".c-mmp",
+        ".also-read", "div[data-owner-ct]",  # "SEE ALSO" cards linking other stories
+        ":scope > .dateline",  # a dateline standing alone before the first paragraph ("واشنگٹن —")
     )
     title_selector: ClassVar[str | None] = "h1.pg-title"
 

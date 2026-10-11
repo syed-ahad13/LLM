@@ -27,8 +27,23 @@ def test_nbsp_and_zwnj() -> None:
 def test_text_blocks_in_order_without_double_counting() -> None:
     soup = soup_of("""<div id="c"><h2>سرخی</h2><p>پہلا</p>
         <ul><li><p>فہرست کا پیرا</p></li><li>دوسری شق</li></ul>
-        <h3>ذیلی</h3><blockquote><p>اقتباس</p></blockquote><h4>skipped h4</h4><p>   </p></div>""")
-    assert text_blocks(soup.find(id="c")) == ["سرخی", "پہلا", "فہرست کا پیرا", "دوسری شق", "ذیلی", "اقتباس"]
+        <h3>ذیلی</h3><blockquote><p>اقتباس</p></blockquote><h4>چوتھی سرخی</h4><p>   </p></div>""")
+    assert text_blocks(soup.find(id="c")) == ["سرخی", "پہلا", "فہرست کا پیرا", "دوسری شق", "ذیلی", "اقتباس",
+                                              "چوتھی سرخی"]
+
+
+def test_loose_text_without_p_spans_and_br() -> None:
+    # Older VOA stories: <span>s separated by <br><br>, inline tags inside, a dateline span.
+    soup = soup_of("""<div class="wsw"><span class="dateline">واشنگٹن —</span> پہلا جملہ <b>اہم</b> ہے۔
+        <span>دوسرا جملہ</span><br><br><span>تیسرا</span> <a href="#">ربط</a> جملہ<br/>
+        <div>بغیر پیرا کے ایک بلاک</div><span>آخری</span></div>""")
+    assert text_blocks(soup.div) == ["واشنگٹن — پہلا جملہ اہم ہے۔ دوسرا جملہ", "تیسرا ربط جملہ",
+                                     "بغیر پیرا کے ایک بلاک", "آخری"]
+
+
+def test_inline_element_wrapping_blocks_is_walked() -> None:
+    soup = soup_of("<div><span><p>ایک</p><p>دو</p></span>تین</div>")
+    assert text_blocks(soup.div) == ["ایک", "دو", "تین"]
 
 
 def test_generic_drop_selectors_remove_junk() -> None:

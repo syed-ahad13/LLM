@@ -128,3 +128,15 @@ def test_adapter_contract(site_id: str) -> None:
     assert a.terms_summary and a.genre and a.container_selectors
     assert all(a.allow_url(u) for u in a.sitemap_urls)
     assert a.keep_entry(Entry("https://x.test/1"))
+
+
+def test_voa_old_layout_without_paragraphs() -> None:
+    e = VoaUrdu().extract(fixture("voa_urdu", "old_layout.html"), "https://www.urduvoa.com/a/old/1755703.html")
+    assert e.published == "2013-09-23 18:00:00Z"
+    assert e.body.split("\n") == [
+        "یہ پہلا جملہ ہے جو کسی پیراگراف کے بغیر لکھا گیا ہے اور اسی سطر میں جاری رہتا ہے۔",
+        "دوسرا حصہ دو لائن بریک کے بعد آتا ہے۔",
+        "ذیلی سرخی",
+        "آخری حصہ ایک سادہ div میں ہے۔",
+    ]
+    assert "SEE ALSO" not in e.text and "کسی اور خبر" not in e.text and "واشنگٹن" not in e.text

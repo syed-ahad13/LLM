@@ -195,3 +195,24 @@ Add one entry for each decision that affects the data, the tokenizer or the repo
   - Python `random.shuffle` over the list. Rejected: the order changes whenever discovery finds one more URL.
 - **Evidence:** `tests/test_scrape_crawl.py`. VOA smoke run, 50 articles: 58 fetched, 8 media pages skipped, 0.35 MB (mean 7.0 KB per article, against a probe median of 2.7 KB), 61 requests in 71 s.
 - **Consequence:** The full VOA crawl needs about 10,000 articles, roughly 4 h at ~1.2 s per request. The probe's 11 h estimate came from its median article size.
+
+### 2026-10-11: extractor v2 reads text outside <p> (VOA stories from about 2012-2014)
+- **Decision:** `text_blocks()` (`collect/scrape/extract.py`) now also collects loose text in the article container: runs of text nodes and inline elements, broken at `<br>` and at the edges of block-level elements, alongside `<p>`, `<h2>`, `<h3>` and `<li>`.
+  - VOA also drops its "SEE ALSO" cards (`.also-read` in `div[data-owner-ct]`) and stand-alone datelines.
+  - Extractors are now `voa_urdu/2` and `humsub/2`.
+  - Both crawls were stopped, re-extracted from the HTML cache with `--reextract` (no requests) and restarted.
+- **Options considered:** Adding `span` to the block tags. Rejected: it would split sentences that use `<span>` for emphasis inside a `<p>`.
+- **Evidence:** In the first 20 minutes of the full VOA crawl, 41 of 333 pages were skipped as "too little text". Their `.wsw` held 400 to 4,900 Arabic letters, written as `<span>`s separated by `<br><br>` or as a bare `<div>`, with no `<p>`. On all 452 cached VOA pages, v2 keeps 366 against v1's 317 (49 recovered). Of the pages both versions keep, only 2 changed, each gaining an `<h4>` subheading or a lead line. Hum Sub's 10 pages are unchanged. Test: `tests/test_scrape_sites.py::test_voa_old_layout_without_paragraphs`.
+- **Consequence:** Older VOA years are no longer silently dropped, which would have skewed the date range toward 2015 and later. `<h4>`–`<h6>` subheadings are now part of the body.
+
+### 2026-10-11: Hum Sub crawl capped at 7 hours
+- **Decision:** Hum Sub runs with `--target-mb 20 --max-hours 7` (new crawler option: stop after 7 h of wall-clock time, discovery included), so it ends about when VOA does. User's request, 2026-10-11.
+- **Options considered:**
+  - Keeping the 20 MB target. Rejected by the user: at Hum Sub's robots.txt Crawl-delay of 20 s it would take about 21–31 h.
+  - Ignoring or shortening the Crawl-delay. Not an option: robots.txt is binding (CLAUDE.md, hard rule 5).
+- **Evidence:** Measured spacing between Hum Sub requests: minimum 20.07 s, mean 20.28 s (`evidence/crawl_log_humsub.jsonl.gz`). Discovering all 136 post sitemaps takes about 46 min of the budget.
+- **Consequence:**
+  - Hum Sub should yield roughly 900–1,100 posts, about 4–7 MB of opinion and blog text, a minority genre in the corpus.
+  - VOA's 70 MB alone covers the 50 MB requirement.
+  - DATA_CARD.md must state Hum Sub's small share.
+  - Rerunning the same command later adds more posts, since the crawl resumes.
