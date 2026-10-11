@@ -1,0 +1,137 @@
+{
+  "_about": "One entry per corpus source (CLAUDE.md, Corpus spec). licence quotes the source's own wording. collect/download.py fills collection_date (UTC), raw_bytes and sha256 when a download completes; for a multi-file source, sha256 is the SHA-256 of the sha256sum-style listing in data/raw/<id>/MANIFEST.json, sorted by file name. Sources with enabled=false are skipped by --source all and run only when named. Facts below were checked on 2026-10-11.",
+  "sources": [
+    {
+      "id": "wiki_ur",
+      "name": "Urdu Wikipedia (pages-articles dump)",
+      "genre": "encyclopedia",
+      "enabled": true,
+      "landing_url": "https://dumps.wikimedia.org/urwiki/",
+      "download_urls": [
+        "https://dumps.wikimedia.org/urwiki/latest/urwiki-latest-pages-articles.xml.bz2"
+      ],
+      "licence": "Except as discussed below, all original textual content is licensed under the GNU Free Documentation License (GFDL) and the Creative Commons Attribution-Share-Alike 4.0 License.",
+      "licence_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "terms_notes": "CC BY-SA 4.0 (text also GFDL), per https://dumps.wikimedia.org/legal.html. Redistribution is allowed with attribution and under the same licence. We do not redistribute outside the course.",
+      "access_method": "dump",
+      "collected_by_us": false,
+      "collection_date": null,
+      "raw_bytes": null,
+      "sha256": null,
+      "notes": "download.py reads latest/urwiki-latest-sha1sums.txt, takes the dated pages-articles file it lists, downloads that dated URL and verifies its SHA-1. Pinning the dated file means 'latest' cannot move mid-download. On 2026-10-11 that was urwiki-20261001-pages-articles.xml.bz2: 476,815,422 bytes, SHA-1 019f6b646544f326a5baf8d41daff294b74d59d3. dumps.wikimedia.org has no robots.txt (404)."
+    },
+    {
+      "id": "ufal_umc",
+      "name": "UFAL Urdu Monolingual Corpus v1.0 (Jawaid, Kamran, Bojar, LREC 2014)",
+      "genre": "mixed (news, religion, blogs, literature, science, education)",
+      "enabled": true,
+      "landing_url": "http://hdl.handle.net/11858/00-097C-0000-0023-65A9-5",
+      "download_urls": [
+        "https://lindat.mff.cuni.cz/repository/server/api/core/bitstreams/f0fc564f-13e1-4eae-887c-c4ab21672271/content"
+      ],
+      "licence": "Attribution-NonCommercial-ShareAlike 3.0 Unported (CC BY-NC-SA 3.0)",
+      "licence_url": "http://creativecommons.org/licenses/by-nc-sa/3.0/",
+      "terms_notes": "Non-commercial use only. Attribution: cite Jawaid, Kamran and Bojar (LREC 2014). Derivatives must use the same licence. The repository labels it PUB: public download, no click-through or login.",
+      "access_method": "dump",
+      "collected_by_us": false,
+      "collection_date": null,
+      "raw_bytes": null,
+      "sha256": null,
+      "notes": "Plain-text file only: urdu-plain-text-corpus.gz (not urdu-tagged-corpus.gz). 223,826,069 bytes; the repository publishes MD5 100b1db9efd403ee677683b3268084d9. 5,464,575 sentences. download.py resolves the handle through LINDAT's API (server/api/pid/find), because robots.txt disallows /repository/handle, which is where hdl.handle.net redirects."
+    },
+    {
+      "id": "urdu_news_1m",
+      "name": "Urdu News Dataset 1M, version 4 (Hussain et al.)",
+      "genre": "news (Business & Economics, Science & Technology, Entertainment, Sports)",
+      "enabled": true,
+      "landing_url": "https://data.mendeley.com/datasets/834vsxnb99/4",
+      "download_urls": [
+        "https://data.mendeley.com/public-files/datasets/834vsxnb99/files/60d1e75f-7d9a-4b24-99df-33174cd49094/file_downloaded"
+      ],
+      "licence": "CC BY 4.0 (Creative Commons Attribution 4.0 International): You can share, copy and modify this dataset so long as you give appropriate credit, provide a link to the CC BY license, and indicate if changes were made, but you may not do so in a way that suggests the rights holder has endorsed you or your use of the dataset. Note that further permission may be required for any content within the dataset that is identified as belonging to a third party.",
+      "licence_url": "http://creativecommons.org/licenses/by/4.0",
+      "terms_notes": "The dataset's methods text adds: \"The web scrapping policies of these new sources carefully evaluated where available in place before scrapping news stories and found that content can be used for non-commercial research purpose only by crediting the news source.\" So use it for non-commercial research only, and credit each news source (Source column). DOI 10.17632/834vsxnb99.4.",
+      "access_method": "api",
+      "collected_by_us": false,
+      "collection_date": null,
+      "raw_bytes": null,
+      "sha256": null,
+      "notes": "One file, urdu-news-dataset-1M.csv: 2,093,917,208 bytes; Mendeley publishes SHA-256 3aa8bcb15b2a4e0455b7b2969123c935621a7db74bdae89dc0ae1063a1bff0ba. Columns: Index, Headline, News Text, Category, Date, URL, Source, News length. The methods text says preprocessing kept \"Urdu text and numbers only\", so check punctuation with collect/inspect_raw.py. Fetched through Mendeley's public API; robots.txt disallows /api/ but not /public-api/ or /public-files/."
+    },
+    {
+      "id": "fineweb2_urd",
+      "name": "FineWeb-2, urd_Arab subset (train split)",
+      "genre": "web",
+      "enabled": true,
+      "landing_url": "https://huggingface.co/datasets/HuggingFaceFW/fineweb-2",
+      "download_urls": [
+        "https://huggingface.co/datasets/HuggingFaceFW/fineweb-2/resolve/main/data/urd_Arab/train/000_00000.parquet",
+        "https://huggingface.co/datasets/HuggingFaceFW/fineweb-2/resolve/main/data/urd_Arab/train/001_00000.parquet"
+      ],
+      "licence": "The dataset is released under the Open Data Commons Attribution License (ODC-By) v1.0 license. The use of this dataset is also subject to CommonCrawl's Terms of Use.",
+      "licence_url": "https://opendatacommons.org/licenses/by/1-0/",
+      "terms_notes": "ODC-By 1.0: attribution required. The Common Crawl Terms of Use also apply (https://commoncrawl.org/terms-of-use), and the underlying web pages keep their own copyright. Train files only; never a *_removed subset.",
+      "access_method": "api",
+      "collected_by_us": false,
+      "collection_date": null,
+      "raw_bytes": null,
+      "sha256": null,
+      "notes": "Files are listed with the HF tree API (api/datasets/HuggingFaceFW/fineweb-2/tree/<rev>/data/urd_Arab/train) and downloaded from resolve/<rev>/<path>, with rev pinned to main's commit at download time (af9c13333eb981300149d5ca60a8e9d659b276b9 on 2026-10-11). SHA-256 comes from the API's LFS metadata. There are 2 train files: 000_00000.parquet (4,844,148,326 B; crawls CC-MAIN-2013-20 to 2021-10) and 001_00000.parquet (2,024,610,997 B; CC-MAIN-2021-10 to 2024-18). The card lists urd_Arab as 4,809,542 documents, 2,733,266,493 words, 19.93 GB of text and 6.40 GB on disk, and the parquet footers agree (4,809,542 rows, about 21.4e9 bytes of uncompressed text). This differs from the 4,164,316 documents and 5.80 GB given in the Step 1 brief, presumably an earlier revision. Plan: download only 001_00000.parquet (--files 001_00000.parquet). It holds about 6.3 GB of text, far more than the roughly 1.5 GB needed, so cleaning must cap the intake. It covers 2021-2024 crawls only."
+    },
+    {
+      "id": "cc100_ur",
+      "name": "CC-100 Urdu (fallback)",
+      "genre": "web",
+      "enabled": false,
+      "landing_url": "https://data.statmt.org/cc-100/",
+      "download_urls": [
+        "https://data.statmt.org/cc-100/ur.txt.xz"
+      ],
+      "licence": "No licence statement on the download page (checked 2026-10-11). The text was extracted from Common Crawl (January-December 2018), so the Common Crawl Terms of Use apply.",
+      "licence_url": "https://commoncrawl.org/terms-of-use",
+      "terms_notes": "Bound by the Common Crawl Terms of Use; the underlying pages keep their own copyright. Do not redistribute.",
+      "access_method": "dump",
+      "collected_by_us": false,
+      "collection_date": null,
+      "raw_bytes": null,
+      "sha256": null,
+      "notes": "Disabled: fallback only, use it only if asked. ur.txt.xz is 926,752,368 bytes (884 MiB), with no published checksum. One paragraph per line in original order; documents are separated by a blank line. data.statmt.org/robots.txt is 'User-agent: * / Disallow: /', so download.py will not fetch it and prints manual steps instead."
+    },
+    {
+      "id": "makhzan",
+      "name": "Maḵẖzan",
+      "genre": "literature and edited essays",
+      "enabled": false,
+      "landing_url": "https://github.com/zeerakahmed/makhzan",
+      "download_urls": [
+        "https://api.github.com/repos/zeerakahmed/makhzan/tarball/2c7ed4f78d985527ea83e00cafcdeef44e1abff7"
+      ],
+      "licence": "All files in the /text directory are covered under standard copyright. Each piece of text has been included in this repository with explicity permission of respective copyright holders, who are identified in the <meta> tag for each file. You are free to use this text for analysis, research and development, but you are not allowed to redistribute or republish this text. Where possible we encourage that forks of this repository be kept private unless explicit permission is granted.",
+      "licence_url": "https://github.com/zeerakahmed/makhzan#license--copyright",
+      "terms_notes": "No redistribution or republication of the text. The README also says: \"Maḵẖzan is free to use for all commercial and non-commercial purposes. To protect writers' whose writing is part of this dataset, we ask that you not republish the raw text\". Scripts and stats are MIT; GitHub detects no LICENSE file. Our train/val/test.txt are submitted by shared-drive link, which may count as redistribution, so ask the instructor before including it.",
+      "access_method": "dump",
+      "collected_by_us": false,
+      "collection_date": null,
+      "raw_bytes": null,
+      "sha256": null,
+      "notes": "Disabled until the redistribution question is settled. 6.26 million words of edited text, as XML files under /text (README). Downloaded as a tarball through api.github.com, pinned to master's commit at download time (2c7ed4f, 2026-07-13). github.com/robots.txt disallows /*/archive/, but api.github.com and codeload.github.com have no robots.txt."
+    },
+    {
+      "id": "own_scrape",
+      "name": "Our own collection (Step 2)",
+      "genre": "TBD in Step 2",
+      "enabled": true,
+      "landing_url": "TBD",
+      "download_urls": [],
+      "licence": "TBD per site in Step 2",
+      "licence_url": "TBD",
+      "terms_notes": "TBD: obey robots.txt and terms of use, skip anything behind a login or paywall, collect no personal data (CLAUDE.md, hard rule 5).",
+      "access_method": "scrape",
+      "collected_by_us": true,
+      "collection_date": null,
+      "raw_bytes": null,
+      "sha256": null,
+      "notes": "Placeholder, filled in Step 2. Needs at least 50 MB collected by us, with evidence in evidence/."
+    }
+  ]
+}

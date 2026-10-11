@@ -1,7 +1,8 @@
 """Shared helpers for the collection, cleaning, training and analysis scripts.
 
 - iter_jsonl / write_jsonl: streaming JSON Lines I/O, UTF-8, gzip when the path ends in .gz.
-- sha256_file: hash a file in 8 MiB chunks.
+- sha256_file / file_digests: hash a file in 8 MiB chunks (several algorithms in one pass).
+- write_json: indented UTF-8 JSON, replaced atomically.
 - machine_info: OS, CPU, cores, RAM and library versions, for reporting run times.
 - Stats: per-(stage, source) counters, written to data/stats/<stage>.json.
 - Timer: context manager that records wall-clock seconds into a dict.
@@ -98,13 +99,28 @@ def write_jsonl(path: PathLike, rows: Iterable[Any]) -> int:
     return n
 
 
-def sha256_file(path: PathLike, chunk_size: int = HASH_CHUNK_BYTES) -> str:
-    """Return the hex SHA-256 of a file, read in chunks of `chunk_size` bytes."""
-    h = hashlib.sha256()
+def file_digests(path: PathLike, algorithms: Iterable[str], chunk_size: int = HASH_CHUNK_BYTES) -> dict[str, str]:
+    """Return {algorithm: hex digest} for a file, computing every digest in one read pass."""
+    hashers = {name: hashlib.new(name) for name in dict.fromkeys(algorithms)}
     with open(path, "rb") as f:
         while chunk := f.read(chunk_size):
-            h.update(chunk)
-    return h.hexdigest()
+            for h in hashers.values():
+                h.update(chunk)
+    return {name: h.hexdigest() for name, h in hashers.items()}
+
+
+def sha256_file(path: PathLike, chunk_size: int = HASH_CHUNK_BYTES) -> str:
+    """Return the hex SHA-256 of a file, read in chunks of `chunk_size` bytes."""
+    return file_digests(path, ["sha256"], chunk_size)["sha256"]
+
+
+def write_json(path: PathLike, obj: Any) -> None:
+    """Write obj as indented UTF-8 JSON (ensure_ascii=False), replacing the file atomically."""
+    path = Path(path)
+    with _atomic_target(path) as tmp:
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(obj, f, ensure_ascii=False, indent=2)
+            f.write("\n")
 
 
 # ---------------------------------------------------------------------------
@@ -264,10 +280,7 @@ class Stats:
                 with open(path, encoding="utf-8") as f:
                     merged = json.load(f)
             merged.update(sources)
-            with _atomic_target(path) as tmp:
-                with open(tmp, "w", encoding="utf-8") as f:
-                    json.dump(merged, f, ensure_ascii=False, indent=2, sort_keys=True)
-                    f.write("\n")
+            write_json(path, {src: dict(sorted(c.items())) for src, c in sorted(merged.items())})
             written.append(path)
         return written
 

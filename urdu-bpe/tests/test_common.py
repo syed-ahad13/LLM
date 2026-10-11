@@ -118,6 +118,24 @@ def test_sha256_across_chunk_boundaries(tmp_path: Path) -> None:
     assert sha256_file(path, chunk_size=7) == expected
 
 
+def test_file_digests_one_pass_matches_hashlib(tmp_path: Path) -> None:
+    data = bytes(range(256)) * 1000
+    path = tmp_path / "f.bin"
+    path.write_bytes(data)
+    got = common.file_digests(path, ["md5", "sha1", "sha256", "sha256"], chunk_size=1000)
+    assert got == {a: hashlib.new(a, data).hexdigest() for a in ("md5", "sha1", "sha256")}
+
+
+def test_write_json_is_utf8_and_atomic(tmp_path: Path) -> None:
+    path = tmp_path / "sub" / "x.json"
+    common.write_json(path, {"name": "مخزن", "n": 1})
+    assert "مخزن" in path.read_text(encoding="utf-8") and path.read_text().endswith("}\n")
+    with pytest.raises(TypeError):
+        common.write_json(path, {"bad": object()})
+    assert json.loads(path.read_text(encoding="utf-8")) == {"name": "مخزن", "n": 1}  # old content survives
+    assert sorted(p.name for p in path.parent.iterdir()) == ["x.json"]
+
+
 # ---------------------------------------------------------------------------
 # machine_info
 # ---------------------------------------------------------------------------

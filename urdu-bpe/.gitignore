@@ -2,6 +2,10 @@
 /data/
 /logs/
 *.bin
+# Lock taken by collect/download.py while it updates sources.json
+/collect/sources.json.lock
+# Your User-Agent contact address (collect/polite.py); never committed because the repo is public
+/collect/contact.local
 
 # Python
 /.venv/
