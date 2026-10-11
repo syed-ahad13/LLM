@@ -1,0 +1,33 @@
+# Corpus, intermediate data and run logs never go in git (CLAUDE.md).
+/data/
+/logs/
+*.bin
+
+# Python
+/.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# LaTeX build files (scoped to report/ so evidence/*.log scrape logs stay tracked)
+report/**/*.aux
+report/**/*.bbl
+report/**/*.bcf
+report/**/*.blg
+report/**/*.fdb_latexmk
+report/**/*.fls
+report/**/*.lof
+report/**/*.log
+report/**/*.lot
+report/**/*.nav
+report/**/*.out
+report/**/*.run.xml
+report/**/*.snm
+report/**/*.synctex.gz
+report/**/*.toc
+report/**/*.vrb
+report/**/*.xdv
+report/_minted*/
+
+# OS
+.DS_Store

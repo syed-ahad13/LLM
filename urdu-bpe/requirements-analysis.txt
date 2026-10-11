@@ -1,0 +1,4 @@
+# Part C only: tiktoken/tokenizers in analysis/compare_tokenizers.py, matplotlib in analysis/.
+tiktoken==0.14.0
+tokenizers==0.23.3
+matplotlib==3.11.2
