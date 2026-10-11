@@ -41,7 +41,7 @@ make check   # forbidden-imports check only
 |---|---|
 | `normalize.py`, `bpe.py`, `train_tokenizer.py`, `encode_corpus.py` | names required by the handout |
 | `common.py` | JSONL I/O, hashing, machine info, stats, timing, logging |
-| `collect/` | `sources.json` (licence/terms per source), `download.py`, `inspect_raw.py`, `polite.py` (HTTP etiquette), `robots.py`; scraper in Step 2 |
+| `collect/` | `sources.json` (licence/terms per source), `download.py`, `inspect_raw.py`, `polite.py` (HTTP etiquette), `robots.py`; `scrape/` (probe, crawler, report, one adapter per site in `scrape/sites/`) |
 | `clean/` | extractors, audit, cleaning pipeline, split, data-card generator |
 | `analysis/` | Part C scripts (`analysis/samples/` holds the hand-picked inputs) |
 | `report/` | LaTeX report, built to `report/report.pdf` |
@@ -62,6 +62,21 @@ python collect/inspect_raw.py                            # files, first records,
 ```
 
 Downloads go to `data/raw/<source>/` and are verified against each source's published checksum. They are recorded in `data/raw/<source>/MANIFEST.json` and in `sources.json`. Before the first download, put your contact email on one line in `collect/contact.local` (gitignored), or set `$URDU_BOT_CONTACT`. It goes into the User-Agent, and the scripts refuse to run without it. A source that needs a browser (robots.txt or HTTP 401/403) gets printed manual steps, and `--register-manual` records the file once you have placed it.
+
+## Collect our own text (Part A, Step 2)
+
+At least 50 MB must be collected by us, with evidence. `collect/scrape/` does it under the same etiquette as the downloader. Both robots.txt parsers (ours and `urllib.robotparser`) must allow every request. Requests are spaced by max(Crawl-delay, 1 s) plus jitter, with no cookies, no login, and no comments, bylines or user pages.
+
+```bash
+python collect/scrape/probe.py                                    # Phase A: robots, sitemaps, sample pages, terms per candidate
+python collect/scrape/crawl.py --site voa_urdu --limit 50 --max-sitemaps 1   # smoke test
+python collect/scrape/crawl.py --site voa_urdu --target-mb 70     # full crawl; resumable, rerun after an interruption
+python collect/scrape/crawl.py --site humsub --target-mb 20
+python collect/scrape/crawl.py --site voa_urdu --reextract        # rebuild articles.jsonl from the HTML cache, no requests
+python collect/scrape/report.py                                   # Phase C: evidence/scrape_report.md and sources.json
+```
+
+The crawl writes `data/raw/own_scrape/<site>/articles.jsonl` and logs every request to `evidence/crawl_log_<site>.jsonl.gz`. The site choice and its evidence are in [evidence/probe_report.md](evidence/probe_report.md) and [docs/decisions.md](docs/decisions.md).
 
 ## Rebuild the tokenizer from train.txt
 

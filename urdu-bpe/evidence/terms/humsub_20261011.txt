@@ -1,0 +1,2 @@
+# Terms snapshot for Hum Sub (humsub), collect/scrape/probe.py, 2026-10-11T14:14:00+00:00
+(no terms or privacy page could be fetched; see evidence/probe_report.md)

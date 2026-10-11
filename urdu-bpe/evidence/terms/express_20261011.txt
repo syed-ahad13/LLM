@@ -1,0 +1,128 @@
+# Terms snapshot for Express News (express), collect/scrape/probe.py, 2026-10-11T14:27:20+00:00
+===== privacy: https://www.express.pk/privacy-policy (HTTP 200, fetched 2026-10-11T14:41:27.050Z, html sha256 91dc7668ebf26cc11db1886c8e71613e2977cbedefec3029a1fb13a685d57436) =====
+EXPRESS TRIBUNE
+URDU E-PAPER
+ENGLISH E-PAPER
+SINDHI E-PAPER
+LIVE STREAMING
+EXPRESS ENTERTAINMENT
+CRICKET PAKISTAN
+TODAY'S PAPER
+October 11, 2026
+اشتہار لگائیں |
+لائیو ٹی وی
+| آج کا اخبار
+صفحۂ اول
+تازہ ترین
+کھیل
+خاص خبریں
+پاکستان
+انٹر نیشنل
+ٹاپ ٹرینڈ
+انٹرٹینمنٹ
+لائف اسٹائل
+فیکٹ چیک
+صحت
+دلچسپ و عجیب
+سائنس و ٹیکنالوجی
+بزنس
+رائے
+مزید
+جرائم
+دین ودنیا
+ویڈیوز
+آپ کا دن
+فوڈ
+میگزین
+بلاگ
+صفحۂ اول
+تازہ ترین
+کھیل
+خاص خبریں
+پاکستان
+پنجاب
+سندھ
+اسلام آباد
+خیبر پختون خواہ
+بلوچستان
+انٹر نیشنل
+ٹاپ ٹرینڈ
+انٹرٹینمنٹ
+لائف اسٹائل
+فیکٹ چیک
+صحت
+دلچسپ و عجیب
+سائنس و ٹیکنالوجی
+بزنس
+رائے
+بلاگ
+ویڈیوز
+آپ کا دن
+PRIVACY POLICY
+Effective Date:
+April 23, 2025
+Express News ("we", "our", or "us") is committed to protecting your privacy. This Privacy Policy explains how our app handles your information.
+1. Information Collection
+We do
+not collect, store, or share
+any personal information from users.
+We do not require users to create an account, submit personal details through forms, or provide sensitive information.
+2. Data from Third-Party Services
+While we do not collect data directly, our app may use third-party services (such as analytics or advertising SDKs like
+Google AdMob
+or
+Firebase
+) that may collect certain information, including but not limited to:
+Device type and operating system
+Approximate location
+App usage data (such as which pages were viewed)
+Crash logs and performance metrics
+Please refer to the respective privacy policies of these third-party providers for more information:
+Google Privacy Policy
+3. Children's Privacy
+Our app is not intended for children under the age of 16, and we do not knowingly collect data from children.
+4. Your Rights
+As we do not collect any personal data, there is no data to access, modify, or delete.
+5. Contact Information
+If you have any questions or concerns about this policy, you can contact us:
+Email:
+[email protected]
+Phone:
++922135800051
+express.pk
+خبروں اور حالات حاضرہ سے متعلق پاکستان کی سب سے زیادہ وزٹ کی جانے والی ویب سائٹ ہے۔ اس ویب
+سائٹ پر شائع شدہ تمام مواد کے جملہ حقوق بحق ایکسپریس میڈیا گروپ محفوظ ہیں۔
+ایکسپریس کے بارے میں
+ضابطہ اخلاق
+Privacy Policy
+Contact Us
+صفحۂ اول
+تازہ ترین
+غزہ لہو لہو
+پاکستان
+انٹر نیشنل
+کھیل
+انٹرٹینمنٹ
+لائف اسٹائل
+ٹاپ ٹرینڈ
+دلچسپ و عجیب
+صحت
+سونے کے نرخ
+پیٹرولیم مصنوعات کی قیمتیں
+سائنس و ٹیکنالوجی
+بلاگ
+بزنس
+ویڈیوز
+جرائم
+Showbiz News in Urdu
+Sports News in Urdu
+International News in Urdu
+Business News in Urdu
+Urdu Magazine
+Urdu Blogs
+The Express Tribune
+Express
+Entertainment
+apple
+google play
+تمام مواد کے جملہ حقوق © 2026 ایکسپریس اردو

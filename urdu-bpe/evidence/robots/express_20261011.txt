@@ -1,0 +1,15 @@
+User-agent: *
+Disallow:
+
+Sitemap: https://www.express.pk/sitemap.xml
+Sitemap: https://www.express.pk/sitemap/latest-1.xml
+Sitemap: https://www.express.pk/sitemap/videos_sitemap.xml
+
+User-agent: Mediapartners-Google
+Allow:
+
+User-agent: Google-Display-Ads-Bot
+Allow:
+
+User-agent: *
+Disallow: /Out-Stream/

@@ -9,10 +9,18 @@
   not re-checked.
 - One connection per host: requests are sequential, each host keeps at most one
   pooled connection, and requests to a host are spaced by min_interval seconds
-  (or the site's Crawl-delay, if longer).
+  (or the site's Crawl-delay, if longer), plus up to `jitter` random seconds.
 - Retries connection errors, timeouts, 429 and 5xx with exponential backoff and
   jitter, honouring Retry-After.
 - Never logs in: 401 and 403 raise AccessDenied so the caller can print manual steps.
+
+Options for the scraper (collect/scrape/fetch.py), off by default:
+- cookies=False: the session neither stores nor sends cookies.
+- allow_redirects=False on get(): 3xx is returned so the caller can check
+  robots.txt for each hop itself.
+- on_response: called after every HTTP attempt (robots.txt and retries
+  included) with an Attempt record. It may raise to abort the request instead
+  of retrying, e.g. on a bot challenge.
 """
 
 import logging
@@ -20,7 +28,10 @@ import os
 import random
 import time
 from collections.abc import Callable, Collection, Mapping
+from dataclasses import dataclass
+from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
+from http.cookiejar import DefaultCookiePolicy
 from pathlib import Path
 from urllib.parse import urlsplit
 
@@ -78,7 +89,38 @@ class RobotsDisallowed(Exception):
         self.url = url
 
 
-def _retry_after_seconds(value: str | None) -> float | None:
+@dataclass
+class Attempt:
+    """One HTTP attempt, as passed to PoliteClient's on_response hook."""
+
+    url: str
+    started_utc: str  # ISO 8601, milliseconds, "Z"
+    elapsed_ms: int
+    response: requests.Response | None  # None when the attempt raised
+    error: BaseException | None = None
+    streamed: bool = False
+
+    @property
+    def status(self) -> int | None:
+        return self.response.status_code if self.response is not None else None
+
+    @property
+    def nbytes(self) -> int | None:
+        """Body bytes as received; Content-Length for streamed responses (None if unknown)."""
+        resp = self.response
+        if resp is None:
+            return None
+        if not self.streamed:  # requests has already read the whole body
+            return len(resp.content)
+        length = resp.headers.get("Content-Length")
+        return int(length) if length and length.isdigit() else None
+
+
+def utc_now_ms() -> str:
+    return datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
+
+
+def retry_after_seconds(value: str | None) -> float | None:
     if not value:
         return None
     try:
@@ -97,6 +139,9 @@ class PoliteClient:
         user_agent: str | None = None,
         *,
         min_interval: float = 1.0,
+        jitter: float = 0.0,
+        cookies: bool = True,
+        on_response: Callable[[Attempt], None] | None = None,
         max_retries: int = 6,
         backoff_base: float = 2.0,
         backoff_cap: float = 300.0,
@@ -109,6 +154,8 @@ class PoliteClient:
         self.user_agent = user_agent or default_user_agent()
         self.agent_token = self.user_agent.split("/", 1)[0]
         self.min_interval = min_interval
+        self.jitter = jitter
+        self.on_response = on_response
         self.max_retries = max_retries
         self.backoff_base = backoff_base
         self.backoff_cap = backoff_cap
@@ -119,6 +166,9 @@ class PoliteClient:
         self.rng = rng or random.Random()
         self.session = requests.Session()
         self.session.headers["User-Agent"] = self.user_agent
+        if not cookies:
+            # An empty allow-list accepts and returns cookies for no domain at all.
+            self.session.cookies.set_policy(DefaultCookiePolicy(allowed_domains=[]))
         adapter = HTTPAdapter(pool_connections=16, pool_maxsize=1, max_retries=0)
         self.session.mount("http://", adapter)
         self.session.mount("https://", adapter)
@@ -145,10 +195,10 @@ class PoliteClient:
             if resp.status_code >= 400:
                 # RFC 9309 2.3.1.3: 4xx (including 401/403) means no restrictions.
                 self.log.info("robots.txt %s: HTTP %d, no restrictions", url, resp.status_code)
-                return RobotsTxt("")
+                return RobotsTxt("", status=resp.status_code)
             text = resp.content[:ROBOTS_MAX_BYTES].decode("utf-8", errors="replace")
         self.log.info("robots.txt %s: %d bytes", url, len(text))
-        return RobotsTxt(text)
+        return RobotsTxt(text, status=resp.status_code)
 
     def allowed(self, url: str) -> bool:
         return self.robots(url).allowed(url, self.agent_token)
@@ -163,6 +213,7 @@ class PoliteClient:
         params: Mapping[str, str] | None = None,
         stream: bool = False,
         accept: Collection[int] = (),
+        allow_redirects: bool = True,
     ) -> requests.Response:
         """GET with robots check, pacing and retries.
 
@@ -170,7 +221,8 @@ class PoliteClient:
         Raises RobotsDisallowed, AccessDenied (401/403), or requests exceptions
         once retries are exhausted. The caller must close streamed responses.
         """
-        return self._send(url, headers=headers, params=params, stream=stream, accept=accept)
+        return self._send(url, headers=headers, params=params, stream=stream, accept=accept,
+                          allow_redirects=allow_redirects)
 
     def _send(
         self,
@@ -181,20 +233,29 @@ class PoliteClient:
         stream: bool = False,
         accept: Collection[int] = (),
         check_robots: bool = True,
+        allow_redirects: bool = True,
     ) -> requests.Response:
         if check_robots and not self.allowed(url):
             raise RobotsDisallowed(url)
         attempt = 0
         while True:
             self._pace(url)
+            started, t0 = utc_now_ms(), time.perf_counter()
             try:
-                resp = self.session.get(url, headers=headers, params=params, stream=stream, timeout=self.timeout)
+                resp = self.session.get(url, headers=headers, params=params, stream=stream, timeout=self.timeout,
+                                        allow_redirects=allow_redirects)
             except RETRYABLE_EXCEPTIONS as e:
+                self._report(Attempt(url, started, round((time.perf_counter() - t0) * 1000), None, e, stream))
                 if attempt >= self.max_retries:
                     raise
                 self.backoff(attempt, f"{type(e).__name__} for {url}")
                 attempt += 1
                 continue
+            try:
+                self._report(Attempt(url, started, round((time.perf_counter() - t0) * 1000), resp, None, stream))
+            except BaseException:
+                resp.close()
+                raise
             status = resp.status_code
             if status in accept:
                 return resp
@@ -205,7 +266,7 @@ class PoliteClient:
                 if attempt >= self.max_retries:
                     resp.close()
                     resp.raise_for_status()
-                retry_after = _retry_after_seconds(resp.headers.get("Retry-After"))
+                retry_after = retry_after_seconds(resp.headers.get("Retry-After"))
                 resp.close()
                 self.backoff(attempt, f"HTTP {status} for {url}", retry_after)
                 attempt += 1
@@ -214,6 +275,10 @@ class PoliteClient:
                 resp.close()
                 resp.raise_for_status()
             return resp
+
+    def _report(self, attempt: Attempt) -> None:
+        if self.on_response is not None:
+            self.on_response(attempt)
 
     def backoff(self, attempt: int, reason: str, retry_after: float | None = None) -> float:
         """Sleep for exponential backoff with jitter (at least retry_after) and return the delay."""
@@ -231,6 +296,8 @@ class PoliteClient:
         robots = self._robots.get(f"{urlsplit(url).scheme}://{host}")
         if robots is not None:
             interval = max(interval, robots.crawl_delay(self.agent_token) or 0.0)
+        if self.jitter > 0:
+            interval += self.rng.uniform(0, self.jitter)
         last = self._last_request.get(host)
         if last is not None:
             wait = last + interval - self.clock()

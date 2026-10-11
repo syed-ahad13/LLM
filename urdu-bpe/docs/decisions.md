@@ -140,3 +140,58 @@ Add one entry for each decision that affects the data, the tokenizer or the repo
 - **UFAL:** 5,464,575 lines, matching the repository metadata. The order test at five offsets (0, 1.0M, 2.5M, 4.0M, 5.3M; 20,000 lines each) gives ratios of 0.99–1.00, so the sentences are shuffled throughout and there are no documents to recover.
 - **FineWeb-2 `001_00000.parquet`:** 1,547,542 rows in 1,548 row groups, with about 6.29 GB of uncompressed text, as the footers predicted.
 - **Evidence:** `logs/inspect_raw.txt` (local, gitignored; regenerate with `python collect/inspect_raw.py`).
+
+### 2026-10-11: the scraper fetches a URL only if both robots.txt parsers allow it
+- **Decision:** `collect/scrape/fetch.py` (ScrapeClient) checks every URL, each redirect hop included, with our RFC 9309 matcher (`collect/robots.py`) **and** `urllib.robotparser.can_fetch`. A URL is requested only if both allow it for our product token. The probe reports each parser's answer separately, for User-agent `*` and for our token.
+- **Options considered:**
+  - `urllib.robotparser` alone, as the Step 2 brief says. Rejected as the only check: it treats `*` and `$` literally, so `Disallow: /*?print=` blocks nothing.
+  - Our matcher alone (the Step 1 decision). Rejected as the only check: the brief asks for robotparser, and robotparser's first-match rule is sometimes stricter (`Disallow: /` before `Allow: /news/`).
+  - Both must allow. Chosen (approved 2026-10-11): it is never less strict than either parser.
+- **Evidence:** `tests/test_scrape_fetch.py`: `test_wildcard_rule_blocks_although_stdlib_parser_would_allow` and `test_stdlib_first_match_blocks_although_rfc_would_allow`.
+- **Consequence:** A site whose robots.txt the two parsers read differently loses the disputed URLs. The probe report lists any disagreements.
+
+### 2026-10-11: scraper etiquette beyond robots.txt
+- **Decision:** User-Agent `UrduCorpusCourseBot/1.0 (NUST SEECS coursework; contact: …)`. The contact comes from `collect/contact.local`, as for the downloader.
+  - Delay: max(Crawl-delay, 1 s) plus 0–0.5 s of jitter.
+  - One connection per host, no concurrency, no cookies (an empty cookie-policy allow-list), no login.
+  - Redirects are followed by hand, at most 5 hops. Each hop is robots-checked and must stay on the site.
+  - 429/503 back off exponentially and honour Retry-After. A Retry-After above the cap stops the site rather than retrying early.
+  - A bot challenge (Cloudflare, Sucuri, Imperva, DataDome, Akamai, AWS WAF) stops the site at once, and so do 20 consecutive 403s.
+- **Options considered:** Letting requests follow redirects. Rejected: the hops would skip the robots check, and redirect responses' cookies would be sent on the next hop.
+- **Evidence:** `tests/test_scrape_fetch.py` (cookies, pacing, Retry-After, challenge and 403 tests).
+- **Consequence:** Every request, robots-blocked URLs included, appears in an `evidence/*log*.jsonl.gz` file with url, UTC time, status, bytes, robots_allowed and elapsed_ms.
+
+### 2026-10-11: own collection from VOA Urdu (70 MB target) and Hum Sub (20 MB target)
+- **Decision:** Crawl VOA Urdu (`--target-mb 70`) and Hum Sub (`--target-mb 20`) with `collect/scrape/crawl.py`. Chosen by the user on 2026-10-11 from the Phase A probe.
+  - VOA Urdu: news. Its own text is US-government work in the public domain.
+  - Hum Sub: opinion and blogs, a genre our other sources barely cover.
+- **Options considered** (evidence/probe_report.md; each site got at most 30 requests per probe run, plus targeted re-runs):
+  - BBC Urdu. Rejected: robots.txt comments forbid scraping, crawling, AI training on its content, creating datasets and text and data mining.
+  - DW Urdu. Rejected: robots.txt comments prohibit "any device, tool, or process designed to data mine or scrape the content using automated means… without prior written permission".
+  - Express (~490k articles, no Crawl-delay). Usable, but copyrighted news ("all rights reserved"), with no terms page and no genre gain. It is the fallback if VOA falls short.
+  - Independent Urdu and Urdu News (Crawl-delay 10). Their sitemaps do not list articles, so crawling would need category-page pagination. Independent Urdu's terms page is empty; Urdu News's terms link points to `#`.
+- **Evidence:** `evidence/probe_report.md`, `evidence/probe_20261011.json`, `evidence/robots/*_20261011.txt`, `evidence/terms/*_20261011.txt`, `evidence/probe_log_20261011.jsonl.gz`.
+- **Consequence:** About 90 MB of extracted text, above the 50 MB requirement after cleaning and dedup.
+  - VOA's archive ends at the 2025 shutdown.
+  - Hum Sub's 20 s Crawl-delay makes its crawl take about a day.
+  - DATA_CARD.md lists both sites with their terms summaries (sources.json `own_scrape`).
+
+### 2026-10-11: Hum Sub reprints from BBC and DW are skipped
+- **Decision:** The Hum Sub adapter skips posts in the `bbc`, `dw` or `rsstest` categories (feeds imported from other outlets) and posts credited to BBC or DW as author. `skips.jsonl` and the scrape report count them.
+- **Options considered:**
+  - Keeping them. Rejected: BBC's and DW's stated terms forbid dataset creation, AI training and scraping of their content. Taking that content through a third site would defeat the reason we excluded them.
+  - Skipping all newsdesk posts. Rejected: Hum Sub's own newsdesk items carry no such restriction.
+- **Evidence:** 2 of the 10 Hum Sub probe samples were BBC reprints (`category-bbc category-rsstest`, meta author بی بی سی, "BBC"). Tests: `tests/test_scrape_sites.py`.
+- **Consequence:** Hum Sub yields roughly 20% fewer usable posts, still far more than the 20 MB target. Columns reprinted from newspapers with a بشکریہ ("courtesy of") credit are kept: those outlets publish no such restriction.
+
+### 2026-10-11: crawl order, resume and what counts toward the target
+- **Decision:**
+  - Crawl order: URLs sorted by sha1("1337:<url>"). This is a seeded pseudo-random order over the whole sitemap archive, and a URL's position does not depend on which other URLs were found.
+  - Target: `--target-mb` counts the UTF-8 bytes of `title + "\n" + body` in articles.jsonl, before cleaning.
+  - Skipped pages: media pages (VOA video and audio), reprints, pages with too little text and duplicate canonical URLs are skipped and logged.
+  - Resume: discovery resumes per sitemap, and articles resume per URL. Cached HTML is re-extracted rather than fetched again, and 404s and robots-blocked URLs are never retried.
+- **Options considered:**
+  - Newest-first order. Rejected: 70 MB would cover only the last year or two.
+  - Python `random.shuffle` over the list. Rejected: the order changes whenever discovery finds one more URL.
+- **Evidence:** `tests/test_scrape_crawl.py`. VOA smoke run, 50 articles: 58 fetched, 8 media pages skipped, 0.35 MB (mean 7.0 KB per article, against a probe median of 2.7 KB), 61 requests in 71 s.
+- **Consequence:** The full VOA crawl needs about 10,000 articles, roughly 4 h at ~1.2 s per request. The probe's 11 h estimate came from its median article size.

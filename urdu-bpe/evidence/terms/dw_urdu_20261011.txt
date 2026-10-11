@@ -1,0 +1,8 @@
+# Terms snapshot for DW Urdu (dw_urdu), collect/scrape/probe.py, 2026-10-11
+The probe's first terms-link finder picked a news section page (https://www.dw.com/ur/انسانی-حقوق/s-60947758),
+not a terms page; that snapshot was removed. DW states its terms in its robots.txt
+(evidence/robots/dw_urdu_20261011.txt):
+  "DW content is made available for your personal, non-commercial use. Use of any device, tool, or process
+  designed to data mine or scrape the content using automated means is prohibited without prior written
+  permission from Deutsche Welle."
+DW was rejected on that basis and received no further requests.

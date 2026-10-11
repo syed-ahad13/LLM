@@ -118,20 +118,71 @@
     },
     {
       "id": "own_scrape",
-      "name": "Our own collection (Step 2)",
-      "genre": "TBD in Step 2",
+      "name": "Our own collection: VOA Urdu and Hum Sub",
+      "genre": "news (VOA Urdu); opinion/blogs (Hum Sub)",
       "enabled": true,
-      "landing_url": "TBD",
+      "landing_url": "https://www.urduvoa.com/ ; https://www.humsub.com.pk/",
       "download_urls": [],
-      "licence": "TBD per site in Step 2",
-      "licence_url": "TBD",
-      "terms_notes": "TBD: obey robots.txt and terms of use, skip anything behind a login or paywall, collect no personal data (CLAUDE.md, hard rule 5).",
+      "licence": "VOA Urdu: VOA's terms (https://www.urduvoa.com/p/7823.html, copyright section): all text, audio and video produced only by VOA is in the public domain, with credit to VOA required. Third-party content (AFP, AP, Reuters) is licensed to VOA and may not be reproduced, republished or redistributed without the agencies' permission; storing it for personal or non-commercial purposes is allowed. robots.txt allows /a/ article URLs, no Crawl-delay. We keep the text inside the course and never redistribute it. | Hum Sub: No terms of use or privacy page is linked from the home page or article pages (probe, 2026-10-11). robots.txt allows article URLs for User-agent * with Crawl-delay: 20. Posts are the authors' and Hum Sub's copyright; we keep the text inside the course and never redistribute it. Reprints from BBC and DW (whose robots.txt forbid scraping, dataset creation and AI training) and RSS-imported posts are skipped.",
+      "licence_url": "https://www.urduvoa.com/p/7823.html ; none (Hum Sub has no terms page)",
+      "terms_notes": "Collected by us with collect/scrape/crawl.py: robots.txt obeyed (RFC 9309 matcher and urllib.robotparser must both allow), Crawl-delay honoured, no login, no cookies, nothing behind a login or paywall. No comments, bylines, author emails or user pages. Kept inside the course and never redistributed. Evidence: evidence/scrape_report.md, evidence/crawl_log_<site>.jsonl.gz, evidence/robots/, evidence/terms/, evidence/probe_report.md.",
       "access_method": "scrape",
       "collected_by_us": true,
-      "collection_date": null,
-      "raw_bytes": null,
-      "sha256": null,
-      "notes": "Placeholder, filled in Step 2. Needs at least 50 MB collected by us, with evidence in evidence/."
+      "collection_date": "2026-10-11",
+      "raw_bytes": 449927,
+      "sha256": "6f39cffbbb4fa5065f7cc471f0c1ea12f99a7aafc0ddb99c59cdf69bf36e76e2",
+      "notes": "Numbers as of 2026-10-11T15:07:02+00:00 (collect/scrape/report.py). raw_bytes is the size of the articles.jsonl files (JSON Lines of extracted articles); text_bytes is their UTF-8 title+body text. sha256 is the SHA-256 of the sha256sum-style listing of the articles.jsonl files when there are several. Rerun the report after the crawls finish.",
+      "text_bytes": 413968,
+      "sites": [
+        {
+          "site_id": "voa_urdu",
+          "name": "VOA Urdu",
+          "landing_url": "https://www.urduvoa.com/",
+          "genre": "news",
+          "terms_url": "https://www.urduvoa.com/p/7823.html",
+          "terms_snapshot": "evidence/terms/voa_urdu_20261011.txt",
+          "robots_snapshot": "evidence/robots/voa_urdu_20261011.txt",
+          "crawl_first_utc": "2026-10-11T15:02:23.025Z",
+          "crawl_last_utc": "2026-10-11T15:03:39.017Z",
+          "requests": 61,
+          "articles": 50,
+          "text_bytes": 348901,
+          "articles_jsonl": "data/raw/own_scrape/voa_urdu/articles.jsonl",
+          "articles_jsonl_bytes": 380322,
+          "articles_jsonl_sha256": "c3c10ff1c528cc22e2480988ebf1406cc78085e30a5c793747d452ebd3f947f6",
+          "published_range": [
+            "2021-12-30",
+            "2025-01-31"
+          ],
+          "extractor_versions": {
+            "voa_urdu/1": 50
+          }
+        },
+        {
+          "site_id": "humsub",
+          "name": "Hum Sub",
+          "landing_url": "https://www.humsub.com.pk/",
+          "genre": "opinion/blogs",
+          "terms_url": null,
+          "terms_snapshot": "evidence/terms/humsub_20261011.txt",
+          "robots_snapshot": "evidence/robots/humsub_20261011.txt",
+          "crawl_first_utc": "2026-10-11T15:02:23.025Z",
+          "crawl_last_utc": "2026-10-11T15:06:26.433Z",
+          "requests": 13,
+          "articles": 10,
+          "text_bytes": 65067,
+          "articles_jsonl": "data/raw/own_scrape/humsub/articles.jsonl",
+          "articles_jsonl_bytes": 69605,
+          "articles_jsonl_sha256": "f1f3c796e5a0d0fa719866d75699148196a6bb05dd5b200a48220d1fada3f43d",
+          "published_range": [
+            "2016-01-12",
+            "2016-02-12"
+          ],
+          "extractor_versions": {
+            "humsub/1": 10
+          }
+        }
+      ]
     }
   ]
 }

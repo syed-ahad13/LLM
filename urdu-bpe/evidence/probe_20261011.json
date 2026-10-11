@@ -1,0 +1,4356 @@
+{
+  "date": "20261011",
+  "seed": 1337,
+  "max_requests": 30,
+  "results": [
+    {
+      "site_id": "humsub",
+      "name": "Hum Sub",
+      "home_url": "https://www.humsub.com.pk/",
+      "genre": "opinion/blogs",
+      "article_re": "^https?://(?:www\\.)?humsub\\.com\\.pk/\\d+/[^/?#]+/?$",
+      "probed_at_utc": "2026-10-11T14:14:00+00:00",
+      "requests": 35,
+      "robots_url": "https://www.humsub.com.pk/robots.txt",
+      "robots_status": 200,
+      "robots_snapshot": "evidence/robots/humsub_20261011.txt",
+      "robots_sha256": "488a8282f8646847b016d5c4f6e2eb213887d56d58712f698343a721b9699d12",
+      "crawl_delay_ua": 20.0,
+      "crawl_delay_star": 20.0,
+      "robots_eval": {
+        "urls_tested": 1000,
+        "agent_token": "UrduCorpusCourseBot",
+        "rfc_ua": 1000,
+        "rfc_star": 1000,
+        "stdlib_ua": 1000,
+        "stdlib_star": 1000,
+        "disagreements": []
+      },
+      "sitemaps": [
+        {
+          "url": "http://www.humsub.com.pk/sitemap_index.xml",
+          "final_url": "https://www.humsub.com.pk/sitemap_index.xml",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "index",
+          "entries": 147
+        },
+        {
+          "url": "https://www.humsub.com.pk/sitemap.xml",
+          "final_url": "https://www.humsub.com.pk/sitemap_index.xml",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "index",
+          "entries": 147
+        },
+        {
+          "url": "https://www.humsub.com.pk/sitemap_index.xml",
+          "final_url": "https://www.humsub.com.pk/sitemap_index.xml",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "index",
+          "entries": 147
+        },
+        {
+          "url": "https://www.humsub.com.pk/post-sitemap38.xml",
+          "final_url": "https://www.humsub.com.pk/post-sitemap38.xml",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 1000
+        },
+        {
+          "url": "https://www.humsub.com.pk/post-sitemap.xml",
+          "final_url": "https://www.humsub.com.pk/post-sitemap.xml",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 1001
+        },
+        {
+          "url": "https://www.humsub.com.pk/author-sitemap5.xml",
+          "final_url": "https://www.humsub.com.pk/author-sitemap5.xml",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 1000
+        },
+        {
+          "url": "https://www.humsub.com.pk/page-sitemap.xml",
+          "final_url": "https://www.humsub.com.pk/page-sitemap.xml",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 29
+        },
+        {
+          "url": "https://www.humsub.com.pk/category-sitemap.xml",
+          "final_url": "https://www.humsub.com.pk/category-sitemap.xml",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 43
+        }
+      ],
+      "sitemap_groups": [
+        {
+          "key": "www.humsub.com.pk/post-sitemap#.xml",
+          "children": 135,
+          "sampled": 1,
+          "article_counts": [
+            1000
+          ],
+          "estimate": 135000,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.humsub.com.pk/post-sitemap.xml",
+          "children": 1,
+          "sampled": 1,
+          "article_counts": [
+            1000
+          ],
+          "estimate": 1000,
+          "exact": true,
+          "news": false
+        },
+        {
+          "key": "www.humsub.com.pk/author-sitemap#.xml",
+          "children": 6,
+          "sampled": 1,
+          "article_counts": [
+            0
+          ],
+          "estimate": 0,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.humsub.com.pk/page-sitemap.xml",
+          "children": 1,
+          "sampled": 1,
+          "article_counts": [
+            0
+          ],
+          "estimate": 0,
+          "exact": true,
+          "news": false
+        },
+        {
+          "key": "www.humsub.com.pk/category-sitemap.xml",
+          "children": 1,
+          "sampled": 1,
+          "article_counts": [
+            0
+          ],
+          "estimate": 0,
+          "exact": true,
+          "news": false
+        },
+        {
+          "key": "www.humsub.com.pk/post_tag-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.humsub.com.pk/post_tag-sitemap#.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.humsub.com.pk/author-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        }
+      ],
+      "estimated_articles": 136000,
+      "estimate_exact": false,
+      "estimate_notes": [
+        "1 child sitemaps matching www.humsub.com.pk/post_tag-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.humsub.com.pk/post_tag-sitemap#.xml not sampled (budget)",
+        "1 child sitemaps matching www.humsub.com.pk/author-sitemap.xml not sampled (budget)",
+        "robots.txt and terms pages re-fetched 2026-10-11T14:39:59+00:00 (--terms-only)"
+      ],
+      "article_urls_seen": 2000,
+      "nonmatching_url_samples": [],
+      "regex_fallback": false,
+      "articles": [
+        {
+          "url": "https://www.humsub.com.pk/4069/husnain-jamal-16/",
+          "final_url": "https://www.humsub.com.pk/4069/husnain-jamal-16/",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 207093,
+          "title": "انتظار ابھی باقی ہے میرے دوست!",
+          "published": "2016-02-08T20:39:38+00:00",
+          "body_bytes": 16010,
+          "arabic_letters": 6763,
+          "render": "server",
+          "html_sha256": "47368d520a61b8d8f67ce4097b75b817e3e3eb938516f8d3568e7d54952a0185"
+        },
+        {
+          "url": "https://www.humsub.com.pk/206280/attiq-ahmad-sadozai-9/",
+          "final_url": "https://www.humsub.com.pk/206280/attiq-ahmad-sadozai-9/",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 193511,
+          "title": "ساہیوال: کیا آپ چین سے سو جائیں گے؟",
+          "published": "2019-01-20T08:29:20+00:00",
+          "body_bytes": 6528,
+          "arabic_letters": 2784,
+          "render": "server",
+          "html_sha256": "c3415fa962b970bf96f625cb42c70b79e37686c0a5a3553c0d4710835bf452bc"
+        },
+        {
+          "url": "https://www.humsub.com.pk/2425/khorsheed-shah-3/",
+          "final_url": "https://www.humsub.com.pk/2425/khorsheed-shah-3/",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 185571,
+          "title": "وزیر داخلہ نے چارسدہ واقعے کی مذمت تک کرنا گوارا نہیں کی: خورشید شاہ",
+          "published": "2016-01-26T09:27:21+00:00",
+          "body_bytes": 2527,
+          "arabic_letters": 1095,
+          "render": "server",
+          "html_sha256": "96b7338dabba00eb60e84243890d1029f01228de2572b493e55972f82c8bc0a4"
+        },
+        {
+          "url": "https://www.humsub.com.pk/205786/%d8%ac%d9%85%d8%a7%d8%b9%d8%aa-%d8%a7%d8%b3%d9%84%d8%a7%d9%85%db%8c-%d8%a7%d9%88%d8%b1-%d8%ac%d9%85%d8%b9%db%8c%d8%aa-%d8%b9%d9%84%d9%85%d8%a7-%d8%a7%d8%b3%d9%84%d8%a7%d9%85-%d9%86%db%92-%d8%a7%d9%81/",
+          "final_url": "https://www.humsub.com.pk/205786/%d8%ac%d9%85%d8%a7%d8%b9%d8%aa-%d8%a7%d8%b3%d9%84%d8%a7%d9%85%db%8c-%d8%a7%d9%88%d8%b1-%d8%ac%d9%85%d8%b9%db%8c%d8%aa-%d8%b9%d9%84%d9%85%d8%a7-%d8%a7%d8%b3%d9%84%d8%a7%d9%85-%d9%86%db%92-%d8%a7%d9%81/",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 219213,
+          "title": "جماعت اسلامی اور جمعیت علما اسلام نے افغان طالبان کے ساتھ مذاکرات کو خوش آئند قرار دے دیا",
+          "published": "2019-01-18T05:50:10+00:00",
+          "body_bytes": 5116,
+          "arabic_letters": 2207,
+          "render": "server",
+          "html_sha256": "22b21a6046cfde9e864f6d1a8912c0312ce0af58502c0d24ccec49a1d6dc6bcb"
+        },
+        {
+          "url": "https://www.humsub.com.pk/3574/zeeshan-hashim-11/",
+          "final_url": "https://www.humsub.com.pk/3574/zeeshan-hashim-11/",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 203292,
+          "title": "پی آئی اے …. معیشت پر سیاست نہ چمکائی جائے",
+          "published": "2016-02-03T14:29:03+00:00",
+          "body_bytes": 9167,
+          "arabic_letters": 3907,
+          "render": "server",
+          "html_sha256": "4f6d05c6c71b0b8add6df09ee60d03453d3c410a0762466565112a1d54bdaf5f"
+        },
+        {
+          "url": "https://www.humsub.com.pk/206373/asma-tariq-23/",
+          "final_url": "https://www.humsub.com.pk/206373/asma-tariq-23/",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 191185,
+          "title": "رونا ایک آرٹ ہے",
+          "published": "2019-01-20T18:46:16+00:00",
+          "body_bytes": 7052,
+          "arabic_letters": 3006,
+          "render": "server",
+          "html_sha256": "47f894d75731a6591aafbfbd05ec1e5164f479e53ad385996dd1331aee26a510"
+        },
+        {
+          "url": "https://www.humsub.com.pk/1866/amnasty-international/",
+          "final_url": "https://www.humsub.com.pk/1866/amnasty-international/",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 184883,
+          "title": "انکم ٹیکس ایمنسٹی ترمیمی بل 2016ء کثرت رائے سے منظور",
+          "published": "2016-01-21T11:44:24+00:00",
+          "body_bytes": 2073,
+          "arabic_letters": 896,
+          "render": "server",
+          "html_sha256": "29621892c4d555fc124657cf885f61ffd542840059370bb77bfe44af7c2f6952"
+        },
+        {
+          "url": "https://www.humsub.com.pk/207973/bbc-1715/",
+          "final_url": "https://www.humsub.com.pk/207973/bbc-1715/",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 195751,
+          "title": "دوحا مذاکرات: امریکہ اور طالبان کے درمیان پیش رفت، امن معاہدے کی امید",
+          "published": "2019-01-26T04:50:10+00:00",
+          "body_bytes": 4160,
+          "arabic_letters": 1787,
+          "render": "server",
+          "html_sha256": "a64c0cfd5f2f8fc9ace9c2163dbc5722c47629d7b07c5b2bbd29e4ef923e2fe8"
+        },
+        {
+          "url": "https://www.humsub.com.pk/1159/africa/",
+          "final_url": "https://www.humsub.com.pk/1159/africa/",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 184327,
+          "title": "افریقہ: برکینا فاسو میں ہوٹل پر دہشت گردوں کا حملہ : 20 ہلاک",
+          "published": "2016-01-16T10:01:56+00:00",
+          "body_bytes": 1796,
+          "arabic_letters": 781,
+          "render": "server",
+          "html_sha256": "ac4f39c4bfc5086ae0fdd2277b455a8bf3937b412db7a46d962cf58a24f0ca77"
+        },
+        {
+          "url": "https://www.humsub.com.pk/209803/newsdesk-1520/",
+          "final_url": "https://www.humsub.com.pk/209803/newsdesk-1520/",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 190553,
+          "title": "حاجیوں کے لئے سرکاری امداد کی تجویز مسترد کرنے پر وزیر مذہبی امور نے کابینہ اجلاس کا بائیکاٹ کر دیا",
+          "published": "2019-01-31T21:53:48+00:00",
+          "body_bytes": 3964,
+          "arabic_letters": 1696,
+          "render": "server",
+          "html_sha256": "65b228cfdf3358c2ff6fc0ba28a31d53fcf378e748cf4fee7823450088d75b94"
+        }
+      ],
+      "median_bytes": 4638.0,
+      "estimated_mb": 630.768,
+      "server_rendered": "server",
+      "terms_pages": [],
+      "terms_snapshot": "evidence/terms/humsub_20261011.txt",
+      "clauses": [],
+      "challenge": null,
+      "errors": [
+        "no terms or privacy link found on the home page or an article page"
+      ],
+      "verdict": "OK (terms page not found)"
+    },
+    {
+      "site_id": "independent_urdu",
+      "name": "Independent Urdu",
+      "home_url": "https://www.independenturdu.com/",
+      "genre": "news",
+      "article_re": "^https?://(?:www\\.)?independenturdu\\.com/node/\\d+(?:/[^?#]*)?$",
+      "probed_at_utc": "2026-10-11T14:31:22+00:00",
+      "requests": 22,
+      "robots_url": "https://www.independenturdu.com/robots.txt",
+      "robots_status": 200,
+      "robots_snapshot": "evidence/robots/independent_urdu_20261011.txt",
+      "robots_sha256": "278e83bcf567badfebcdea4d5d20ca9898e4449fe4eb2e3b5a08227b4ca9b762",
+      "crawl_delay_ua": 10.0,
+      "crawl_delay_star": 10.0,
+      "robots_eval": {
+        "urls_tested": 44,
+        "agent_token": "UrduCorpusCourseBot",
+        "rfc_ua": 44,
+        "rfc_star": 44,
+        "stdlib_ua": 44,
+        "stdlib_star": 44,
+        "disagreements": []
+      },
+      "sitemaps": [
+        {
+          "url": "https://www.independenturdu.com/sitemap.xml",
+          "final_url": "https://www.independenturdu.com/sitemap.xml",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "index",
+          "entries": 2
+        },
+        {
+          "url": "https://www.independenturdu.com/sitemap_index.xml",
+          "final_url": "https://www.independenturdu.com/sitemap_index.xml",
+          "outcome": "not_found",
+          "status": 404
+        },
+        {
+          "url": "https://www.independenturdu.com/sitemap.xml?page=2",
+          "final_url": "https://www.independenturdu.com/sitemap.xml?page=2",
+          "outcome": "error",
+          "status": null
+        },
+        {
+          "url": "https://www.independenturdu.com/sitemap.xml?page=1",
+          "final_url": "https://www.independenturdu.com/sitemap.xml?page=1",
+          "outcome": "error",
+          "status": null
+        }
+      ],
+      "sitemap_groups": [
+        {
+          "key": "www.independenturdu.com/sitemap.xml?page=#",
+          "children": 2,
+          "sampled": 2,
+          "article_counts": [
+            0,
+            0
+          ],
+          "leaf_counts": [
+            0,
+            0
+          ],
+          "estimate": 0,
+          "exact": true,
+          "news": false
+        }
+      ],
+      "estimated_articles": null,
+      "estimate_exact": false,
+      "estimate_notes": [
+        "highest numeric ID among home-page article links: 188,200 (an upper bound on items if the site numbers them sequentially)",
+        "no article URLs from sitemaps; 44 article links from the home page used as samples (matching the guessed regex). Article count unknown.",
+        "no sitemap URL list loaded (every child sitemap failed), so the count is unknown"
+      ],
+      "article_urls_seen": 0,
+      "nonmatching_url_samples": [],
+      "regex_fallback": false,
+      "articles": [
+        {
+          "url": "https://www.independenturdu.com/node/188156",
+          "final_url": "https://www.independenturdu.com/node/188156",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 76401,
+          "title": "صاحبزادہ فرحان کو ’نئے کامبینیشن‘ سے اچھی کارکردگی کی امید",
+          "published": "2026-10-08T19:07:39+05:00",
+          "body_bytes": 4319,
+          "arabic_letters": 1850,
+          "render": "server",
+          "html_sha256": "5d72d7b9c6ba9ddb8b241aafc561b6628829006e219c1206a733b3c8ecac1309"
+        },
+        {
+          "url": "https://www.independenturdu.com/node/188189",
+          "final_url": "https://www.independenturdu.com/node/188189",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 82458,
+          "title": "حوثیوں کے خلاف سعودی حملوں میں شامل ہونے کا فیصلہ جلد: ٹرمپ",
+          "published": "2026-10-10T20:26:53+05:00",
+          "body_bytes": 9126,
+          "arabic_letters": 3945,
+          "render": "server",
+          "html_sha256": "09c54948a2226f938c50aa976880154513ee7ec01a01da21130204f99239249b"
+        },
+        {
+          "url": "https://www.independenturdu.com/node/188200",
+          "final_url": "https://www.independenturdu.com/node/188200",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 74367,
+          "title": "پاکستانی سپیکر کی ریاض ایئرپورٹ پر حملے کی مذمت",
+          "published": "2026-10-11T19:08:54+05:00",
+          "body_bytes": 2257,
+          "arabic_letters": 976,
+          "render": "server",
+          "html_sha256": "69e130878e6797b0606c9a523bcbfa94d5761782f0dd1418d04ef9db02ceb116"
+        },
+        {
+          "url": "https://www.independenturdu.com/node/188137",
+          "final_url": "https://www.independenturdu.com/node/188137",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 74408,
+          "title": "بالی وڈ اداکار نانا پاٹیکر 75 برس کی عمر میں چل بسے",
+          "published": "2026-10-08T08:57:56+05:00",
+          "body_bytes": 2471,
+          "arabic_letters": 1033,
+          "render": "server",
+          "html_sha256": "fd8ac59a65ba6df1bc22d12e868319f24c5eab554bb38a682b2ca28884881694"
+        },
+        {
+          "url": "https://www.independenturdu.com/node/188194",
+          "final_url": "https://www.independenturdu.com/node/188194",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 80400,
+          "title": "کراچی کی تنگ گلیوں سے فلمی پردے تک: تین ریپرز کی کہانی",
+          "published": "2026-10-11T11:37:11+05:00",
+          "body_bytes": 7190,
+          "arabic_letters": 3041,
+          "render": "server",
+          "html_sha256": "44f49b2ab9ca1e2cb8330e462a3b147bbd0312b882ac1c59149ef7a35aeac419"
+        },
+        {
+          "url": "https://www.independenturdu.com/node/188193",
+          "final_url": "https://www.independenturdu.com/node/188193",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 76404,
+          "title": "پشاور میں کنٹنیرز لگا کر راستے بند، اراکین اسمبلی کی سکیورٹی واپس",
+          "published": "2026-10-11T10:36:25+05:00",
+          "body_bytes": 3909,
+          "arabic_letters": 1689,
+          "render": "server",
+          "html_sha256": "091beb4ca33b3fc8947bc7ed13b1a64dbb86efb3c49fdaeffb5796e21d73528d"
+        },
+        {
+          "url": "https://www.independenturdu.com/node/188196",
+          "final_url": "https://www.independenturdu.com/node/188196",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 95752,
+          "title": "کے پی حکومت کو دہشت گردی کے خلاف جنگ میں ساتھ ملانے کی کوشش ناکام رہی: محسن نقوی",
+          "published": "2026-10-11T17:34:30+05:00",
+          "body_bytes": 14165,
+          "arabic_letters": 6067,
+          "render": "server",
+          "html_sha256": "f47c5fdea98e33e7ac3ed08c898e2ecd70b9b1ef72bcfab6d3864d97b2c54077"
+        },
+        {
+          "url": "https://www.independenturdu.com/node/188178",
+          "final_url": "https://www.independenturdu.com/node/188178",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 81017,
+          "title": "کیا صرف 100 روپے سے بچت کا آغاز ہوسکتا ہے؟",
+          "published": "2026-10-11T08:30:24+05:00",
+          "body_bytes": 8606,
+          "arabic_letters": 3625,
+          "render": "server",
+          "html_sha256": "7d239c05a307ad4fad0751d26ea7fdc5fce724cc5aab7caa7517c08fd6013b39"
+        },
+        {
+          "url": "https://www.independenturdu.com/node/188068",
+          "final_url": "https://www.independenturdu.com/node/188068",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 74898,
+          "title": "بلوچستان: تیر اندازی مقابلوں میں پہلی بار خواتین کی بھی شرکت",
+          "published": "2026-10-03T12:30:14+05:00",
+          "body_bytes": 2283,
+          "arabic_letters": 975,
+          "render": "server",
+          "html_sha256": "88f9a7a40162ee8cae557130b0fa03a39c32986055cf7de1b9d765bd15e45f14"
+        },
+        {
+          "url": "https://www.independenturdu.com/node/188143",
+          "final_url": "https://www.independenturdu.com/node/188143",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 86177,
+          "title": "پاکستان کے لیے سبق: خلیجی ممالک نے کیسے خوراکی تحفظ حاصل کیا؟",
+          "published": "2026-10-11T08:00:10+05:00",
+          "body_bytes": 12359,
+          "arabic_letters": 5285,
+          "render": "server",
+          "html_sha256": "b60311a16a461f12d85f03877a78fe199467535325f888870792f6407bc63eec"
+        }
+      ],
+      "median_bytes": 5754.5,
+      "estimated_mb": null,
+      "server_rendered": "server",
+      "terms_pages": [
+        {
+          "score": 3,
+          "kind": "terms",
+          "url": "https://www.independenturdu.com/content/%D8%A7%D8%B3%D8%AA%D8%B9%D9%85%D8%A7%D9%84-%DA%A9%DB%8C-%D8%B4%D8%B1%D8%A7%D8%A6%D8%B7",
+          "text": "استعمال کی شرائط",
+          "in_footer": true,
+          "final_url": "https://www.independenturdu.com/content/%D8%A7%D8%B3%D8%AA%D8%B9%D9%85%D8%A7%D9%84-%DA%A9%DB%8C-%D8%B4%D8%B1%D8%A7%D8%A6%D8%B7",
+          "outcome": "ok",
+          "status": 200,
+          "html_sha256": "7037b2aab8a283be577cb4e4aa47984e2eeec143ce630baa08a6470cc98c3d6b",
+          "text_chars": 443
+        },
+        {
+          "score": 1,
+          "kind": "privacy",
+          "url": "https://www.independenturdu.com/content/%D9%BE%D8%B1%D8%A7%D8%A6%DB%8C%D9%88%DB%8C%D8%B3%DB%8C-%D9%BE%D8%A7%D9%84%DB%8C%D8%B3%DB%8C",
+          "text": "پرائیویسی پالیسی",
+          "in_footer": true,
+          "final_url": "https://www.independenturdu.com/content/%D9%BE%D8%B1%D8%A7%D8%A6%DB%8C%D9%88%DB%8C%D8%B3%DB%8C-%D9%BE%D8%A7%D9%84%DB%8C%D8%B3%DB%8C",
+          "outcome": "ok",
+          "status": 200,
+          "html_sha256": "59cc526052b38c8ed7b91096733d2199aec88065c20a94122d5d3993fe5b11dc",
+          "text_chars": 4768
+        }
+      ],
+      "terms_snapshot": "evidence/terms/independent_urdu_20261011.txt",
+      "clauses": [],
+      "challenge": null,
+      "errors": [],
+      "verdict": "OK"
+    },
+    {
+      "site_id": "bbc_urdu",
+      "name": "BBC Urdu",
+      "home_url": "https://www.bbc.com/urdu",
+      "genre": "news",
+      "article_re": "^https?://www\\.bbc\\.com/urdu/(?:articles/[a-z0-9]{8,}|[a-z0-9-]+-\\d{6,})$",
+      "probed_at_utc": "2026-10-11T14:23:45+00:00",
+      "requests": 17,
+      "robots_url": "https://www.bbc.com/robots.txt",
+      "robots_status": 200,
+      "robots_snapshot": "evidence/robots/bbc_urdu_20261011.txt",
+      "robots_sha256": "37a8567b049d9a34ca7b7dcb420ed3b8cbd929f1720a1c57c03ad28a1efec0b7",
+      "crawl_delay_ua": null,
+      "crawl_delay_star": null,
+      "robots_eval": {},
+      "sitemaps": [
+        {
+          "url": "https://www.bbc.com/urdu/sitemap.xml",
+          "final_url": "https://www.bbc.com/urdu/sitemap.xml",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 100
+        },
+        {
+          "url": "https://www.bbc.com/afrique/sitemap.xml",
+          "final_url": "https://www.bbc.com/afrique/sitemap.xml",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 100
+        },
+        {
+          "url": "https://www.bbc.com/arabic/sitemap.xml",
+          "final_url": "https://www.bbc.com/arabic/sitemap.xml",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 100
+        },
+        {
+          "url": "https://www.bbc.com/bbcx/audio_archive_sitemap.xml",
+          "final_url": "https://www.bbc.com/bbcx/audio_archive_sitemap.xml",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "index",
+          "entries": 12
+        },
+        {
+          "url": "https://www.bbc.com/bbcx/content_index_sitemap.xml",
+          "final_url": "https://www.bbc.com/bbcx/content_index_sitemap.xml",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "index",
+          "entries": 5
+        },
+        {
+          "url": "https://www.bbc.com/bbcx/index_sitemap.xml",
+          "final_url": "https://www.bbc.com/bbcx/index_sitemap.xml",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 439
+        },
+        {
+          "url": "https://www.bbc.com/bbcx/video_documentaries_sitemap.xml",
+          "final_url": "https://www.bbc.com/bbcx/video_documentaries_sitemap.xml",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 3013
+        },
+        {
+          "url": "https://www.bbc.com/bbcx/audio_archive_sitemap/page/11",
+          "final_url": "https://www.bbc.com/bbcx/audio_archive_sitemap/page/11",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 2677
+        },
+        {
+          "url": "https://www.bbc.com/bbcx/content_index_sitemap/page/2",
+          "final_url": "https://www.bbc.com/bbcx/content_index_sitemap/page/2",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 30713
+        },
+        {
+          "url": "https://www.bbc.com/bbcx/audio_archive_sitemap/page/3",
+          "final_url": "https://www.bbc.com/bbcx/audio_archive_sitemap/page/3",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 10000
+        },
+        {
+          "url": "https://www.bbc.com/bbcx/content_index_sitemap/page/3",
+          "final_url": "https://www.bbc.com/bbcx/content_index_sitemap/page/3",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 41144
+        },
+        {
+          "url": "https://www.bbc.com/bbcx/audio_archive_sitemap/page/7",
+          "final_url": "https://www.bbc.com/bbcx/audio_archive_sitemap/page/7",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 10000
+        },
+        {
+          "url": "https://www.bbc.com/bbcx/content_index_sitemap/page/4",
+          "final_url": "https://www.bbc.com/bbcx/content_index_sitemap/page/4",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 39495
+        }
+      ],
+      "sitemap_groups": [
+        {
+          "key": "www.bbc.com/bbcx/audio_archive_sitemap/page/#",
+          "children": 12,
+          "sampled": 3,
+          "article_counts": [
+            0,
+            0,
+            0
+          ],
+          "estimate": 0,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.bbc.com/bbcx/content_index_sitemap/page/#",
+          "children": 5,
+          "sampled": 3,
+          "article_counts": [
+            0,
+            0,
+            0
+          ],
+          "estimate": 0,
+          "exact": false,
+          "news": false
+        }
+      ],
+      "estimated_articles": null,
+      "estimate_exact": false,
+      "estimate_notes": [
+        "request budget reached before all seed sitemaps were fetched"
+      ],
+      "article_urls_seen": 0,
+      "nonmatching_url_samples": [],
+      "regex_fallback": false,
+      "articles": [],
+      "median_bytes": null,
+      "estimated_mb": null,
+      "server_rendered": "unknown",
+      "terms_pages": [
+        {
+          "score": 3,
+          "kind": "terms",
+          "url": "https://www.bbc.com/urdu/institutional-37588278",
+          "text": "استعمال کے ضوابط",
+          "final_url": "https://www.bbc.com/urdu/institutional-37588278",
+          "outcome": "ok",
+          "status": 200,
+          "html_sha256": "b9ee216edbd22d43ff0cbdb5b995c5b6b7a7d4f638bb0ea6778246745e2194a2",
+          "text_chars": 14027
+        },
+        {
+          "score": 1,
+          "kind": "privacy",
+          "url": "https://www.bbc.com/urdu/institutional-37588282",
+          "text": "پرائیویسی پالیسی",
+          "final_url": "https://www.bbc.com/urdu/institutional-37588282",
+          "outcome": "ok",
+          "status": 200,
+          "html_sha256": "b2925c4b0960cb03381514b85f75371ad4cfcdbc977bcab342d3181e2e2ed088",
+          "text_chars": 8079
+        }
+      ],
+      "terms_snapshot": "evidence/terms/bbc_urdu_20261011.txt",
+      "clauses": [
+        {
+          "categories": [
+            "robots"
+          ],
+          "prohibitive": true,
+          "quote": "In short: Please use our site like a human, not a robot.",
+          "page": "robots.txt",
+          "url": ""
+        },
+        {
+          "categories": [
+            "scraping/crawling"
+          ],
+          "prohibitive": true,
+          "quote": "No scraping, crawling, or systematic extraction of content",
+          "page": "robots.txt",
+          "url": ""
+        },
+        {
+          "categories": [
+            "AI/ML training"
+          ],
+          "prohibitive": true,
+          "quote": "No use of BBC content for training or fine-tuning AI models, including large language models (LLMs)",
+          "page": "robots.txt",
+          "url": ""
+        },
+        {
+          "categories": [
+            "AI/ML training"
+          ],
+          "prohibitive": true,
+          "quote": "No retrieval-augmented generation (RAG), AI-powered search, agentic AI or grounding using BBC content",
+          "page": "robots.txt",
+          "url": ""
+        },
+        {
+          "categories": [
+            "data mining"
+          ],
+          "prohibitive": true,
+          "quote": "No creating datasets from BBC content",
+          "page": "robots.txt",
+          "url": ""
+        },
+        {
+          "categories": [
+            "data mining"
+          ],
+          "prohibitive": true,
+          "quote": "No text and data mining (TDM) under Article 4 of the EU Directive on Copyright in the Digital Single Market",
+          "page": "robots.txt",
+          "url": ""
+        },
+        {
+          "categories": [
+            "data mining"
+          ],
+          "prohibitive": false,
+          "quote": "The BBC reserves all rights in its content and expressly opts out of any statutory exceptions in any jurisdiction for text and data mining, as permitted by law TL;DR: Browse, read, watch, enjoy - like a human.",
+          "page": "robots.txt",
+          "url": ""
+        },
+        {
+          "categories": [
+            "reproduction"
+          ],
+          "prohibitive": false,
+          "quote": "٭اس ویب سائٹ کے تمام جملہ حقوق بشمول کاپی رائٹس، ٹریڈ مارک، ڈیزائن کے حقوق، پیٹنٹ اور دیگر انٹلیکچوئل پراپرٹی رائٹس (چاہے وہ پہلے سے رجسٹرڈ ہوں یا نہ ہوں) اور اس ویب سائٹ پر شائع ہونے والے تمام مواد (بمشول تمام کمپیوٹر ایپلیکیشنز) کے جملہ حقوق بی بی سی یا بی بی سی کو لائسنس فراہم کرنے والے اداروں کے نام محفوظ ہیں۔",
+          "page": "terms",
+          "url": "https://www.bbc.com/urdu/institutional-37588278"
+        },
+        {
+          "categories": [
+            "reproduction"
+          ],
+          "prohibitive": false,
+          "quote": "آپ سے توقع کی جاتی ہے کہ آپ بی بی سی اردو ڈاٹ کام پر شائع ہونے والے مواد کو کسی بھی صورت میں اپنے ذاتی اور غیر کاروباری استعمال کے علاوہ نہ تو نقل کریں گے، نہ کسی دوسری جگہ شائع کریں گے، نہ اس کے حصے بخرے کریں گے، نہ ریورس انجینئرنگ کریں، نہ ڈاؤن لوڈ کریں گے، نہ پوسٹ کریں گے، نہ براڈ کاسٹ کریں گے، نہ کسی دوسرے ذریعے سے اس کی ترسیل کریں گے یا عوام الناس کو بہم پہنچائیں گے۔",
+          "page": "terms",
+          "url": "https://www.bbc.com/urdu/institutional-37588278"
+        },
+        {
+          "categories": [
+            "reproduction"
+          ],
+          "prohibitive": true,
+          "quote": "ان شرائط سے ہم یہ اخذ کرتے ہیں کسی بھی استعمال کنندہ کو بی بی سی، بی بی سی ورلڈ وائیڈ یا تیسرے فریق کے ٹریڈ مارک، ڈیزائن رائٹس اور کاپی رائٹس کے استعمال کا لائسنس حاصل نہیں ہو سکتا۔",
+          "page": "terms",
+          "url": "https://www.bbc.com/urdu/institutional-37588278"
+        },
+        {
+          "categories": [
+            "reproduction"
+          ],
+          "prohibitive": false,
+          "quote": "٭ آپ کے مواد کے کاپی رائٹس آپ کے پاس ہی رہیں گے اور ہمارے ساتھ شیئر کرنے کے ساتھ ساتھ آپ کو یہ حق حاصل رہے گا کہ آپ اپنے مواد کو جس طرح سے چاہیں استعمال کر سکیں گے اوراپنا مواد کسی دوسرے فریق کے ساتھ بھی شیئر کر سکیں گے۔",
+          "page": "terms",
+          "url": "https://www.bbc.com/urdu/institutional-37588278"
+        },
+        {
+          "categories": [
+            "reproduction"
+          ],
+          "prohibitive": true,
+          "quote": "٭کسی کی نقل اتارنے کی اجازت نہیں ہو گی۔",
+          "page": "terms",
+          "url": "https://www.bbc.com/urdu/institutional-37588278"
+        },
+        {
+          "categories": [
+            "reproduction"
+          ],
+          "prohibitive": false,
+          "quote": "آپ پر لازم ہے کہ بی بی سی یا کسی تیسرے فریق کے کاپی رائٹس کی خلاف ورزی نہ کریں اور نہ ہی نقل کریں۔",
+          "page": "terms",
+          "url": "https://www.bbc.com/urdu/institutional-37588278"
+        },
+        {
+          "categories": [
+            "automated access"
+          ],
+          "prohibitive": false,
+          "quote": "جب آپ کسی بھی سائٹ میں داخل ہوتے ہیں تو آپ کے کمپیوٹر کو خودکار طور پر کوکیز جاری کر دی جاتی ہیں۔",
+          "page": "privacy",
+          "url": "https://www.bbc.com/urdu/institutional-37588282"
+        },
+        {
+          "categories": [
+            "reproduction"
+          ],
+          "prohibitive": false,
+          "quote": "آپ کو حق حاصل ہے کہ کسی وقت بھی بی بی سی کے پاس موجود اپنی تمام تر نجی معلومات کی ایک نقل حاصل کر سکتے ہیں۔",
+          "page": "privacy",
+          "url": "https://www.bbc.com/urdu/institutional-37588282"
+        },
+        {
+          "categories": [
+            "reproduction"
+          ],
+          "prohibitive": true,
+          "quote": "اس اجازت کے بغیر آپ ہمیں اپنے بارے میں نجی معلومات نہیں بھیج سکتے۔",
+          "page": "privacy",
+          "url": "https://www.bbc.com/urdu/institutional-37588282"
+        }
+      ],
+      "challenge": null,
+      "errors": [
+        "no article URLs found in sitemaps"
+      ],
+      "verdict": "NO: robots.txt comments restrict AI/ML training, data mining, robots, scraping/crawling (quotes below)"
+    },
+    {
+      "site_id": "dw_urdu",
+      "name": "DW Urdu",
+      "home_url": "https://www.dw.com/ur/",
+      "genre": "news",
+      "article_re": "^https?://www\\.dw\\.com/ur/[^/?#]+/a-\\d+$",
+      "probed_at_utc": "2026-10-11T14:24:05+00:00",
+      "requests": 19,
+      "robots_url": "https://www.dw.com/robots.txt",
+      "robots_status": 200,
+      "robots_snapshot": "evidence/robots/dw_urdu_20261011.txt",
+      "robots_sha256": "f7daa7ad2ba66d113657a45c8ef5269c60701e204bee0c0560f196b3b985c98c",
+      "crawl_delay_ua": null,
+      "crawl_delay_star": null,
+      "robots_eval": {},
+      "sitemaps": [
+        {
+          "url": "https://www.dw.com/sitemap.xml",
+          "final_url": "https://www.dw.com/sitemap.xml",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "index",
+          "entries": 217
+        },
+        {
+          "url": "https://www.dw.com/sitemap_index.xml",
+          "final_url": "https://www.dw.com/sitemap_index.xml",
+          "outcome": "not_found",
+          "status": 404
+        },
+        {
+          "url": "https://www.dw.com/de/navigation-sitemap.xml",
+          "final_url": "https://www.dw.com/de/navigation-sitemap.xml",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 21
+        },
+        {
+          "url": "https://www.dw.com/de/article-sitemap.xml",
+          "final_url": "https://www.dw.com/de/article-sitemap.xml",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 1038
+        },
+        {
+          "url": "https://www.dw.com/de/person-sitemap.xml",
+          "final_url": "https://www.dw.com/de/person-sitemap.xml",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 455
+        },
+        {
+          "url": "https://www.dw.com/en/navigation-sitemap.xml",
+          "final_url": "https://www.dw.com/en/navigation-sitemap.xml",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 23
+        },
+        {
+          "url": "https://www.dw.com/en/article-sitemap.xml",
+          "final_url": "https://www.dw.com/en/article-sitemap.xml",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 1908
+        },
+        {
+          "url": "https://www.dw.com/en/person-sitemap.xml",
+          "final_url": "https://www.dw.com/en/person-sitemap.xml",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 624
+        },
+        {
+          "url": "https://www.dw.com/ru/navigation-sitemap.xml",
+          "final_url": "https://www.dw.com/ru/navigation-sitemap.xml",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 15
+        },
+        {
+          "url": "https://www.dw.com/ru/article-sitemap.xml",
+          "final_url": "https://www.dw.com/ru/article-sitemap.xml",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 2771
+        },
+        {
+          "url": "https://www.dw.com/ru/person-sitemap.xml",
+          "final_url": "https://www.dw.com/ru/person-sitemap.xml",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 380
+        },
+        {
+          "url": "https://www.dw.com/zh/navigation-sitemap.xml",
+          "final_url": "https://www.dw.com/zh/navigation-sitemap.xml",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 16
+        },
+        {
+          "url": "https://www.dw.com/zh/article-sitemap.xml",
+          "final_url": "https://www.dw.com/zh/article-sitemap.xml",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 673
+        },
+        {
+          "url": "https://www.dw.com/zh/person-sitemap.xml",
+          "final_url": "https://www.dw.com/zh/person-sitemap.xml",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 183
+        }
+      ],
+      "sitemap_groups": [
+        {
+          "key": "www.dw.com/de/navigation-sitemap.xml",
+          "children": 1,
+          "sampled": 1,
+          "article_counts": [
+            0
+          ],
+          "estimate": 0,
+          "exact": true,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/de/article-sitemap.xml",
+          "children": 1,
+          "sampled": 1,
+          "article_counts": [
+            0
+          ],
+          "estimate": 0,
+          "exact": true,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/de/person-sitemap.xml",
+          "children": 1,
+          "sampled": 1,
+          "article_counts": [
+            0
+          ],
+          "estimate": 0,
+          "exact": true,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/en/navigation-sitemap.xml",
+          "children": 1,
+          "sampled": 1,
+          "article_counts": [
+            0
+          ],
+          "estimate": 0,
+          "exact": true,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/en/article-sitemap.xml",
+          "children": 1,
+          "sampled": 1,
+          "article_counts": [
+            0
+          ],
+          "estimate": 0,
+          "exact": true,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/en/person-sitemap.xml",
+          "children": 1,
+          "sampled": 1,
+          "article_counts": [
+            0
+          ],
+          "estimate": 0,
+          "exact": true,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/ru/navigation-sitemap.xml",
+          "children": 1,
+          "sampled": 1,
+          "article_counts": [
+            0
+          ],
+          "estimate": 0,
+          "exact": true,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/ru/article-sitemap.xml",
+          "children": 1,
+          "sampled": 1,
+          "article_counts": [
+            0
+          ],
+          "estimate": 0,
+          "exact": true,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/ru/person-sitemap.xml",
+          "children": 1,
+          "sampled": 1,
+          "article_counts": [
+            0
+          ],
+          "estimate": 0,
+          "exact": true,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/zh/navigation-sitemap.xml",
+          "children": 1,
+          "sampled": 1,
+          "article_counts": [
+            0
+          ],
+          "estimate": 0,
+          "exact": true,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/zh/article-sitemap.xml",
+          "children": 1,
+          "sampled": 1,
+          "article_counts": [
+            0
+          ],
+          "estimate": 0,
+          "exact": true,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/zh/person-sitemap.xml",
+          "children": 1,
+          "sampled": 1,
+          "article_counts": [
+            0
+          ],
+          "estimate": 0,
+          "exact": true,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/zh-hant/navigation-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/zh-hant/article-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/zh-hant/person-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/pt-br/navigation-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/pt-br/article-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/pt-br/person-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/sq/navigation-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/sq/article-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/sq/person-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/am/navigation-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/am/article-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/am/person-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/ar/navigation-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/ar/article-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/ar/person-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/bn/navigation-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/bn/article-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/bn/person-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/bs/navigation-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/bs/article-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/bs/person-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/bg/navigation-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/bg/article-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/bg/person-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/fa-af/navigation-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/fa-af/article-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/fa-af/person-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/fr/navigation-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/fr/article-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/fr/person-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/el/navigation-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/el/article-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/el/person-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/ha/navigation-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/ha/article-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/ha/person-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/hi/navigation-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/hi/article-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/hi/person-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/id/navigation-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/id/article-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/id/person-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/sw/navigation-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/sw/article-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/sw/person-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/hr/navigation-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/hr/article-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/hr/person-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/mk/navigation-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/mk/article-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/mk/person-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/ps/navigation-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/ps/article-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/ps/person-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/fa-ir/navigation-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/fa-ir/article-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/fa-ir/person-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/pl/navigation-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/pl/article-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/pl/person-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/pt-#/navigation-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/pt-#/article-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/pt-#/person-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/ro/navigation-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/ro/article-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/ro/person-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/sr/navigation-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/sr/article-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/sr/person-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/es/navigation-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/es/article-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/es/person-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/tr/navigation-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/tr/article-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/tr/person-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/uk/navigation-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/uk/article-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/uk/person-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/ur/navigation-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/ur/article-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/ur/person-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/de/news-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": true
+        },
+        {
+          "key": "www.dw.com/en/news-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": true
+        },
+        {
+          "key": "www.dw.com/ru/news-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": true
+        },
+        {
+          "key": "www.dw.com/zh/news-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": true
+        },
+        {
+          "key": "www.dw.com/zh-hant/news-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": true
+        },
+        {
+          "key": "www.dw.com/pt-br/news-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": true
+        },
+        {
+          "key": "www.dw.com/sq/news-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": true
+        },
+        {
+          "key": "www.dw.com/am/news-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": true
+        },
+        {
+          "key": "www.dw.com/ar/news-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": true
+        },
+        {
+          "key": "www.dw.com/bn/news-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": true
+        },
+        {
+          "key": "www.dw.com/bs/news-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": true
+        },
+        {
+          "key": "www.dw.com/bg/news-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": true
+        },
+        {
+          "key": "www.dw.com/fa-af/news-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": true
+        },
+        {
+          "key": "www.dw.com/fr/news-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": true
+        },
+        {
+          "key": "www.dw.com/el/news-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": true
+        },
+        {
+          "key": "www.dw.com/ha/news-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": true
+        },
+        {
+          "key": "www.dw.com/hi/news-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": true
+        },
+        {
+          "key": "www.dw.com/id/news-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": true
+        },
+        {
+          "key": "www.dw.com/sw/news-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": true
+        },
+        {
+          "key": "www.dw.com/hr/news-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": true
+        },
+        {
+          "key": "www.dw.com/mk/news-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": true
+        },
+        {
+          "key": "www.dw.com/ps/news-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": true
+        },
+        {
+          "key": "www.dw.com/fa-ir/news-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": true
+        },
+        {
+          "key": "www.dw.com/pl/news-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": true
+        },
+        {
+          "key": "www.dw.com/pt-#/news-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": true
+        },
+        {
+          "key": "www.dw.com/ro/news-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": true
+        },
+        {
+          "key": "www.dw.com/sr/news-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": true
+        },
+        {
+          "key": "www.dw.com/es/news-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": true
+        },
+        {
+          "key": "www.dw.com/tr/news-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": true
+        },
+        {
+          "key": "www.dw.com/uk/news-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": true
+        },
+        {
+          "key": "www.dw.com/ur/news-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": true
+        },
+        {
+          "key": "www.dw.com/de/gallery-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/de/video-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/de/auto-topic-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/en/gallery-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/en/video-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/en/auto-topic-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/ru/gallery-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/ru/video-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/ru/auto-topic-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/zh/gallery-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/zh/video-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/zh/auto-topic-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/zh-hant/gallery-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/zh-hant/video-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/zh-hant/auto-topic-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/pt-br/gallery-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/pt-br/video-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/pt-br/auto-topic-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/sq/gallery-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/sq/video-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/sq/auto-topic-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/am/gallery-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/am/video-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/am/auto-topic-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/ar/gallery-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/ar/video-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/ar/auto-topic-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/bn/gallery-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/bn/video-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/bn/auto-topic-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/bs/gallery-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/bs/video-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/bs/auto-topic-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/bg/gallery-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/bg/video-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/bg/auto-topic-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/fa-af/gallery-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/fa-af/video-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/fa-af/auto-topic-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/fr/gallery-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/fr/video-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/fr/auto-topic-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/el/gallery-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/el/video-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/el/auto-topic-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/ha/gallery-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/ha/video-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/ha/auto-topic-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/hi/gallery-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/hi/video-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/hi/auto-topic-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/id/gallery-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/id/video-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/id/auto-topic-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/sw/gallery-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/sw/video-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/sw/auto-topic-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/hr/gallery-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/hr/video-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/hr/auto-topic-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/mk/gallery-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/mk/video-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/mk/auto-topic-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/ps/gallery-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/ps/video-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/ps/auto-topic-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/fa-ir/gallery-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/fa-ir/video-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/fa-ir/auto-topic-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/pl/gallery-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/pl/video-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/pl/auto-topic-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/pt-#/gallery-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/pt-#/video-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/pt-#/auto-topic-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/ro/gallery-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/ro/video-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/ro/auto-topic-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/sr/gallery-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/sr/video-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/sr/auto-topic-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/es/gallery-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/es/video-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/es/auto-topic-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/tr/gallery-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/tr/video-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/tr/auto-topic-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/uk/gallery-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/uk/video-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/uk/auto-topic-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/ur/gallery-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/ur/video-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.dw.com/ur/auto-topic-sitemap.xml",
+          "children": 1,
+          "sampled": 0,
+          "article_counts": [],
+          "estimate": null,
+          "exact": false,
+          "news": false
+        }
+      ],
+      "estimated_articles": null,
+      "estimate_exact": false,
+      "estimate_notes": [
+        "1 child sitemaps matching www.dw.com/de/gallery-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/de/news-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/de/video-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/de/auto-topic-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/en/gallery-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/en/news-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/en/video-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/en/auto-topic-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/ru/gallery-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/ru/news-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/ru/video-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/ru/auto-topic-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/zh/gallery-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/zh/news-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/zh/video-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/zh/auto-topic-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/zh-hant/navigation-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/zh-hant/gallery-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/zh-hant/article-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/zh-hant/news-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/zh-hant/video-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/zh-hant/person-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/zh-hant/auto-topic-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/pt-br/navigation-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/pt-br/gallery-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/pt-br/article-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/pt-br/news-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/pt-br/video-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/pt-br/person-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/pt-br/auto-topic-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/sq/navigation-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/sq/gallery-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/sq/article-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/sq/news-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/sq/video-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/sq/person-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/sq/auto-topic-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/am/navigation-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/am/gallery-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/am/article-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/am/news-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/am/video-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/am/person-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/am/auto-topic-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/ar/navigation-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/ar/gallery-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/ar/article-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/ar/news-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/ar/video-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/ar/person-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/ar/auto-topic-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/bn/navigation-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/bn/gallery-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/bn/article-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/bn/news-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/bn/video-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/bn/person-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/bn/auto-topic-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/bs/navigation-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/bs/gallery-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/bs/article-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/bs/news-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/bs/video-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/bs/person-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/bs/auto-topic-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/bg/navigation-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/bg/gallery-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/bg/article-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/bg/news-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/bg/video-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/bg/person-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/bg/auto-topic-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/fa-af/navigation-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/fa-af/gallery-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/fa-af/article-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/fa-af/news-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/fa-af/video-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/fa-af/person-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/fa-af/auto-topic-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/fr/navigation-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/fr/gallery-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/fr/article-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/fr/news-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/fr/video-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/fr/person-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/fr/auto-topic-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/el/navigation-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/el/gallery-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/el/article-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/el/news-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/el/video-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/el/person-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/el/auto-topic-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/ha/navigation-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/ha/gallery-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/ha/article-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/ha/news-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/ha/video-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/ha/person-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/ha/auto-topic-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/hi/navigation-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/hi/gallery-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/hi/article-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/hi/news-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/hi/video-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/hi/person-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/hi/auto-topic-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/id/navigation-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/id/gallery-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/id/article-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/id/news-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/id/video-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/id/person-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/id/auto-topic-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/sw/navigation-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/sw/gallery-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/sw/article-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/sw/news-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/sw/video-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/sw/person-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/sw/auto-topic-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/hr/navigation-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/hr/gallery-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/hr/article-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/hr/news-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/hr/video-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/hr/person-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/hr/auto-topic-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/mk/navigation-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/mk/gallery-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/mk/article-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/mk/news-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/mk/video-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/mk/person-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/mk/auto-topic-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/ps/navigation-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/ps/gallery-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/ps/article-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/ps/news-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/ps/video-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/ps/person-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/ps/auto-topic-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/fa-ir/navigation-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/fa-ir/gallery-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/fa-ir/article-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/fa-ir/news-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/fa-ir/video-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/fa-ir/person-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/fa-ir/auto-topic-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/pl/navigation-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/pl/gallery-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/pl/article-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/pl/news-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/pl/video-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/pl/person-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/pl/auto-topic-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/pt-#/navigation-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/pt-#/gallery-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/pt-#/article-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/pt-#/news-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/pt-#/video-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/pt-#/person-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/pt-#/auto-topic-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/ro/navigation-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/ro/gallery-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/ro/article-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/ro/news-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/ro/video-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/ro/person-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/ro/auto-topic-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/sr/navigation-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/sr/gallery-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/sr/article-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/sr/news-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/sr/video-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/sr/person-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/sr/auto-topic-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/es/navigation-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/es/gallery-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/es/article-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/es/news-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/es/video-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/es/person-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/es/auto-topic-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/tr/navigation-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/tr/gallery-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/tr/article-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/tr/news-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/tr/video-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/tr/person-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/tr/auto-topic-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/uk/navigation-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/uk/gallery-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/uk/article-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/uk/news-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/uk/video-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/uk/person-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/uk/auto-topic-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/ur/navigation-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/ur/gallery-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/ur/article-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/ur/news-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/ur/video-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/ur/person-sitemap.xml not sampled (budget)",
+        "1 child sitemaps matching www.dw.com/ur/auto-topic-sitemap.xml not sampled (budget)"
+      ],
+      "article_urls_seen": 0,
+      "nonmatching_url_samples": [],
+      "regex_fallback": false,
+      "articles": [],
+      "median_bytes": null,
+      "estimated_mb": null,
+      "server_rendered": "unknown",
+      "terms_pages": [],
+      "terms_snapshot": "evidence/terms/dw_urdu_20261011.txt",
+      "clauses": [
+        {
+          "categories": [
+            "reproduction"
+          ],
+          "prohibitive": false,
+          "quote": "DW content is made available for your personal, non-commercial use.",
+          "page": "robots.txt",
+          "url": ""
+        },
+        {
+          "categories": [
+            "scraping/crawling",
+            "automated access",
+            "data mining"
+          ],
+          "prohibitive": true,
+          "quote": "Use of any device, tool, or process designed to data mine or scrape the content using automated means is prohibited without prior written permission from Deutsche Welle.",
+          "page": "robots.txt",
+          "url": ""
+        },
+        {
+          "categories": [
+            "automated access"
+          ],
+          "prohibitive": false,
+          "quote": "Disallowd Bots Other Bot Rules Facebook link sharing preview Sitemaps",
+          "page": "robots.txt",
+          "url": ""
+        }
+      ],
+      "challenge": null,
+      "errors": [
+        "no article URLs found in sitemaps",
+        "terms link finder (first version, since fixed) picked a news section page (https://www.dw.com/ur/انسانی-حقوق/s-60947758) instead of a terms page; that snapshot was removed. Not re-fetched: DW's robots.txt comment already states its terms (quoted below)."
+      ],
+      "verdict": "NO: robots.txt comments restrict automated access, data mining, scraping/crawling (quotes below)"
+    },
+    {
+      "site_id": "urdunews",
+      "name": "Urdu News",
+      "home_url": "https://www.urdunews.com/",
+      "genre": "news",
+      "article_re": "^https?://(?:www\\.)?urdunews\\.com/node/\\d+(?:/[^?#]*)?$",
+      "probed_at_utc": "2026-10-11T14:34:58+00:00",
+      "requests": 45,
+      "robots_url": "https://www.urdunews.com/robots.txt",
+      "robots_status": 200,
+      "robots_snapshot": "evidence/robots/urdunews_20261011.txt",
+      "robots_sha256": "278e83bcf567badfebcdea4d5d20ca9898e4449fe4eb2e3b5a08227b4ca9b762",
+      "crawl_delay_ua": 10.0,
+      "crawl_delay_star": 10.0,
+      "robots_eval": {
+        "urls_tested": 46,
+        "agent_token": "UrduCorpusCourseBot",
+        "rfc_ua": 46,
+        "rfc_star": 46,
+        "stdlib_ua": 46,
+        "stdlib_star": 46,
+        "disagreements": []
+      },
+      "sitemaps": [
+        {
+          "url": "https://www.urdunews.com/sitemap.xml",
+          "final_url": "https://www.urdunews.com/sitemap.xml",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "index",
+          "entries": 3
+        },
+        {
+          "url": "https://www.urdunews.com/sitemap_index.xml",
+          "final_url": "https://www.urdunews.com/sitemap_index.xml",
+          "outcome": "not_found",
+          "status": 404
+        },
+        {
+          "url": "http://www.urdunews.com/sitemap.xml?page=2",
+          "final_url": "https://www.urdunews.com/sitemap.xml?page=2",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 49996
+        },
+        {
+          "url": "http://www.urdunews.com/sitemap.xml?page=3",
+          "final_url": "https://www.urdunews.com/sitemap.xml?page=3",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 44216
+        },
+        {
+          "url": "http://www.urdunews.com/sitemap.xml?page=1",
+          "final_url": "https://www.urdunews.com/sitemap.xml?page=1",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 49994
+        }
+      ],
+      "sitemap_groups": [
+        {
+          "key": "www.urdunews.com/sitemap.xml?page=#",
+          "children": 3,
+          "sampled": 3,
+          "article_counts": [
+            4,
+            8,
+            24
+          ],
+          "leaf_counts": [
+            4,
+            8,
+            24
+          ],
+          "estimate": 36,
+          "exact": true,
+          "news": true
+        }
+      ],
+      "estimated_articles": null,
+      "estimate_exact": false,
+      "estimate_notes": [
+        "re-run 2026-10-11T14:44:03+00:00 with --steps articles",
+        "sitemaps list no URL matching the article regex (they hold other pages), so the article count is unknown",
+        "46 home-page links matching the article regex used as samples",
+        "highest numeric ID among home-page article links: 909,304 (an upper bound on items if the site numbers them sequentially)",
+        "re-run 2026-10-11T14:48:19+00:00 with --steps terms"
+      ],
+      "article_urls_seen": 0,
+      "nonmatching_url_samples": [
+        "http://www.urdunews.com/tags/%C2%A0%D8%A7%D9%84%D8%B9%D9%84%D8%A7",
+        "http://www.urdunews.com/tags/%D8%A7%D9%86%DA%88%DB%8C%D9%86-%D8%A7%D8%AF%DB%8C%D8%A8",
+        "http://www.urdunews.com/tags/%D8%A8%DB%81%D8%AA%D8%B1%DB%8C%D9%86-%DA%A9%D8%A7%D9%85",
+        "http://www.urdunews.com/tags/%D8%AF%D8%A8%D8%A6%DB%8C-%DA%A9%DB%92-%D8%AD%DA%A9%D9%85%D8%B1%D8%A7%D9%86-%D8%B4%DB%8C%D8%AE-%D9%85%D8%AD%D9%85%D8%AF-%D8%A8%D9%86-%D8%B1%D8%A7%D8%B4%D8%AF-%D8%A7%D9%84%D9%85%D8%AE%D8%AA%D9%88%D9%85",
+        "http://www.urdunews.com/tags/%D8%B3%D8%B9%D9%88%D8%AF%DB%8C-%D9%81%D9%84%D8%A7%D8%A6%D9%86%DA%AF-%DA%A9%D9%84%D8%A8",
+        "http://www.urdunews.com/tags/%D8%B6%D9%84%D8%B9-%D9%88%DB%81%D8%A7%DA%91%DB%8C",
+        "http://www.urdunews.com/tags/%D9%85%D8%A7%D8%A4%D9%86%D9%B9-%D8%A7%DB%8C%D9%88%D8%B1%D8%B3%D9%B9-%DA%A9%DB%8C-%D8%A8%D9%84%D9%86%D8%AF%DB%8C",
+        "http://www.urdunews.com/tags/%D9%86%DB%8C%D8%A7",
+        "http://www.urdunews.com/tags/%D9%BE%D8%B4%D8%A7%D9%88%D8%B1-%DB%81%D8%B3%D9%BE%D8%AA%D8%A7%D9%84",
+        "http://www.urdunews.com/tags/%DA%A9%D9%88%D8%B1%D9%88%D9%86%D8%A7-%D8%B3%DB%92-%D9%85%D8%AA%D8%A7%D8%AB%D8%B1%DB%81-%D8%A7%D9%81%D8%B3%D8%B1"
+      ],
+      "regex_fallback": false,
+      "articles": [
+        {
+          "url": "https://www.urdunews.com/node/909230",
+          "final_url": "https://www.urdunews.com/node/909230",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 61394,
+          "title": "جب تک کپتانی ہے، توجہ پاکستان کو جتوانے پر مرکوز رہے گی: صاحبزادہ فرحان",
+          "published": "2026-10-08T17:40:33+03:00",
+          "body_bytes": 5175,
+          "arabic_letters": 2218,
+          "render": "server",
+          "html_sha256": "0cd24f32b75b0def5c0154bd5f352f7a440148a25fe6304e92e1c7b026f5d8c0"
+        },
+        {
+          "url": "https://www.urdunews.com/node/909298",
+          "final_url": "https://www.urdunews.com/node/909298",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 48013,
+          "title": "کراچی سفاری پارک میں ہتھنی مدھوبالا کا علاج کہاں تک پہنچا؟",
+          "published": "2026-10-11T07:33:53+03:00",
+          "body_bytes": 534,
+          "arabic_letters": 232,
+          "render": "server",
+          "html_sha256": "9f2dbe8591a368b4dc3010bcfc098fb51fb274a4b7239be9b8cc002c8efb05de"
+        },
+        {
+          "url": "https://www.urdunews.com/node/909215",
+          "final_url": "https://www.urdunews.com/node/909215",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 66126,
+          "title": "فتح فور کے ایکسٹینڈڈ ورژن کی طاقت کتنی اور انڈیا کے تناظر میں اہمیت کیا ہے؟",
+          "published": "2026-10-08T10:59:10+03:00",
+          "body_bytes": 10130,
+          "arabic_letters": 4283,
+          "render": "server",
+          "html_sha256": "2f566dff1d5cab8faf845651c99f46a56add50d9e1df2be98e6a403007334992"
+        },
+        {
+          "url": "https://www.urdunews.com/node/909151",
+          "final_url": "https://www.urdunews.com/node/909151",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 61206,
+          "title": "دنیا کا پہلا اے آئی ہیلتھ کیئر نظام جو ڈاکٹر کے بغیر ادویات کا نسخہ جاری کرے گا",
+          "published": "2026-10-06T12:33:54+03:00",
+          "body_bytes": 4527,
+          "arabic_letters": 1924,
+          "render": "server",
+          "html_sha256": "78a9f1dc048697fd0d4fdcb246d58cf9b40d0845a44f6cef8419439764b3bbf9"
+        },
+        {
+          "url": "https://www.urdunews.com/node/909294",
+          "final_url": "https://www.urdunews.com/node/909294",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 60958,
+          "title": "ریاض ایئرپورٹ پر حملے میں 12 افراد جان سے گئے، 309 زخمی، دمام ایئرپورٹ کو بھی نشانہ بنایا گیا",
+          "published": "2026-10-11T01:27:46+03:00",
+          "body_bytes": 4648,
+          "arabic_letters": 1982,
+          "render": "server",
+          "html_sha256": "7bb646a534a5162fa38fe424bc264cfeb2a3057371a476066ce4b3fb23fd1f36"
+        },
+        {
+          "url": "https://www.urdunews.com/node/909257",
+          "final_url": "https://www.urdunews.com/node/909257",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 58899,
+          "title": "پاکستانی فوج سعودی عرب میں دفاعی ذمہ داریاں انجام دے رہی ہے: دفترِ خارجہ",
+          "published": "2026-10-09T16:39:58+03:00",
+          "body_bytes": 2658,
+          "arabic_letters": 1146,
+          "render": "server",
+          "html_sha256": "7b887ec9167e967e8f2e8cdab812224923491ca60024b3094de2d11c9be22ac2"
+        },
+        {
+          "url": "https://www.urdunews.com/node/909239",
+          "final_url": "https://www.urdunews.com/node/909239",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 60246,
+          "title": "ایمازون نے پہلی بار اینڈرائیڈ آپریٹنگ سسٹم والے ٹیبلٹس متعارف کرا دیے",
+          "published": "2026-10-09T07:00:47+03:00",
+          "body_bytes": 4778,
+          "arabic_letters": 1993,
+          "render": "server",
+          "html_sha256": "ff20cb1a4506ec81158079e0f9f8c36f2a3305f8ddd8bfbbc986618d7cd95a97"
+        },
+        {
+          "url": "https://www.urdunews.com/node/909289",
+          "final_url": "https://www.urdunews.com/node/909289",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 57690,
+          "title": "وزیر اعظم شہباز شریف اور مولانا فضل الرحمن کی ملاقات، قومی و سیاسی امور پر مشاورت",
+          "published": "2026-10-10T21:40:58+03:00",
+          "body_bytes": 3200,
+          "arabic_letters": 1382,
+          "render": "server",
+          "html_sha256": "1c011098f0fac6fc9aa0449b595153424a375133789a0dc43f000ba81cbc2e48"
+        },
+        {
+          "url": "https://www.urdunews.com/node/909293",
+          "final_url": "https://www.urdunews.com/node/909293",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 55748,
+          "title": "طائف میں انار کے دو لاکھ 20 ہزار درخت، پانچ ہزار ٹن پیداوار",
+          "published": "2026-10-11T00:04:24+03:00",
+          "body_bytes": 1425,
+          "arabic_letters": 613,
+          "render": "server",
+          "html_sha256": "f09ba340da9be0d88e9cbaf7a5eb870f319d593f204a49f60886fd8ed087abc4"
+        },
+        {
+          "url": "https://www.urdunews.com/node/909256",
+          "final_url": "https://www.urdunews.com/node/909256",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 48049,
+          "title": "مشرق وسطیٰ میں طویل تعیناتی کے بعد ’یو ایس ایس ابراہم لنکن‘ کی کیلیفورنیا واپسی",
+          "published": "2026-10-09T16:20:30+03:00",
+          "body_bytes": 279,
+          "arabic_letters": 119,
+          "render": "none",
+          "html_sha256": "4f96767742816632b4394505d4fce950ce81aef99af0dcbef404ae8ac6317c8a"
+        }
+      ],
+      "median_bytes": 3863.5,
+      "estimated_mb": null,
+      "server_rendered": "server",
+      "terms_pages": [
+        {
+          "score": 1,
+          "kind": "privacy",
+          "url": "https://www.urdunews.com/privacy-policy",
+          "text": "پرائیوسی پالیسی",
+          "in_footer": true,
+          "final_url": "https://www.urdunews.com/%DB%81%D9%85%D8%A7%D8%B1%DB%8C-%D9%BE%D8%B1%D8%A7%D8%A6%DB%8C%D9%88%DB%8C%D8%B3%DB%8C-%D9%BE%D8%A7%D9%84%DB%8C%D8%B3%DB%8C",
+          "outcome": "ok",
+          "status": 200,
+          "html_sha256": "88e2bee269efc485c4c18d6af82e0b60734ca9ce7aa17423b9ca6cf10bcba87f",
+          "text_chars": 4413
+        }
+      ],
+      "terms_snapshot": "evidence/terms/urdunews_20261011.txt",
+      "clauses": [],
+      "challenge": null,
+      "errors": [],
+      "verdict": "OK"
+    },
+    {
+      "site_id": "voa_urdu",
+      "name": "VOA Urdu",
+      "home_url": "https://www.urduvoa.com/",
+      "genre": "news",
+      "article_re": "^https?://(?:www\\.)?urduvoa\\.com/a/(?:[^/?#]+/)?\\d+\\.html$",
+      "probed_at_utc": "2026-10-11T14:26:34+00:00",
+      "requests": 23,
+      "robots_url": "https://www.urduvoa.com/robots.txt",
+      "robots_status": 200,
+      "robots_snapshot": "evidence/robots/voa_urdu_20261011.txt",
+      "robots_sha256": "428161a536378d3632fb9e7ff851089e6c199f0caacd485dd2cbe0787c7d42c9",
+      "crawl_delay_ua": null,
+      "crawl_delay_star": null,
+      "robots_eval": {
+        "urls_tested": 1000,
+        "agent_token": "UrduCorpusCourseBot",
+        "rfc_ua": 1000,
+        "rfc_star": 1000,
+        "stdlib_ua": 1000,
+        "stdlib_star": 1000,
+        "disagreements": []
+      },
+      "sitemaps": [
+        {
+          "url": "https://www.urduvoa.com/sitemap.xml",
+          "final_url": "https://www.urduvoa.com/sitemap.xml",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "index",
+          "entries": 12
+        },
+        {
+          "url": "https://www.urduvoa.com/sitemap_index.xml",
+          "final_url": "https://www.urduvoa.com/sitemap_index.xml",
+          "outcome": "not_found",
+          "status": 404
+        },
+        {
+          "url": "https://www.urduvoa.com/sitemap_445_3.xml.gz",
+          "final_url": "https://www.urduvoa.com/sitemap_445_3.xml.gz",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 20000
+        },
+        {
+          "url": "https://www.urduvoa.com/Sitemap/Hreflang",
+          "final_url": "https://www.urduvoa.com/Sitemap/Hreflang",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "unknown",
+          "entries": 0
+        },
+        {
+          "url": "https://www.urduvoa.com/sitemap_445_latest.xml.gz",
+          "final_url": "https://www.urduvoa.com/sitemap_445_latest.xml.gz",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 0
+        },
+        {
+          "url": "https://www.urduvoa.com/sitemap_445_news.xml.gz",
+          "final_url": "https://www.urduvoa.com/sitemap_445_news.xml.gz",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 0
+        },
+        {
+          "url": "https://www.urduvoa.com/sitemap_445_sections.xml.gz",
+          "final_url": "https://www.urduvoa.com/sitemap_445_sections.xml.gz",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 195
+        },
+        {
+          "url": "https://www.urduvoa.com/sitemap_445_videos.xml.gz",
+          "final_url": "https://www.urduvoa.com/sitemap_445_videos.xml.gz",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 19999
+        },
+        {
+          "url": "https://www.urduvoa.com/sitemap_445_1.xml.gz",
+          "final_url": "https://www.urduvoa.com/sitemap_445_1.xml.gz",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 20000
+        },
+        {
+          "url": "https://www.urduvoa.com/sitemap_445_7.xml.gz",
+          "final_url": "https://www.urduvoa.com/sitemap_445_7.xml.gz",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 13181
+        }
+      ],
+      "sitemap_groups": [
+        {
+          "key": "www.urduvoa.com/sitemap_#_#.xml.gz",
+          "children": 7,
+          "sampled": 3,
+          "article_counts": [
+            20000,
+            20000,
+            13181
+          ],
+          "estimate": 124089,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.urduvoa.com/Sitemap/Hreflang",
+          "children": 1,
+          "sampled": 1,
+          "article_counts": [
+            0
+          ],
+          "estimate": 0,
+          "exact": true,
+          "news": false
+        },
+        {
+          "key": "www.urduvoa.com/sitemap_#_latest.xml.gz",
+          "children": 1,
+          "sampled": 1,
+          "article_counts": [
+            0
+          ],
+          "estimate": 0,
+          "exact": true,
+          "news": false
+        },
+        {
+          "key": "www.urduvoa.com/sitemap_#_news.xml.gz",
+          "children": 1,
+          "sampled": 1,
+          "article_counts": [
+            0
+          ],
+          "estimate": 0,
+          "exact": true,
+          "news": true
+        },
+        {
+          "key": "www.urduvoa.com/sitemap_#_sections.xml.gz",
+          "children": 1,
+          "sampled": 1,
+          "article_counts": [
+            0
+          ],
+          "estimate": 0,
+          "exact": true,
+          "news": false
+        },
+        {
+          "key": "www.urduvoa.com/sitemap_#_videos.xml.gz",
+          "children": 1,
+          "sampled": 1,
+          "article_counts": [
+            19999
+          ],
+          "estimate": 19999,
+          "exact": true,
+          "news": false
+        }
+      ],
+      "estimated_articles": 124089,
+      "estimate_exact": false,
+      "estimate_notes": [
+        "news sitemaps www.urduvoa.com/sitemap_#_news.xml.gz left out of the count",
+        "media sitemaps www.urduvoa.com/sitemap_#_videos.xml.gz (~19,999 URLs) left out of the count"
+      ],
+      "article_urls_seen": 73180,
+      "nonmatching_url_samples": [],
+      "regex_fallback": false,
+      "articles": [
+        {
+          "url": "https://www.urduvoa.com/a/afghanistan-list/3732084.html",
+          "final_url": "https://www.urduvoa.com/a/afghanistan-list/3732084.html",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 73000,
+          "title": "افغانستان نے دہشت گردوں کی فہرست پاکستان کو دے دی",
+          "published": "2017-02-20 16:17:36Z",
+          "body_bytes": 3646,
+          "arabic_letters": 1585,
+          "render": "server",
+          "html_sha256": "35d38284cbc8d723609c98ee6da30bcd8c2d2d0666660dc174ffbfb955168678"
+        },
+        {
+          "url": "https://www.urduvoa.com/a/karachi-footbal-11june10-96128869/1126285.html",
+          "final_url": "https://www.urduvoa.com/a/karachi-footbal-11june10-96128869/1126285.html",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 77171,
+          "title": "عالمی کپ کا جوش و خروش عروج پر",
+          "published": "2010-06-11 00:00:00Z",
+          "body_bytes": 5289,
+          "arabic_letters": 2274,
+          "render": "server",
+          "html_sha256": "f079265e6a2f6e2a778d8f9ce95aef6da42dd06d6ca80f2b948ca19765c6eefe"
+        },
+        {
+          "url": "https://www.urduvoa.com/a/imran-khan-talks-on-twitter-space/6537979.html",
+          "final_url": "https://www.urduvoa.com/a/imran-khan-talks-on-twitter-space/6537979.html",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 84829,
+          "title": "فوج کے خلاف بات نہ کریں،مجھ سے زیادہ اس ملک کو فوج کی ضرورت ہے: عمران خان",
+          "published": "2022-04-20 21:54:09Z",
+          "body_bytes": 11954,
+          "arabic_letters": 5153,
+          "render": "server",
+          "html_sha256": "00d9770adb7dfec670a4560b251fa3051e7f37784976f083aa1758fe94176d6c"
+        },
+        {
+          "url": "https://www.urduvoa.com/a/us-slaps-sanctions-on-7-north-koreans-2-dprk-entities/3673196.html",
+          "final_url": "https://www.urduvoa.com/a/us-slaps-sanctions-on-7-north-koreans-2-dprk-entities/3673196.html",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 73100,
+          "title": "امریکہ کی شمالی کوریا کے سات عہدیداروں پر پابندی عائد",
+          "published": "2017-01-12 05:33:58Z",
+          "body_bytes": 3051,
+          "arabic_letters": 1313,
+          "render": "server",
+          "html_sha256": "fa10c0bfca508ad15dffff9e1f326861ae40c698d5aa3ff5223cf8d25acf5a3a"
+        },
+        {
+          "url": "https://www.urduvoa.com/a/e24-eligible-voters-in-united-states-presidential-election/7817468.html",
+          "final_url": "https://www.urduvoa.com/a/e24-eligible-voters-in-united-states-presidential-election/7817468.html",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 92093,
+          "title": "ویڈیوز",
+          "published": "2024-10-10 13:55:57Z",
+          "body_bytes": 589,
+          "arabic_letters": 248,
+          "render": "server",
+          "html_sha256": "9f04a62803983364c1e70f9a7f5252c6bc3626299001b789bcb2e93b89ae21f9"
+        },
+        {
+          "url": "https://www.urduvoa.com/a/iranian-diplomate-30mar10-89493722/1124905.html",
+          "final_url": "https://www.urduvoa.com/a/iranian-diplomate-30mar10-89493722/1124905.html",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 70868,
+          "title": "مغوی ایرانی سفارت کار کی بازیابی کی تصدیق",
+          "published": "2010-03-30 00:00:00Z",
+          "body_bytes": 3000,
+          "arabic_letters": 1285,
+          "render": "server",
+          "html_sha256": "92b3b4ebff36df22a27bd4e871140e419f0e656317916284920020f62fa0c8f9"
+        },
+        {
+          "url": "https://www.urduvoa.com/a/7581671.html",
+          "final_url": "https://www.urduvoa.com/a/7581671.html",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 78788,
+          "title": "View 360",
+          "published": "2024-04-23 16:27:48Z",
+          "body_bytes": 361,
+          "arabic_letters": 158,
+          "render": "none",
+          "html_sha256": "485016c9944c2f594548a7357cf2aeb1e489189447d49c3587cc3e20d6d8cd67"
+        },
+        {
+          "url": "https://www.urduvoa.com/a/4051450.html",
+          "final_url": "https://www.urduvoa.com/a/4051450.html",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 62410,
+          "title": "خط آپ کے",
+          "published": null,
+          "body_bytes": 76,
+          "arabic_letters": 35,
+          "render": "none",
+          "html_sha256": "9050340206197f1aecde77548c2f05d5b0e2eafbb87af79c54ff98e8b2a327c6"
+        },
+        {
+          "url": "https://www.urduvoa.com/a/mother-teresa-award-salman-sufi/4614782.html",
+          "final_url": "https://www.urduvoa.com/a/mother-teresa-award-salman-sufi/4614782.html",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 77907,
+          "title": "سلمان صوفی مدر ٹریسا ایوارڈ کے لیے نامزد",
+          "published": "2018-10-15 22:34:23Z",
+          "body_bytes": 2349,
+          "arabic_letters": 1014,
+          "render": "server",
+          "html_sha256": "31a126c65c3876aa59041ab3f332456b8e890c9d1a11dbde4db2b3f4bbae0961"
+        },
+        {
+          "url": "https://www.urduvoa.com/a/nd-fm-bulletin/6913734.html",
+          "final_url": "https://www.urduvoa.com/a/nd-fm-bulletin/6913734.html",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 72066,
+          "title": "آڈیو",
+          "published": null,
+          "body_bytes": 76,
+          "arabic_letters": 35,
+          "render": "none",
+          "html_sha256": "44d491fcec2116bcc27aec26d3a0ed245afa50e5ea6ba078178a800d95a4b905"
+        }
+      ],
+      "median_bytes": 2674.5,
+      "estimated_mb": 331.8760305,
+      "server_rendered": "server",
+      "terms_pages": [
+        {
+          "score": 1,
+          "kind": "privacy",
+          "url": "https://www.urduvoa.com/p/7823.html",
+          "text": "پرائیویسی نوٹس",
+          "final_url": "https://www.urduvoa.com/p/7823.html",
+          "outcome": "ok",
+          "status": 200,
+          "html_sha256": "60a1c255df681fafe65e27f99e87b2f826e551d5911161dec1007602f7f69395",
+          "text_chars": 12028
+        }
+      ],
+      "terms_snapshot": "evidence/terms/voa_urdu_20261011.txt",
+      "clauses": [
+        {
+          "categories": [
+            "automated access"
+          ],
+          "prohibitive": false,
+          "quote": "معلومات خودکار طور پر جمع اور محفوظ ہوتی ہیں",
+          "page": "privacy",
+          "url": "https://www.urduvoa.com/p/7823.html"
+        },
+        {
+          "categories": [
+            "automated access"
+          ],
+          "prohibitive": false,
+          "quote": "اگر آپ ویب سائٹ پر جائیں اور کچھ بھی نہ کریں یا وہاں کچھ پڑھیں یا کسی قسم کی معلومات ڈاؤن لوڈ کریں تو ان تمام صورتوں میں ہمارے پاس آپ کے ویب سائٹ پر جانے سے متعلق اطلاعات خودکار طور پر جمع ہو جائیں گی۔",
+          "page": "privacy",
+          "url": "https://www.urduvoa.com/p/7823.html"
+        },
+        {
+          "categories": [
+            "reproduction"
+          ],
+          "prohibitive": false,
+          "quote": "کاپی رائٹس سے متعلق پالیسی",
+          "page": "privacy",
+          "url": "https://www.urduvoa.com/p/7823.html"
+        },
+        {
+          "categories": [
+            "reproduction"
+          ],
+          "prohibitive": false,
+          "quote": "تاہم voanews.com پر ایسا متن، ویڈیو، آڈیو، تصاویر، گرافکس یا ایسا مواد ہو سکتا ہے جس کے کاپی رائٹس کا لائسنس صرف وی او اے پروگرامنگ کے لیے مختص ہو۔",
+          "page": "privacy",
+          "url": "https://www.urduvoa.com/p/7823.html"
+        },
+        {
+          "categories": [
+            "reproduction"
+          ],
+          "prohibitive": true,
+          "quote": "یہ مواد عام دسترس میں نہیں ہوگا اور کاپی رائٹ کے مالک کی اجازت کے بغیر اسے نہ نقل کیا جا سکتا ہے، نہ دوبارہ تقسیم کیا جاسکتا ہے اور نہ ہی شائع کیا جا سکتا ہے۔",
+          "page": "privacy",
+          "url": "https://www.urduvoa.com/p/7823.html"
+        },
+        {
+          "categories": [
+            "reproduction"
+          ],
+          "prohibitive": true,
+          "quote": "ان ایجنسیوں کی تحریری اجازت کے بغیر ان کے مواد کو نہ نقل کیا جاسکتا ہے، نہ شائع کیا جاسکتا ہے اور نہ دوبارہ تقسیم کیا جا سکتا ہے۔",
+          "page": "privacy",
+          "url": "https://www.urduvoa.com/p/7823.html"
+        },
+        {
+          "categories": [
+            "reproduction"
+          ],
+          "prohibitive": true,
+          "quote": "وائس آف امریکہ اور voanews.com ٹریڈ مارکس ہیں، جنہیں باضابطہ اجازت کے بغیر تجارتی مقاصد کے لیے استعمال نہیں کیا جاسکتا۔",
+          "page": "privacy",
+          "url": "https://www.urduvoa.com/p/7823.html"
+        },
+        {
+          "categories": [
+            "reproduction"
+          ],
+          "prohibitive": false,
+          "quote": "ڈیجیٹل ملینیم کاپی رائٹ ایکٹ نوٹس",
+          "page": "privacy",
+          "url": "https://www.urduvoa.com/p/7823.html"
+        },
+        {
+          "categories": [
+            "reproduction"
+          ],
+          "prohibitive": false,
+          "quote": "ڈیجیٹل ملینیم کاپی رائٹ ایکٹ(DMVA) اور دوسرے متعلقہ قوانین کے تحت وی او اے نے ایسی پالیسی اپنائی ہے جس کے تحت کاپی رائٹ رکھنے والوں کے حقوق غصب کرنے والے اکاؤنٹ ہولڈرز کے ساتھ تعلق ختم کر دیا جاتا ہے۔",
+          "page": "privacy",
+          "url": "https://www.urduvoa.com/p/7823.html"
+        },
+        {
+          "categories": [
+            "reproduction"
+          ],
+          "prohibitive": false,
+          "quote": "اگر آپ یہ سمجھتے ہیں کہ آپ کے کام کو اس طرح نقل کیا گیا ہے جس سے کاپی رائٹ کی خلاف ورزی کا ارتکاب ہوتا ہے تو آپ وی او اے کے کاپی رائٹ ایجنٹ کو درج ذیل معلومات فراہم کریں:",
+          "page": "privacy",
+          "url": "https://www.urduvoa.com/p/7823.html"
+        },
+        {
+          "categories": [
+            "reproduction"
+          ],
+          "prohibitive": false,
+          "quote": "جس کاپی رائٹ کی خلاف ورزی کا دعویٰ کیا گیا ہو، اس کی نشان دہی یا ایک نوٹی فکیشن کے تحت وی اے او کی سائٹ کے مختلف النوع کام (جن کے کاپی رائٹ بحق محفوظ ہوں) اور سائٹ پر ایسے کاموں کی نمائندہ فہرست۔",
+          "page": "privacy",
+          "url": "https://www.urduvoa.com/p/7823.html"
+        },
+        {
+          "categories": [
+            "reproduction"
+          ],
+          "prohibitive": false,
+          "quote": "جس کاپی رائٹ کام کی خلاف ورزی کا دعویٰ کیا گیا ہو، یا اس کی خلاف ورزی کی جا رہی ہو اور جسے ہٹانا مقصود ہو یا اس تک رسائی کو ناکارہ بنایا جائے یا اس سلسلے میں معقول معلومات کی نشان دہی جن کے ذریعے وی او اے اس مواد تک پہنچ سکے۔",
+          "page": "privacy",
+          "url": "https://www.urduvoa.com/p/7823.html"
+        },
+        {
+          "categories": [
+            "reproduction"
+          ],
+          "prohibitive": true,
+          "quote": "آپ کا یہ بیان کہ آپ ایمان داری سے یہ یقین رکھتے ہیں کہ جس مواد کے استعمال کی شکایت کی ہے اس کی کاپی رائٹ کے مالک یا اس کے ایجنٹ سے باضابطہ اجازت نہیں لی گئی یا قانون اس کی اجازت نہیں دیتا۔",
+          "page": "privacy",
+          "url": "https://www.urduvoa.com/p/7823.html"
+        },
+        {
+          "categories": [
+            "reproduction"
+          ],
+          "prohibitive": false,
+          "quote": "کاپی رائٹ کی خلاف ورزی کے دعوؤں کے نوٹس کے سلسلے میں یا وی او اے کی سائٹ کے بارے میں وی او اے کے ایجنٹ سے اس ای میل پتے پر رابطہ کیا جا سکتا ہےcopyrightclearances@usagm.gov",
+          "page": "privacy",
+          "url": "https://www.urduvoa.com/p/7823.html"
+        }
+      ],
+      "challenge": null,
+      "errors": [],
+      "verdict": "OK (terms: reproduction clause only; we do not republish)"
+    },
+    {
+      "site_id": "express",
+      "name": "Express News",
+      "home_url": "https://www.express.pk/",
+      "genre": "news",
+      "article_re": "^https?://(?:www\\.)?express\\.pk/story/\\d+(?:/[^?#]*)?$",
+      "probed_at_utc": "2026-10-11T14:27:20+00:00",
+      "requests": 30,
+      "robots_url": "https://www.express.pk/robots.txt",
+      "robots_status": 200,
+      "robots_snapshot": "evidence/robots/express_20261011.txt",
+      "robots_sha256": "b9950cc9620398e8e7a53fb7040ee02297ea29bf27eb3c7f1db73ca0b299f6b3",
+      "crawl_delay_ua": null,
+      "crawl_delay_star": null,
+      "robots_eval": {
+        "urls_tested": 1000,
+        "agent_token": "UrduCorpusCourseBot",
+        "rfc_ua": 1000,
+        "rfc_star": 1000,
+        "stdlib_ua": 1000,
+        "stdlib_star": 1000,
+        "disagreements": []
+      },
+      "sitemaps": [
+        {
+          "url": "https://www.express.pk/sitemap.xml",
+          "final_url": "https://www.express.pk/sitemap.xml",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "index",
+          "entries": 127
+        },
+        {
+          "url": "https://www.express.pk/sitemap/latest-1.xml",
+          "final_url": "https://www.express.pk/sitemap/latest-1.xml",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 150
+        },
+        {
+          "url": "https://www.express.pk/sitemap/videos_sitemap.xml",
+          "final_url": "https://www.express.pk/sitemap/videos_sitemap.xml",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 500
+        },
+        {
+          "url": "https://www.express.pk/sitemap_index.xml",
+          "final_url": "https://www.express.pk/sitemap_index.xml",
+          "outcome": "not_found",
+          "status": 404
+        },
+        {
+          "url": "https://www.express.pk/sitemap/posts-67.xml",
+          "final_url": "https://www.express.pk/sitemap/posts-67.xml",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 5000
+        },
+        {
+          "url": "https://www.express.pk/sitemap/sitemap_main.xml",
+          "final_url": "https://www.express.pk/sitemap/sitemap_main.xml",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 40
+        },
+        {
+          "url": "https://www.express.pk/sitemap/slideshows-1.xml",
+          "final_url": "https://www.express.pk/sitemap/slideshows-1.xml",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 2565
+        },
+        {
+          "url": "https://www.express.pk/sitemap/tags-23.xml",
+          "final_url": "https://www.express.pk/sitemap/tags-23.xml",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 5000
+        },
+        {
+          "url": "https://www.express.pk/sitemap/post_categories-1.xml",
+          "final_url": "https://www.express.pk/sitemap/post_categories-1.xml",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 36
+        },
+        {
+          "url": "https://www.express.pk/sitemap/posts-10.xml",
+          "final_url": "https://www.express.pk/sitemap/posts-10.xml",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 5000
+        },
+        {
+          "url": "https://www.express.pk/sitemap/tags-20.xml",
+          "final_url": "https://www.express.pk/sitemap/tags-20.xml",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 5000
+        },
+        {
+          "url": "https://www.express.pk/sitemap/posts-94.xml",
+          "final_url": "https://www.express.pk/sitemap/posts-94.xml",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 5000
+        },
+        {
+          "url": "https://www.express.pk/sitemap/tags-21.xml",
+          "final_url": "https://www.express.pk/sitemap/tags-21.xml",
+          "outcome": "ok",
+          "status": 200,
+          "kind": "urlset",
+          "entries": 5000
+        }
+      ],
+      "sitemap_groups": [
+        {
+          "key": "www.express.pk/sitemap/posts-#.xml",
+          "children": 98,
+          "sampled": 3,
+          "article_counts": [
+            5000,
+            5000,
+            5000
+          ],
+          "estimate": 490000,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.express.pk/sitemap/sitemap_main.xml",
+          "children": 1,
+          "sampled": 1,
+          "article_counts": [
+            0
+          ],
+          "estimate": 0,
+          "exact": true,
+          "news": false
+        },
+        {
+          "key": "www.express.pk/sitemap/slideshows-#.xml",
+          "children": 1,
+          "sampled": 1,
+          "article_counts": [
+            0
+          ],
+          "estimate": 0,
+          "exact": true,
+          "news": false
+        },
+        {
+          "key": "www.express.pk/sitemap/tags-#.xml",
+          "children": 24,
+          "sampled": 3,
+          "article_counts": [
+            0,
+            0,
+            0
+          ],
+          "estimate": 0,
+          "exact": false,
+          "news": false
+        },
+        {
+          "key": "www.express.pk/sitemap/post_categories-#.xml",
+          "children": 1,
+          "sampled": 1,
+          "article_counts": [
+            0
+          ],
+          "estimate": 0,
+          "exact": true,
+          "news": false
+        }
+      ],
+      "estimated_articles": 490150,
+      "estimate_exact": false,
+      "estimate_notes": [
+        "robots.txt and terms pages re-fetched 2026-10-11T14:41:23+00:00 (--terms-only)"
+      ],
+      "article_urls_seen": 15150,
+      "nonmatching_url_samples": [],
+      "regex_fallback": false,
+      "articles": [
+        {
+          "url": "https://www.express.pk/story/69453/krachy-njy-myn-bynk-dkyty-ky-kwshsh-nakampwlys-ahlkar-jan-bhq-69453",
+          "final_url": "https://www.express.pk/story/69453/krachy-njy-myn-bynk-dkyty-ky-kwshsh-nakampwlys-ahlkar-jan-bhq-69453",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 122481,
+          "title": "کراچی نجی میں بینک ڈکیتی کی کوشش ناکامپولیس اہلکار جاں بحق",
+          "published": "2012-12-27T18:18:36+00:00",
+          "body_bytes": 1076,
+          "arabic_letters": 470,
+          "render": "server",
+          "html_sha256": "5d2aa7bcd85e44ecb026c3241f23c248f50c7ea6c0ea43fcf455480876dab5a4"
+        },
+        {
+          "url": "https://www.express.pk/story/733506/nan-alywn-mastr-mand-ne-kht-myn-amrykh-kw-dhsht-grdy-ka-zmh-dar-qrar-de-dya-733506",
+          "final_url": "https://www.express.pk/story/733506/nan-alywn-mastr-mand-ne-kht-myn-amrykh-kw-dhsht-grdy-ka-zmh-dar-qrar-de-dya-733506",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 125799,
+          "title": "نائن الیون ماسٹر مائنڈ نے خط میں امریکہ کو دہشت گردی کا ذمہ دار قرار دے دیا",
+          "published": "2017-02-09T16:21:28+00:00",
+          "body_bytes": 3897,
+          "arabic_letters": 1660,
+          "render": "server",
+          "html_sha256": "1a11906ace3fa88434cf82487c6ef1916b931f5a14f2a9b5ebf01ed3959d9ffe"
+        },
+        {
+          "url": "https://www.express.pk/story/760455/hang-kang-ty-20-msbah-ke-37-gyndwn-pr-82-rnz-760455",
+          "final_url": "https://www.express.pk/story/760455/hang-kang-ty-20-msbah-ke-37-gyndwn-pr-82-rnz-760455",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 122314,
+          "title": "ہانگ کانگ ٹی 20 مصباح کے 37 گیندوں پر 82 رنز",
+          "published": "2017-03-09T15:18:10+00:00",
+          "body_bytes": 2062,
+          "arabic_letters": 826,
+          "render": "server",
+          "html_sha256": "430fa3702a4b48812832b7f088944722574a2e10c1e277fe782b07a69c166465"
+        },
+        {
+          "url": "https://www.express.pk/story/749463/daash-ka-khatmh-kryn-ge-sawdy-arb-awr-araq-ka-aalan-749463",
+          "final_url": "https://www.express.pk/story/749463/daash-ka-khatmh-kryn-ge-sawdy-arb-awr-araq-ka-aalan-749463",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 123493,
+          "title": "داعش کا خاتمہ کریں گے سعودی عرب اور عراق کا اعلان",
+          "published": "2017-02-26T05:30:58+00:00",
+          "body_bytes": 2495,
+          "arabic_letters": 1080,
+          "render": "server",
+          "html_sha256": "98f5c6f51f1852bd0b7d586a76a962c7bee51c3c4641d27e3786ebecd8b4e107"
+        },
+        {
+          "url": "https://www.express.pk/story/751637/askr-ayward-myn-awm-pwry-ky-khdmat-ka-aatraf-baly-wwd-ke-mnh-pr-tmanchh-751637",
+          "final_url": "https://www.express.pk/story/751637/askr-ayward-myn-awm-pwry-ky-khdmat-ka-aatraf-baly-wwd-ke-mnh-pr-tmanchh-751637",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 124701,
+          "title": "آسکر ایوارڈ میں اوم پوری کی خدمات کا اعتراف بالی ووڈ کے منہ پر طمانچہ",
+          "published": "2017-02-28T18:47:49+00:00",
+          "body_bytes": 2593,
+          "arabic_letters": 1112,
+          "render": "server",
+          "html_sha256": "510ea7b28e6f34ef01b28387b5d3f86008413f8a9661ceec207a4a83037d652c"
+        },
+        {
+          "url": "https://www.express.pk/story/59564/jaka-59564",
+          "final_url": "https://www.express.pk/story/59564/jaka-59564",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 131694,
+          "title": "جھاکا",
+          "published": "2012-12-06T23:50:56+00:00",
+          "body_bytes": 12839,
+          "arabic_letters": 5514,
+          "render": "server",
+          "html_sha256": "2defb54f373f99a815740dfdb2fa09af7637e17a39f40bb310e0de2494629206"
+        },
+        {
+          "url": "https://www.express.pk/story/2751810/musta-aamir-qatal-case-me-mulzim-ki-remand-report-adalat-me-jama-2751810",
+          "final_url": "https://www.express.pk/story/2751810/musta-aamir-qatal-case-me-mulzim-ki-remand-report-adalat-me-jama-2751810",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 124423,
+          "title": "مصطفی عامر قتل کیس: قتل کے بعد والد نے ملزم کو روپوش ہونے کا مشورہ دیا، ریمانڈ رپورٹ میں انکشاف",
+          "published": "2025-03-11T12:28:52+00:00",
+          "body_bytes": 1386,
+          "arabic_letters": 602,
+          "render": "server",
+          "html_sha256": "33e152872830ceb99321cecce54c2df3db6d734370f44baf15b664cbfd69a2a5"
+        },
+        {
+          "url": "https://www.express.pk/story/69984/blawl-btw-zrdary-ka-khtab-69984",
+          "final_url": "https://www.express.pk/story/69984/blawl-btw-zrdary-ka-khtab-69984",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 128353,
+          "title": "بلاول بھٹو زرداری کا خطاب",
+          "published": "2012-12-28T23:45:27+00:00",
+          "body_bytes": 8982,
+          "arabic_letters": 3883,
+          "render": "server",
+          "html_sha256": "6944f18e580c179185eb6b655e89838364d6e5d78f7d0a2b16743371ee068401"
+        },
+        {
+          "url": "https://www.express.pk/story/2751577/human-rights-activists-challenge-26th-constitutional-amendment-in-supreme-court-of-pakistan-2751577",
+          "final_url": "https://www.express.pk/story/2751577/human-rights-activists-challenge-26th-constitutional-amendment-in-supreme-court-of-pakistan-2751577",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 128198,
+          "title": "انسانی حقوق کے کارکنان نے 26 ویں آئینی ترمیم کو سپریم کورٹ میں چیلنج کر دیا",
+          "published": "2025-03-10T12:59:31+00:00",
+          "body_bytes": 4842,
+          "arabic_letters": 2093,
+          "render": "server",
+          "html_sha256": "11b01a38507534be1c53774f6dd76aab2c0bafe84c99f5c205315d3d8d54c545"
+        },
+        {
+          "url": "https://www.express.pk/story/714020/ajnbyt-714020",
+          "final_url": "https://www.express.pk/story/714020/ajnbyt-714020",
+          "outcome": "ok",
+          "status": 200,
+          "html_bytes": 130252,
+          "title": "اجنبیت",
+          "published": "2017-01-20T00:31:34+00:00",
+          "body_bytes": 11622,
+          "arabic_letters": 4953,
+          "render": "server",
+          "html_sha256": "358f7d775de9453c9be53611ecf7da996eff213b0685dde2c23f932f26470c99"
+        }
+      ],
+      "median_bytes": 3245.0,
+      "estimated_mb": 1590.53675,
+      "server_rendered": "server",
+      "terms_pages": [
+        {
+          "score": 1,
+          "kind": "privacy",
+          "url": "https://www.express.pk/privacy-policy",
+          "text": "Privacy Policy",
+          "in_footer": false,
+          "final_url": "https://www.express.pk/privacy-policy",
+          "outcome": "ok",
+          "status": 200,
+          "html_sha256": "91dc7668ebf26cc11db1886c8e71613e2977cbedefec3029a1fb13a685d57436",
+          "text_chars": 2524
+        }
+      ],
+      "terms_snapshot": "evidence/terms/express_20261011.txt",
+      "clauses": [],
+      "challenge": null,
+      "errors": [],
+      "verdict": "OK"
+    }
+  ]
+}

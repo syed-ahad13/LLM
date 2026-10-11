@@ -1,0 +1,19 @@
+User-agent: *
+Crawl-delay: 20
+
+User-agent: Twitterbot
+Disallow:
+
+User-agent: *
+Disallow: /*?=print*
+
+User-agent: Applebot
+Crawl-delay: 10
+
+Sitemap: http://www.humsub.com.pk/sitemap_index.xml
+
+
+
+#WP Import Export Rule
+User-agent: *
+Disallow: /wp-content/uploads/wp-import-export-lite/

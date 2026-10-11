@@ -1,4 +1,4 @@
-"""Shared fixtures: a local HTTP server that the downloader tests can script."""
+"""Shared fixtures: a local HTTP server that the downloader and scraper tests can script."""
 
 import re
 import threading
@@ -29,6 +29,10 @@ class FakeSite:
     hang_up_always: set[str] = field(default_factory=set)  # paths that never send a body byte
     ignore_range: set[str] = field(default_factory=set)
     range_from_zero: set[str] = field(default_factory=set)  # answer 206 but serve from byte 0 (a buggy server)
+    redirects: dict[str, tuple[int, str]] = field(default_factory=dict)  # path -> (status, Location)
+    scripted: dict[str, list[tuple[int, dict[str, str], bytes]]] = field(default_factory=dict)  # answered first
+    headers: dict[str, dict[str, str]] = field(default_factory=dict)  # extra headers on a file's responses
+    set_cookie: str | None = None  # Set-Cookie on every file response
     requests: list[dict[str, Any]] = field(default_factory=list)
 
     def url(self, path: str) -> str:
@@ -61,7 +65,11 @@ class _Handler(BaseHTTPRequestHandler):
             "if_range": self.headers.get("If-Range"),
             "user_agent": self.headers.get("User-Agent"),
             "accept_encoding": self.headers.get("Accept-Encoding"),
+            "cookie": self.headers.get("Cookie"),
         })
+        if script := site.scripted.get(path):
+            status, headers, body = script.pop(0)
+            return self._send(status, body, headers)
         if path == "/robots.txt":
             if site.robots_status != 200 or site.robots is None:
                 return self._send(site.robots_status if site.robots is not None else 404)
@@ -69,6 +77,9 @@ class _Handler(BaseHTTPRequestHandler):
         if queue := site.status_queue.get(path):
             status = queue.pop(0)
             return self._send(status, b"no", {"Retry-After": site.retry_after} if site.retry_after else {})
+        if path in site.redirects:
+            status, location = site.redirects[path]
+            return self._send(status, b"", {"Location": location})
         if path not in site.files:
             return self._send(404)
         data, etag = site.files[path], site.etags.get(path, '"v1"')
@@ -87,6 +98,10 @@ class _Handler(BaseHTTPRequestHandler):
         self.send_header("ETag", etag)
         self.send_header("Last-Modified", LAST_MODIFIED)
         self.send_header("Accept-Ranges", "bytes")
+        for k, v in site.headers.get(path, {}).items():
+            self.send_header(k, v)
+        if site.set_cookie:
+            self.send_header("Set-Cookie", site.set_cookie)
         self.send_header("Content-Length", str(len(body)))
         if status == 206:
             self.send_header("Content-Range", f"bytes {start}-{len(data) - 1}/{len(data)}")

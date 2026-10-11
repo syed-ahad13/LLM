@@ -9,6 +9,8 @@ and `$` wildcards that sites we use rely on (LINDAT, Mendeley, GitHub). Rules:
   end. The longest matching rule wins; Allow wins a tie. No match means allowed.
 - /robots.txt itself is always allowed.
 - Crawl-delay (non-standard) is parsed so the client can honour it.
+- Sitemap lines are collected whatever group they sit in (they are not group
+  records), and the raw text is kept so the scraper can snapshot it.
 """
 
 import re
@@ -38,9 +40,11 @@ class Group:
 
 
 class RobotsTxt:
-    def __init__(self, text: str = "", *, disallow_all: bool = False) -> None:
+    def __init__(self, text: str = "", *, disallow_all: bool = False, status: int | None = None) -> None:
+        self.text = text
+        self.status = status  # HTTP status of the robots.txt fetch; None if unreachable or not fetched
         self.disallow_all = disallow_all
-        self.groups = _parse(text)
+        self.groups, self.sitemaps = _parse(text)
 
     @classmethod
     def unreachable(cls) -> "RobotsTxt":
@@ -75,8 +79,10 @@ class RobotsTxt:
         return max(delays) if delays else None
 
 
-def _parse(text: str) -> list[Group]:
+def _parse(text: str) -> tuple[list[Group], list[str]]:
+    """Return (groups, sitemap URLs in file order, without duplicates)."""
     groups: list[Group] = []
+    sitemaps: list[str] = []
     current: Group | None = None
     in_agent_lines = False
     for raw in text.splitlines():
@@ -85,6 +91,10 @@ def _parse(text: str) -> list[Group]:
         if not sep:
             continue  # blank, comment-only or malformed (e.g. "Allow /api/docs")
         key, value = key.strip().lower(), value.strip()
+        if key == "sitemap":
+            if value and value not in sitemaps:
+                sitemaps.append(value)
+            continue
         if key == "user-agent":
             if current is None or not in_agent_lines:
                 current = Group()
@@ -102,4 +112,4 @@ def _parse(text: str) -> list[Group]:
                 current.crawl_delay = float(value)
             except ValueError:
                 pass
-    return groups
+    return groups, sitemaps
