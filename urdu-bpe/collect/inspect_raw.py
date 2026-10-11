@@ -155,6 +155,17 @@ def iter_tar_texts(path: Path) -> Iterator[tuple[str, str]]:
         return
 
 
+def tar_records(path: Path) -> Iterator[str]:
+    """Members under a text/ directory (the corpus inside a repo tarball such as Makhzan's); all files if none."""
+    found = False
+    for member, text in iter_tar_texts(path):
+        if "/text/" in f"/{member}":
+            found = True
+            yield f"{member}: {text}"
+    if not found:
+        yield from (f"{member}: {text}" for member, text in iter_tar_texts(path))
+
+
 # ---------------------------------------------------------------------------
 # Checks
 # ---------------------------------------------------------------------------
@@ -226,7 +237,7 @@ def print_records(path: Path, n: int, max_chars: int) -> None:
     elif name.endswith(".csv"):
         records = iter_csv_rows(path)
     elif name.endswith(".tar.gz"):
-        records = (f"{member}: {text}" for member, text in iter_tar_texts(path))
+        records = tar_records(path)
     else:
         records = iter_lines(path)
     print(f"  first {n} records:")

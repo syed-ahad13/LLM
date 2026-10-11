@@ -85,6 +85,7 @@ Add one entry for each decision that affects the data, the tokenizer or the repo
   - CC-100: data.statmt.org/robots.txt disallows everything. It was a fallback anyway.
   - Makhzan: the README says the `/text` files are "covered under standard copyright… you are not allowed to redistribute or republish this text". Our train/val/test.txt go to the course by shared-drive link.
 - **Consequence:** Literature as a genre must come from elsewhere unless the instructor confirms that submitting Makhzan-derived text by link is allowed. UFAL also includes literature, and Step 2 can target public-domain books.
+- **Update (same day):** The Makhzan part is superseded; see "Makhzan enabled with instructor approval" below. CC-100 stays disabled.
 
 ### 2026-10-11: findings from inspecting the smoke-test prefixes (to act on in Step 3)
 - **Urdu News 1M (first 8 MB, 1,617 rows):**
@@ -99,3 +100,43 @@ Add one entry for each decision that affects the data, the tokenizer or the repo
   - The text is also pre-tokenized: there is a space before ۔ and ،.
   - Step 3 must choose a "document" unit for this source (single sentences, or fixed-size chunks) for dedup and the split. It also needs to decide whether to undo the space before punctuation.
 - **Wikipedia:** The first pages are redirects and `MediaWiki:` namespace pages, so the extractor must keep ns=0 pages that are not redirects.
+
+### 2026-10-11: Makhzan enabled with instructor approval
+- **Decision:** Set `enabled: true` for `makhzan`, so `--source all` downloads it and Makhzan text may go into train/val/test.txt.
+- **Options considered:** Keeping it disabled. Rejected once the instructor agreed: Makhzan is carefully edited text with intact punctuation and diacritics, unlike Urdu News 1M. (An earlier version of this entry called it "the only source of edited literary prose". Wrong: see the download findings below.)
+- **Evidence:** Makhzan's README says the `/text` files are "free to use for analysis, research and development, but you are not allowed to redistribute or republish this text". The instructor was asked and approved including it, provided the shared-drive link for the corpus files stays private to course staff.
+- **Consequence:**
+  - The shared-drive link must stay private.
+  - `data/raw/makhzan/` and any file containing Makhzan text must never be committed or published. `data/` is already gitignored.
+  - Makhzan text must not be quoted in the report or in `analysis/samples/`. Pick the Part C hand-picked inputs from other sources.
+  - DATA_CARD.md must list Makhzan with its licence restriction and this condition.
+
+### 2026-10-11: Makhzan download findings (to act on in Step 3)
+- **Download:** `makhzan-2c7ed4f78d98.tar.gz`, 27,043,691 bytes, SHA-256 `a8b0c47e…` (commit 2c7ed4f). No published checksum exists, so integrity was checked by streaming the whole archive: no gzip or tar errors, and all 6,315 `text/*.xml` files decode as UTF-8 and parse as XML.
+- **Genre:** mostly journalism, not literature. By `<copyright-holder>`:
+  - IBC Urdu (news/opinion site): 5,474 files (87%).
+  - Al-Mawrid (religious essays): 630.
+  - Gurmani Centre, LUMS (*Bunyad*, a literary research journal): 206.
+  - Unicode, Inc.: 4.
+
+  `sources.json` now says "edited journalism and essays". The data card's genre table must use this breakdown.
+- **Extraction rules for Step 3:**
+  - Take text from `<body>` only. Never take `<meta>`: it holds titles, author names and links.
+  - Treat each `<p>` and `<blockquote>` paragraph as one line.
+  - 1,277 files are flagged as containing non-Urdu text, marked with `<annotation>`. Decide whether to keep those spans (Arabic quotations, English terms) or drop them.
+  - The download is not resumable: codeload ignores Range, so a dropped connection restarts it. That happened once, costing about 11 minutes.
+
+### 2026-10-11: full downloads complete; smoke-test findings confirmed on the full files
+- **Downloads:** 5 sources, 4,846,213,387 bytes in total (formats as published). Sizes on disk match MANIFEST.json for every file.
+  - Published checksums verified: Wikipedia urwiki-20261001 (SHA-1), UFAL (MD5), Urdu News 1M (SHA-256), FineWeb-2 `001_00000.parquet` (SHA-256).
+  - Makhzan has no published checksum; the archive streamed end to end without errors.
+  - Resume worked on real drops: UFAL lost its connection 6 times and Wikipedia twice. Each resumed with Range, and both still match their published checksums.
+- **Urdu News 1M:** 1,038,340 rows, read in full (the last row's Index is 1038339). In a seeded random sample of 1,000 rows:
+  - 0% contain ۔ ، ؟ or ASCII . , ? in News Text or Headline.
+  - 0% contain آ, أ, ۂ or ۓ, and none have diacritics. ئ appears in 99.6% of News Text samples.
+  - Only 51 distinct characters appear.
+
+  The smoke-test finding holds for the whole file: sentence boundaries and alef madda were stripped at source. The Step 3 decision (drop, repair or cap) is still open.
+- **UFAL:** 5,464,575 lines, matching the repository metadata. The order test at five offsets (0, 1.0M, 2.5M, 4.0M, 5.3M; 20,000 lines each) gives ratios of 0.99–1.00, so the sentences are shuffled throughout and there are no documents to recover.
+- **FineWeb-2 `001_00000.parquet`:** 1,547,542 rows in 1,548 row groups, with about 6.29 GB of uncompressed text, as the footers predicted.
+- **Evidence:** `logs/inspect_raw.txt` (local, gitignored; regenerate with `python collect/inspect_raw.py`).

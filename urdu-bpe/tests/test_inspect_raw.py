@@ -4,6 +4,7 @@ import gzip
 import io
 import lzma
 import random
+import tarfile
 from pathlib import Path
 
 import pyarrow as pa
@@ -83,6 +84,29 @@ def test_iter_csv_rows_handles_bom_quotes_and_partial_tail(tmp_path: Path) -> No
     assert [r["Index"] for r in iter_csv_rows(part)] == ["0", "1"]
     part.write_bytes(path.read_bytes() + b'3,"open quote')  # ends inside a quoted field
     assert [r["Index"] for r in iter_csv_rows(part)] == ["0", "1", "2"]
+
+
+def write_tar(path: Path, members: dict[str, str]) -> None:
+    with tarfile.open(path, "w:gz") as tf:
+        for name, text in members.items():
+            data = text.encode()
+            info = tarfile.TarInfo(name)
+            info.size = len(data)
+            tf.addfile(info, io.BytesIO(data))
+
+
+def test_tar_records_prefer_text_directory(tmp_path: Path) -> None:
+    repo = tmp_path / "makhzan-abc.tar.gz"
+    write_tar(repo, {"makhzan-abc/.gitignore": "*.swp", "makhzan-abc/README.md": "# Makhzan",
+                     "makhzan-abc/text/0001.xml": "<document>پہلا</document>",
+                     "makhzan-abc/text/0002.xml": "<document>دوسرا</document>"})
+    assert list(inspect_raw.tar_records(repo)) == [
+        "makhzan-abc/text/0001.xml: <document>پہلا</document>",
+        "makhzan-abc/text/0002.xml: <document>دوسرا</document>",
+    ]
+    other = tmp_path / "other.tar.gz"
+    write_tar(other, {"pkg/README.md": "# readme"})
+    assert list(inspect_raw.tar_records(other)) == ["pkg/README.md: # readme"]
 
 
 def test_data_files_skips_manifest_meta_and_stale_parts(tmp_path: Path) -> None:
