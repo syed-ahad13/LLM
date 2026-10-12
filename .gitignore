@@ -1,0 +1,6 @@
+# Raw data bundles shared by the group (private corpus; never committed, the repo is public).
+# The project's own data/ is ignored by urdu-bpe/.gitignore.
+/data/
+
+# OS
+.DS_Store
