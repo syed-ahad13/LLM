@@ -64,8 +64,11 @@ BOILERPLATE_STAGE = "boilerplate"
 DEDUP_STAGE = "dedup"
 ENDOFTEXT = "<|endoftext|>"
 PRIORITY = ("own_scrape", "makhzan", "wiki_ur", "urdu_news_1m", "ufal_umc", "fineweb2_urd")
+# From the full-data --report (docs/decisions.md, Step 5b): lines in 5+ documents are credits, bylines,
+# headings, link lists and bot-template sentences; below 5 they are mostly real shared content. VOA words its
+# AP/Reuters/AFP credit a dozen ways, each in 3-4 articles, so own_scrape uses 3.
 DEFAULT_MIN_DOCS = 5
-BOILERPLATE_MIN_DOCS: dict[str, int] = {}
+BOILERPLATE_MIN_DOCS: dict[str, int] = {"own_scrape": 3}
 REPORT_CUTOFFS = (2, 3, 5, 10, 20, 50, 100, 1000)
 TOP_LINES = 200
 

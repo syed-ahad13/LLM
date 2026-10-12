@@ -386,3 +386,39 @@ Add one entry for each decision that affects the data, the tokenizer or the repo
   - The data card's cleaning table gets the normalize and langfilter rows from `data/stats/`.
   - Short Arabic quotes without harakat inside Urdu religious texts stay; they are code-mixing.
   - Revisit the thresholds if the full-run dropped-line samples show a new false-positive class.
+
+### 2026-10-12: Step 5b: boilerplate cutoff 5 documents (3 for own_scrape); exact dedup across sources in priority order
+- **Decision:**
+  - A line is boilerplate, and every copy of it is removed, when it appears in at least 5 documents of its source; for own_scrape the cutoff is 3.
+  - Exact duplicate documents (same text after boilerplate removal) are dropped within a source and across sources. Sources are processed in the order own_scrape, makhzan, wiki_ur, urdu_news_1m, ufal_umc, fineweb2_urd, so the copy in the earlier source is kept: our own collection first, the web crawl last.
+  - Literal `<|endoftext|>` is removed from the text here.
+- **Options considered:**
+  - **Cutoff 2–3 everywhere.** Rejected. Lines in 2–4 documents are mostly real content: duplicated paragraphs, quoted verses, recurring sentences in series. In Makhzan, cutoff 2 would remove 7.16% of the text against 0.11% at cutoff 5.
+  - **Cutoff 10–100 for FineWeb, since it has 1.5M documents.** Rejected. Lines in 5–49 FineWeb documents are still navigation:
+    - related-headline lists ("- امریکا کے مختلف شہروں میں فائرنگ سے 6 افراد ہلاک، 17 زخمی", 39 docs);
+    - WordPress and app spam;
+    - newsroom datelines.
+
+    FineWeb will be subsampled to its budget anyway, so precision matters more than size.
+  - **Near-duplicate detection** (MinHash or similar). Not done now. The handout calls it optional. What it would catch: about 300 MB of FineWeb lines shared by 2–4 documents (syndicated news), Urdu News 1M stories repeated under different headlines, and Wikipedia bot stubs.
+- **Evidence:** `logs/dedup_report.log` (`clean/dedup.py --report` on the full Step 5 output). Distinct lines and the share of each source's line text removed:
+
+  | Source | Cutoff 2 | Cutoff 3 | Cutoff 5 | Cutoff 10 | Cutoff 100 |
+  |---|---|---|---|---|---|
+  | fineweb2_urd | 9.43% | 5.91% | 4.63% (286.65 MB) | 3.75% | 1.25% |
+  | wiki_ur | 5.27% | 4.08% | 3.68% (19.56 MB) | 3.40% | 2.92% |
+  | urdu_news_1m | 1.45% | 0.34% | 0.08% | 0.03% | 0.01% |
+  | ufal_umc | 0.68% | 0.27% | 0.03% | 0.01% | 0.00% |
+  | makhzan | 7.16% | 0.95% | 0.11% | 0.06% | 0.00% |
+  | own_scrape | 0.45% | 0.09% (0.07 MB) | 0.04% | 0.02% | 0.00% |
+
+  The most frequent removed lines:
+  - **Wikipedia:** "مداری خصوصیات" (asteroid stubs, 26,587 docs), a chemical-compound safety sentence (11,939), and section headings ("انتقال" 5,490, "تصانیف" 2,412).
+  - **FineWeb:** "خلیج اردو" 1,873, "متعلقہ خبریں" 1,739, "پرائیویسی پولیسی" 265.
+  - **Urdu News 1M:** market headlines ("امریکا میں خام تیل کے نرخوں میں اضافہ" 164) and "سپورٹس ڈیسک" 277.
+  - **UFAL:** bibliography lines ("بیروت، لبنان : دار الکتب العلمیہ۔" 123).
+  - **own_scrape:** wire credits ("آڈیو رپورٹ سنیئے:" 69; "اس رپورٹ کا مواد اے ایف پی سے لیا گیا ہے۔" 27) and reporter bylines.
+- **Consequence:**
+  - Expected removal is about 308 MB of lines (3.2%), plus documents that fall under the word minimum and exact duplicates; the full run gives the final numbers.
+  - Removing VOA bylines also serves the no-personal-data rule.
+  - Wikipedia keeps about 26,600 asteroid stubs minus their heading, so bot text is still over-represented; this goes in the data card's known gaps.
