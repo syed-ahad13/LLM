@@ -105,6 +105,16 @@ Full run, in tmux:
 tmux new -s extract 'cd ~/Desktop/LLM/urdu-bpe && mkdir -p logs && .venv/bin/python clean/extract_all.py --wiki-jobs 7 2>&1 | tee logs/extract.log'
 ```
 
+## Normalize Urdu (Part A, Step 4)
+
+`normalize.normalize(text)` maps Arabic yeh, kaf and heh (and ە, ة, ۀ) to their Urdu forms, and turns presentation forms into plain letters. It composes decomposed letters (NFC), removes tatweel and invisible characters, keeps ZWNJ only inside words, writes all digits as ASCII, and tidies whitespace. The rules, their order and the reasons are in the module docstring and in [docs/decisions.md](docs/decisions.md). The cleaning pipeline applies it, and the tokenizer never does.
+
+```bash
+python clean/audit_chars.py                  # code points that normalization acts on, per source (data/samples)
+python clean/audit_chars.py --normalized     # what is left after normalize(); should be only deliberate keeps
+python clean/audit_chars.py --interim --limit 20000 --source wiki_ur --contexts 20
+```
+
 ## Rebuild the tokenizer from train.txt
 
 Not written yet. The commands go here once Part B is done.

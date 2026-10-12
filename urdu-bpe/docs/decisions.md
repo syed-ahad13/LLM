@@ -265,3 +265,55 @@ Add one entry for each decision that affects the data, the tokenizer or the repo
   - `tests/test_wikitext.py`: 80 hand-written fixtures covering every rule, including nested templates, a table inside a template, a file link whose caption contains links, the back-matter cut, and redirect and disambiguation detection.
   - Stripping runs at about 20 MB/s per core on 141 KB synthetic pages, so XML parsing in the main process is the bottleneck.
 - **Consequence:** The detection counts per method go into `data/stats/extract.json` for the data card. After the first full run, spot-check 20 dropped `short_body` pages and 20 kept articles with `clean/peek.py --raw`.
+
+### 2026-10-12: Step 4: Urdu normalization rules
+- **Decision:** `normalize.py` applies, in this order:
+  1. line breaks to LF;
+  2. Arabic presentation forms to the letters they display (from their positional compatibility decompositions), except the phrase ligatures ﷺ (U+FDFA) and ﷻ (U+FDFB); ﷲ becomes اللہ;
+  3. removal of tatweel, ZWJ, ZWSP, word joiner, LRM/RLM/ALM, bidi embeddings, overrides and isolates, BOM, soft hyphen and C0/C1 controls;
+  4. ZWNJ kept only between two Arabic-script letters, removed elsewhere;
+  5. NFC;
+  6. ي/ى → ی, ك → ک, ه/ە → ہ, ة → ۃ, ۀ → ۂ, and Arabic-Indic and Urdu digits → ASCII, then NFC again;
+  7. ٫ and ٬ between digits → `.` and `,`;
+  8. whitespace: Unicode spaces, tab, VT and FF → space; no space before ۔ ، ؟ ؛; one space between words; trimmed lines; no empty lines.
+
+  The module docstring gives the reason for the order. `normalize` is idempotent.
+- **Options considered:**
+  - **Digits.** Urdu digits ۰–۹ everywhere. Rejected: ASCII digits dominate five of the six sources in the audit (4,064–15,842 per million characters). Only Makhzan uses more ۰–۹ (2,736 per million) than ASCII (2,214), and Arabic-Indic digits are rare everywhere (at most 215 per million, in Wikipedia). ASCII also costs 1 byte per digit instead of 2, and matches the GPT-2/o200k comparison in Part C.
+  - **ZWNJ.**
+    - Remove it everywhere. Rejected: Makhzan uses it on purpose inside compounds. Of 47 ZWNJs in its sample, 34 are ت+ZWNJ+ح/گ/خ (صورت + ZWNJ + حال, …).
+    - Keep it everywhere. Rejected: the stray ones (next to a space, a newline or punctuation in Wikipedia) are invisible noise.
+
+    The CLAUDE.md pre-tokenizer spec already keeps ZWNJ inside words.
+  - **Full NFKC.** Rejected: it would also rewrite full-width Latin, superscripts and ligatures that are not Urdu typing variants, and it expands ﷺ into a four-word phrase that does not look like the symbol. The positional table changes only glyph-shape variants of the same letters.
+  - **Swash kaf ڪ → ک.** Rejected: ڪ is a Sindhi letter, and the Sindhi letters are what the Step 5 filter needs to find Sindhi text (see the next entry).
+  - **ASCII `.` and `,` after Urdu → ۔ and ،.** Rejected for now: they look different, so they are not invisible typing variants, and abbreviations, decimals and URLs make the mapping a guess. FineWeb has 497 per million characters.
+  - **Gol heh ہ vs do-chashmi ھ.** Kept apart, as the handout says. Makhzan's older IBC texts write ھ for ہ (ھو گئے, ھیں); that is spelling, not a code-point variant.
+  - **NFC through `unicodedata`.** Kept: it is the standard library's Unicode table, not an Urdu NLP library, and every Urdu-specific rule is our own code.
+- **Evidence:**
+  - `clean/audit_chars.py` on the 2 MB samples gives per-source counts and contexts in `data/stats/char_audit.json`. Highlights:
+    - Arabic yeh: 876–2,234 per million characters in UFAL, own_scrape and Wikipedia.
+    - Presentation forms: 3,039 per million in Makhzan (whole documents typed in them).
+    - Decomposed ا + ٓ: 1,374 in the Makhzan sample.
+    - Space before ۔ or ،: 11,752 per million in UFAL and 1,979 in FineWeb.
+  - `python clean/audit_chars.py --normalized` (`data/stats/char_audit_normalized.json`): every category the rules target is 0 per million in every source, and no document changes under NFC. What remains is deliberate:
+    - ڪ in Sindhi text;
+    - ۃ in Arabic loanwords;
+    - 44 in-word ZWNJs;
+    - ﷺ and the ornate parentheses ﴾﴿;
+    - a few malformed hamza sequences with no precomposed form (یٔ, a lone ٕ after a space).
+  - On the full interim files, normalization removes 0.10% of own_scrape bytes (8,837 of 17,168 docs change) and 0.42% of Makhzan (4,962 of 6,301 docs).
+  - Speed: 11–19 MB/s on one core.
+  - Tests: `tests/test_normalize.py`, covering every rule and the ordering traps (ي + ٔ → ئ, ه + ٔ → ۂ, an LRM between ا and ٓ), plus idempotence and output invariants on 5,000 seeded random strings.
+- **Consequence:**
+  - The tokenizer sees one code point per letter and digit.
+  - Harakat and ۃ stay, so the vocabulary will hold some Arabic-quotation tokens.
+  - The data card's cleaning table gets a normalization row from the stage stats.
+  - Revisit the ASCII-punctuation decision if Part C shows `.` and `۔` splitting the same sentence-final merges.
+
+### 2026-10-12: VOA Urdu contains Sindhi articles (to act on in Step 5)
+- **Finding:** 217 of the 16,325 VOA Urdu articles are written in Sindhi, not Urdu. They hold 0.99 MB of text, all under `www.urduvoa.com/a/`, and more than 1% of their characters are Sindhi-only letters (ڪ ٽ ڏ ڀ ٻ ڄ ڃ ڇ ڻ ٿ ڦ). They read as Sindhi throughout, for example "پاڪستان جي پرڏيهي وزير". One Hum Sub post contains some Sindhi letters. The FineWeb sample also has Sindhi passages (ڪ: 14 in the normalized sample).
+- **Consequence:**
+  - Step 5's line language filter must reject Sindhi. Sindhi-only letters are the signal, which is why `normalize` keeps ڪ.
+  - Our own collection loses about 1 MB, leaving about 76 MB, still above the 50 MB requirement.
+  - DATA_CARD.md should say that the scrape contained Sindhi pages and that they were removed.
