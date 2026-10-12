@@ -42,7 +42,7 @@ make check   # forbidden-imports check only
 | `normalize.py`, `bpe.py`, `train_tokenizer.py`, `encode_corpus.py` | names required by the handout |
 | `common.py` | JSONL I/O, hashing, machine info, stats, timing, logging |
 | `collect/` | `sources.json` (licence/terms per source), `download.py`, `inspect_raw.py`, `polite.py` (HTTP etiquette), `robots.py`; `scrape/` (probe, crawler, report, one adapter per site in `scrape/sites/`) |
-| `clean/` | `extract_<source>.py` + `extract_all.py` (Step 3), `wikitext.py`, `peek.py`; `audit_chars.py` (Step 4), `linefilter.py` + `normalize_filter.py` (Step 5); boilerplate, dedup, split, data-card generator to come |
+| `clean/` | `extract_<source>.py` + `extract_all.py` (Step 3), `wikitext.py`, `peek.py`; `audit_chars.py` (Step 4), `linefilter.py` + `normalize_filter.py` (Step 5), `dedup.py` (Step 5b); budget, split, data-card generator to come |
 | `analysis/` | Part C scripts (`analysis/samples/` holds the hand-picked inputs) |
 | `report/` | LaTeX report, built to `report/report.pdf` |
 | `evidence/` | scrape logs and robots.txt/terms snapshots |
@@ -133,6 +133,28 @@ Full run (about 20 minutes on 7 workers for 9.6 GB), in tmux:
 
 ```bash
 tmux new -s filter 'cd ~/Desktop/LLM/urdu-bpe && mkdir -p logs && caffeinate -i .venv/bin/python clean/normalize_filter.py --jobs 7 2>&1 | tee logs/normalize_filter_run.log'
+```
+
+## Boilerplate lines and exact duplicates (Part A, Step 5b)
+
+`clean/dedup.py` reads `data/clean/filtered/` and writes `data/clean/<source>.jsonl.gz`. For each document it:
+- removes any literal `<|endoftext|>`;
+- drops every line found in at least the source's cutoff number of documents (wire-agency credits, bylines, "مزید پڑھیں", section labels);
+- re-checks the minimum word count;
+- drops exact duplicate documents.
+
+Sources are processed in priority order (own_scrape, makhzan, wiki_ur, urdu_news_1m, ufal_umc, fineweb2_urd), so a document found in two sources stays in the earlier one. Stats go to `data/stats/boilerplate.json` and `dedup.json`. The most frequent removed lines go to `data/samples/boilerplate/<source>.jsonl`, with their document counts.
+
+```bash
+python clean/dedup.py --report               # per source: lines and MB removed at each cutoff, with examples
+python clean/dedup.py --limit 2000           # smoke run
+python clean/dedup.py --table
+```
+
+Full run (about 25 minutes, one process; it needs all sources in one run for cross-source dedup), in tmux:
+
+```bash
+tmux new -s dedup 'cd ~/Desktop/LLM/urdu-bpe && mkdir -p logs && caffeinate -i .venv/bin/python clean/dedup.py 2>&1 | tee logs/dedup_run.log'
 ```
 
 ## Rebuild the tokenizer from train.txt
