@@ -228,3 +228,40 @@ Add one entry for each decision that affects the data, the tokenizer or the repo
   - No VOA body line repeats in 0.5% or more of documents.
   - Re-extracting VOA with the new generic list gives a byte-identical articles.jsonl (SHA-256 `23a640e4…`).
 - **Consequence:** Step 3 reads `data/raw/own_scrape/{voa_urdu,humsub}/articles.jsonl`. The remaining repeated lines are newspaper credits (بشکریہ … "courtesy of …") and "(جاری ہے)" ("to be continued"), left for the boilerplate-line step. The DATA_CARD.md genre table must show Hum Sub as about 9% of our own collection.
+
+### 2026-10-12: Step 3 extraction format and per-source document units
+- **Decision:** Every source is extracted to `data/interim/<source>.jsonl.gz` with one schema (`doc_id, source, genre, url, title, date, text, meta`), with no normalization and no filtering beyond what each container needs. Strings that are not valid UTF-8 are dropped and counted as `utf8_error`. A deterministic ~2 MB sample per source goes to `data/samples/`: the documents with the smallest blake2b-64 of `doc_id`, written in corpus order, so the same documents come out whatever the read order. Document units:
+  - **wiki_ur:** one article (title + body).
+  - **ufal_umc:** one sentence per document (`--group auto` picks 1, because the order test ratio is below 1.5). Step 5 needs a lower `--min-words` for this source.
+  - **urdu_news_1m:** headline + story. `meta.punct_stripped` is set per story: true when it holds none of ۔ ، ؟ . , ? !
+  - **fineweb2_urd:** one row. `--keep-per-mille K` keeps `int(sha1(id), 16) % 1000 < K`, to be tuned in Step 6.
+  - **makhzan:** one XML file, `<body>` only; each `<p>`, `<heading>` or `<blockquote>` becomes one line.
+  - **own_scrape:** one article (title + body). Repeated canonical URLs are dropped.
+- **Options considered:**
+  - UFAL as 32-line pseudo-documents. Rejected: consecutive lines are unrelated, so the chunks would be random sentence bags. Dedup and the split would also treat 32 unrelated sentences as one unit.
+  - Makhzan titles in the text. Rejected: the 2026-10-11 Makhzan rule says never to take `<meta>`. Only the publication name, year, copyright holder and non-Urdu flag go into `meta`, for the data card's genre breakdown. Author names and links are never read.
+  - Makhzan `<annotation>` spans (non-Urdu passages) dropped at extraction. Rejected: they sit inside Urdu sentences, so they are code-mixing, and the Step 5 line filter judges them like any other line.
+- **Evidence:**
+  - UFAL: Step 1 order test, mean word-set Jaccard 0.0390 for consecutive pairs vs 0.0390 for random pairs (ratio 1.00), at five offsets (ratios 0.99–1.00). `extract_ufal.py` reruns it and writes both numbers to `data/stats/extract.json` (`order_jaccard_consecutive`, `order_jaccard_random`).
+  - Urdu News 1M: Step 1 found 0% of 1,000 sampled rows with any sentence punctuation, so `punct_stripped` will be true for nearly all of them.
+  - Tests: `tests/test_extract.py`.
+- **Consequence:**
+  - Step 5's minimum-words filter must be set per source (UFAL sentences are short).
+  - Step 6 decides the fate of Urdu News 1M from `punct_stripped`.
+  - UFAL's space before ۔ and ، (Step 1) is left as is here and comes up in Step 4.
+
+### 2026-10-12: Wikipedia markup is stripped by our own scanner, and disambiguation pages are detected on the raw wikitext
+- **Decision:** `clean/wikitext.py` strips markup with the standard library and `regex` only, in the order given in its docstring:
+  - comments, then refs, then dropped tags, then the back-matter cut, then templates and tables, then external links, then internal links, then emphasis and headings, then tags and entities, then lines.
+  - Templates and tables share one depth scanner. A `{{` or `{|` that is never closed is treated as text (MediaWiki shows it as text), so one broken template cannot swallow the rest of an article.
+  - Internal links are resolved innermost first, so a file caption's own links are resolved before the file link is dropped whole.
+  - Lines starting with `|` (table or infobox residue) are dropped along with empty and punctuation-only lines.
+  - A page is a disambiguation page if, on the raw wikitext, it has a template named ضد ابہام, Disambiguation, disambig*, dab or dmbox, or a category containing ضد ابہام or "disambiguation", or a title containing "(ضد ابہام)". Name comparisons fold ي/ى→ی, ك→ک, ه→ہ, `_`→space and case. Each method is counted separately (`drop_disambiguation_template`, `_category`, `_title`).
+- **Options considered:**
+  - mwparserfromhell or WikiExtractor. Not allowed by the brief.
+  - A regex for `{{…}}` alone. Rejected: templates nest, and tables sit inside templates.
+  - `Pool.imap` over page batches. Replaced by `common.ordered_imap`: the same ordering, but at most 4 × jobs batches in flight. `Pool.imap`'s feeder thread would read the whole dump into its task queue.
+- **Evidence:**
+  - `tests/test_wikitext.py`: 80 hand-written fixtures covering every rule, including nested templates, a table inside a template, a file link whose caption contains links, the back-matter cut, and redirect and disambiguation detection.
+  - Stripping runs at about 20 MB/s per core on 141 KB synthetic pages, so XML parsing in the main process is the bottleneck.
+- **Consequence:** The detection counts per method go into `data/stats/extract.json` for the data card. After the first full run, spot-check 20 dropped `short_body` pages and 20 kept articles with `clean/peek.py --raw`.

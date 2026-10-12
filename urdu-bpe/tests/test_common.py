@@ -321,3 +321,39 @@ def test_setup_logging_twice_does_not_duplicate(tmp_path: Path, logger_name: str
 
 def test_setup_logging_default_dir_is_repo_logs() -> None:
     assert common.LOG_DIR == common.REPO_ROOT / "logs"
+
+
+# ---------------------------------------------------------------------------
+# ordered_imap
+# ---------------------------------------------------------------------------
+
+def _square(x: int) -> int:
+    return x * x
+
+
+def test_ordered_imap_in_process_and_pool() -> None:
+    import multiprocessing
+
+    from common import ordered_imap
+
+    assert list(ordered_imap(None, _square, range(5), window=2)) == [0, 1, 4, 9, 16]
+    with multiprocessing.Pool(2) as pool:
+        assert list(ordered_imap(pool, _square, range(50), window=3)) == [x * x for x in range(50)]
+
+
+def test_ordered_imap_reads_input_lazily() -> None:
+    import multiprocessing
+
+    from common import ordered_imap
+
+    consumed: list[int] = []
+
+    def items():
+        for i in range(100):
+            consumed.append(i)
+            yield i
+
+    with multiprocessing.Pool(2) as pool:
+        it = ordered_imap(pool, _square, items(), window=4)
+        assert next(it) == 0
+        assert len(consumed) <= 5  # at most window items in flight, plus the one being read

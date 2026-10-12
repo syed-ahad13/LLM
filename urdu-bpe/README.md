@@ -42,7 +42,7 @@ make check   # forbidden-imports check only
 | `normalize.py`, `bpe.py`, `train_tokenizer.py`, `encode_corpus.py` | names required by the handout |
 | `common.py` | JSONL I/O, hashing, machine info, stats, timing, logging |
 | `collect/` | `sources.json` (licence/terms per source), `download.py`, `inspect_raw.py`, `polite.py` (HTTP etiquette), `robots.py`; `scrape/` (probe, crawler, report, one adapter per site in `scrape/sites/`) |
-| `clean/` | extractors, audit, cleaning pipeline, split, data-card generator |
+| `clean/` | `extract_<source>.py` + `extract_all.py` (Step 3), `wikitext.py`, `peek.py`; audit, cleaning pipeline, split, data-card generator to come |
 | `analysis/` | Part C scripts (`analysis/samples/` holds the hand-picked inputs) |
 | `report/` | LaTeX report, built to `report/report.pdf` |
 | `evidence/` | scrape logs and robots.txt/terms snapshots |
@@ -77,6 +77,33 @@ python collect/scrape/report.py                                   # Phase C: evi
 ```
 
 The crawl writes `data/raw/own_scrape/<site>/articles.jsonl` and logs every request to `evidence/crawl_log_<site>.jsonl.gz`. The site choice and its evidence are in [evidence/probe_report.md](evidence/probe_report.md) and [docs/decisions.md](docs/decisions.md).
+
+## Extract plain text (Part A, Step 3)
+
+One extractor per source turns its raw container into `data/interim/<source>.jsonl.gz`, one document per line: `doc_id, source, genre, url, title, date, text, meta`. Nothing is normalized or filtered for language yet. Each extractor also writes a deterministic ~2 MB sample to `data/samples/<source>.sample.jsonl`, and its counts (records read, docs written, bytes, drops by reason) to `data/stats/extract.json`.
+
+| Source | Script | Notes |
+|---|---|---|
+| wiki_ur | `clean/extract_wiki.py` | our own wikitext stripper (`clean/wikitext.py`); ns 0 only; no redirects or disambiguation pages |
+| ufal_umc | `clean/extract_ufal.py` | order test decides the document unit (`--group auto`) |
+| urdu_news_1m | `clean/extract_news1m.py` | headline + story; `meta.punct_stripped` |
+| fineweb2_urd | `clean/extract_fineweb2.py` | `--keep-per-mille K` deterministic subsample |
+| makhzan | `clean/extract_makhzan.py` | `<body>` only; `--show-one` prints one raw file and its extraction |
+| own_scrape | `clean/extract_scrape.py` | repeated canonical URLs dropped |
+| cc100_ur | `clean/extract_cc100.py` | fallback, disabled |
+
+```bash
+python clean/extract_all.py --limit 2000                 # smoke run of every enabled source with raw data
+python clean/peek.py --source wiki_ur --n 1 --raw        # one article: raw wikitext, then the extracted text
+python clean/extract_all.py --wiki-jobs 7                # full run (see the tmux command below)
+python clean/extract_all.py --table                      # the per-source table from data/stats/extract.json
+```
+
+Full run, in tmux:
+
+```bash
+tmux new -s extract 'cd ~/Desktop/LLM/urdu-bpe && mkdir -p logs && .venv/bin/python clean/extract_all.py --wiki-jobs 7 2>&1 | tee logs/extract.log'
+```
 
 ## Rebuild the tokenizer from train.txt
 

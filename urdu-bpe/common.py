@@ -7,6 +7,7 @@
 - Stats: per-(stage, source) counters, written to data/stats/<stage>.json.
 - Timer: context manager that records wall-clock seconds into a dict.
 - setup_logging: logger that writes to the console and logs/<name>.log.
+- ordered_imap: Pool.imap with a bounded number of tasks in flight.
 
 Standard library only, so every script can import it.
 """
@@ -20,8 +21,8 @@ import platform
 import subprocess
 import sys
 import time
-from collections import defaultdict
-from collections.abc import Iterable, Iterator, Mapping
+from collections import defaultdict, deque
+from collections.abc import Callable, Iterable, Iterator, Mapping
 from contextlib import contextmanager
 from importlib import metadata
 from pathlib import Path
@@ -348,3 +349,27 @@ def setup_logging(name: str, log_dir: PathLike = LOG_DIR, level: int = logging.I
         setattr(handler, _HANDLER_TAG, True)
         logger.addHandler(handler)
     return logger
+
+
+# ---------------------------------------------------------------------------
+# Parallel map
+# ---------------------------------------------------------------------------
+
+def ordered_imap(pool: Any, func: Callable[[Any], Any], items: Iterable[Any], window: int) -> Iterator[Any]:
+    """Yield func(item) for each item, in input order, keeping at most `window` tasks in flight.
+
+    Pool.imap has the same ordering but its feeder thread drains `items` as
+    fast as it can, so a generator over a multi-GB dump ends up in the task
+    queue. Here the next item is read only when a result has been taken.
+    `pool` is a multiprocessing.Pool, or None to run func in this process.
+    """
+    if pool is None:
+        yield from map(func, items)
+        return
+    pending: deque[Any] = deque()
+    for item in items:
+        pending.append(pool.apply_async(func, (item,)))
+        if len(pending) >= window:
+            yield pending.popleft().get()
+    while pending:
+        yield pending.popleft().get()
