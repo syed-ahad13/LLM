@@ -422,3 +422,10 @@ Add one entry for each decision that affects the data, the tokenizer or the repo
   - Expected removal is about 308 MB of lines (3.2%), plus documents that fall under the word minimum and exact duplicates; the full run gives the final numbers.
   - Removing VOA bylines also serves the no-personal-data rule.
   - Wikipedia keeps about 26,600 asteroid stubs minus their heading, so bot text is still over-represented; this goes in the data card's known gaps.
+- **Full run result** (`logs/dedup_run.log`, `data/stats/boilerplate.json`, `dedup.json`; about 23 minutes in one process): 9,546.90 MB in, 9,194.65 MB out (3.69% removed); 8,276,053 documents in, 8,219,948 out.
+  - Boilerplate lines removed: 309.99 MB (FineWeb 288.41, Wikipedia 19.66, news 1.59, UFAL 0.20, own_scrape 0.07, Makhzan 0.06).
+  - Exact duplicates dropped within a source: FineWeb 18,848 (33.05 MB), UFAL 28,559 (2.59 MB), news 1,867 (2.74 MB), Makhzan 35 (1.00 MB), Wikipedia 5, own_scrape 1.
+  - Exact duplicates across sources: only 105 FineWeb documents (0.10 MB). Copies of the same article in FineWeb usually differ by a header line or spacing, so exact matching misses them; that is the near-duplicate gap noted above.
+  - Documents under the word minimum after boilerplate removal: UFAL 3,361, FineWeb 3,173, Wikipedia 146, news 5.
+  - No literal `<|endoftext|>` was found in any source.
+  - Cleaned sizes for Step 6 (MB): fineweb2_urd 5,893.90; urdu_news_1m 1,958.01; ufal_umc 702.21; wiki_ur 513.78; own_scrape 76.01; makhzan 50.75.
