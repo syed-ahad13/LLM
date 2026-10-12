@@ -317,3 +317,72 @@ Add one entry for each decision that affects the data, the tokenizer or the repo
   - Step 5's line language filter must reject Sindhi. Sindhi-only letters are the signal, which is why `normalize` keeps ڪ.
   - Our own collection loses about 1 MB, leaving about 76 MB, still above the 50 MB requirement.
   - DATA_CARD.md should say that the scrape contained Sindhi pages and that they were removed.
+
+### 2026-10-12: Step 3 full run results; Wikipedia short_body cutoff kept at 200 characters
+- **Decision:** Keep `--min-body-chars 200` for Wikipedia.
+- **Full run** (`clean/extract_all.py --wiki-jobs 7`, about 17 minutes on an 8-core M-series Mac with 8 GB RAM; `data/stats/extract.json`):
+
+  | Source | Docs | MB |
+  |---|---|---|
+  | wiki_ur | 302,658 | 539.24 |
+  | ufal_umc | 5,464,575 | 711.94 |
+  | urdu_news_1m | 1,038,340 | 1,962.36 |
+  | fineweb2_urd | 1,547,542 | 6,277.12 |
+  | makhzan | 6,301 | 52.93 |
+  | own_scrape | 17,168 | 77.16 |
+  | **Total** | **8,376,584** | **9,620.76** |
+
+  Wikipedia drops: 1,098,627 redirects, 926,072 non-article pages, 399,290 short bodies, and 2,585 disambiguation pages (template 2,063, category 507, title 15).
+- **Options considered:** Lower the cutoff to about 100 characters. Rejected:
+  - The extra text is small: dropped bodies average about 110 characters, so about 85 MB in total.
+  - Much of it is bot output, which the boilerplate step would partly remove anyway.
+  - We have 9.6 GB extracted against a 0.5–1 GB target, so size is not the constraint.
+- **Evidence:** Spot-check of `short_body` drops among the first 60,000 candidate pages: 30,283 dropped and 28,677 kept. Body lengths of the drops: under 50 chars 2,402; 50–99 11,261; 100–149 9,296; 150–199 7,324. Of 11 random drops:
+  - 4 are year pages whose body is only the twelve month names (97ء, 538ء, 934ء, 1597ء);
+  - 2 are infobox-only articles with an empty body (یوروپیئم: 2,756 raw chars, 0 after stripping);
+  - 1 is a list of meanings (عسکری);
+  - 4 are clean one- or two-sentence definitions (تبرا, طلوع, رب العالمین, آمریت).
+- **Consequence:**
+  - FineWeb is 65% of the extracted text, so Step 6 must set `--keep-per-mille` (or cap FineWeb another way) to keep the genre balance.
+  - Spot-check of 20 kept articles (`clean/peek.py` reservoir, seed 1337): no markup left, but 9 of 20 are bot-generated template stubs whose sentences differ only in names and numbers:
+    - 4 asteroids ("… نظام شمسی کا ایک سیارچہ ہے۔ اس کا عارضی نام … تھا");
+    - 2 railway stations;
+    - 2 footballers;
+    - 1 US census place.
+
+    Exact line dedup will not catch these. The dedup step (Step 6/7) should measure them, e.g. by counting articles that share the first 40 characters after the title with the title masked, and decide whether to cap them.
+  - Removed templates sometimes leave a hole: "کیمیائی فارمولا  ہے" (formula template) and "لین فونٹین  6 دسمبر 18 - جولائی 30، 1983)" (date template). The text is still readable, and normalization collapses the double space.
+
+### 2026-10-12: Step 5: line language filter and document rules
+- **Decision:** `clean/normalize_filter.py` normalizes each document and then classifies each line with `clean/linefilter.py`.
+  - **Line rules:**
+    - drop lines with no letters;
+    - drop lines where fewer than half the letter-bearing words are in Arabic script, unless they hold at least 2 Urdu function words (this keeps code-mixing);
+    - drop Sindhi lines: at least 2 Sindhi-only characters, making up at least 1% of the line's Arabic-script letters;
+    - drop Arabic or Persian lines only on positive evidence: at least 12 Arabic-script letters, no Urdu-only letter (ٹ ڈ ڑ ں ے ۓ), no Urdu function word, and either at least 2 Arabic/Persian function words or harakat on at least 25% of the letters.
+  - **Document rules:**
+    - drop a document when Sindhi lines are at least 72% of its normalized bytes;
+    - drop a document when no line is left;
+    - drop a document with fewer than 10 words (3 for UFAL, whose documents are single sentences).
+- **Options considered:**
+  - Drop Arabic-script lines with no Urdu function word. Rejected: 323 of 7,770 Wikipedia sample lines and 81 FineWeb lines match, and most are Urdu headlines, name lines and list items ("محسنِ پاکستان ڈاکٹر عبد القدیر خان").
+  - Drop lines lacking ٹ ڈ ڑ ں ے and function words. Rejected: it removed 1.4% of Wikipedia bytes, including Urdu headlines ("طلبہ و طالبات پریشان، شدید احتجاج") and poetry.
+  - Letter share instead of word share for the script test. Rejected: Urdu sentences full of English club names fall under 30% Arabic-script letters but are Urdu.
+  - Counting distinct foreign words. Rejected: Arabic repeats فی and من, so real quotes were kept, while this rule only fixed "سی این این" (CNN), which removing این from the list fixes too. علی and آن are not on the list because they are Urdu words.
+  - A 20% Sindhi share for whole documents. Rejected: it dropped the Urdu Wikipedia article on G. M. Syed (673 Urdu words) for its bibliography of Sindhi titles.
+  - A minimum of 20 words. Rejected: it dropped clean 14–18-word Makhzan video blurbs. Below 10 words only fragments remain ("بشکریہ : روزنامہ جنگ").
+- **Evidence:**
+  - Sindhi share per document, over all of own_scrape and the first 60,000 Wikipedia articles, is bimodal: the 217 VOA Sindhi articles are at 0.785 or more (216 at 0.9 or more), and Urdu articles about Sindh and Saraiki reach at most 0.655 (سرائیکی حروف تہجی).
+  - Word counts per document after line filtering (samples): p1 is 37 words for Wikipedia, 52 for FineWeb, 64 for Makhzan and 51 for news. UFAL's median is 12, and 1.8% of its sentences have fewer than 3 words.
+  - Smoke run, 20,000 docs per source (all of Makhzan and own_scrape): 377.33 MB in, 376.78 MB after normalization, 373.16 MB out (1.10% removed). Biggest drops:
+    - own_scrape: sindhi 0.98 MB, and 217 documents dropped (exactly the Sindhi articles);
+    - Makhzan: arabic_or_persian 0.79 MB (Quran and hadith in Al-Mawrid essays);
+    - Wikipedia: arabic_or_persian 0.53 MB and mostly_not_urdu_script 0.40 MB;
+    - Urdu News 1M: nothing removed.
+  - Dropped-line samples (`data/samples/dropped_lines/`) are almost all Quranic or hadith Arabic, Persian verse, English boilerplate ("EPAPER", "Last Updated: …") and number-only lines. Known false positives: Urdu citation lines with an Arabic book title and the Persian از ("اقتباس : معالم فی الطریق از سید قطب ( اردو ترجمہ … )"), and short vowelled Urdu lines.
+  - Tests: `tests/test_linefilter.py`, `tests/test_normalize_filter.py`.
+- **Consequence:**
+  - Our own collection ends at about 76 MB (above 50 MB).
+  - The data card's cleaning table gets the normalize and langfilter rows from `data/stats/`.
+  - Short Arabic quotes without harakat inside Urdu religious texts stay; they are code-mixing.
+  - Revisit the thresholds if the full-run dropped-line samples show a new false-positive class.

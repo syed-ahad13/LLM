@@ -42,7 +42,7 @@ make check   # forbidden-imports check only
 | `normalize.py`, `bpe.py`, `train_tokenizer.py`, `encode_corpus.py` | names required by the handout |
 | `common.py` | JSONL I/O, hashing, machine info, stats, timing, logging |
 | `collect/` | `sources.json` (licence/terms per source), `download.py`, `inspect_raw.py`, `polite.py` (HTTP etiquette), `robots.py`; `scrape/` (probe, crawler, report, one adapter per site in `scrape/sites/`) |
-| `clean/` | `extract_<source>.py` + `extract_all.py` (Step 3), `wikitext.py`, `peek.py`; `audit_chars.py` (Step 4 code-point audit); cleaning pipeline, split, data-card generator to come |
+| `clean/` | `extract_<source>.py` + `extract_all.py` (Step 3), `wikitext.py`, `peek.py`; `audit_chars.py` (Step 4), `linefilter.py` + `normalize_filter.py` (Step 5); boilerplate, dedup, split, data-card generator to come |
 | `analysis/` | Part C scripts (`analysis/samples/` holds the hand-picked inputs) |
 | `report/` | LaTeX report, built to `report/report.pdf` |
 | `evidence/` | scrape logs and robots.txt/terms snapshots |
@@ -113,6 +113,26 @@ tmux new -s extract 'cd ~/Desktop/LLM/urdu-bpe && mkdir -p logs && .venv/bin/pyt
 python clean/audit_chars.py                  # code points that normalization acts on, per source (data/samples)
 python clean/audit_chars.py --normalized     # what is left after normalize(); should be only deliberate keeps
 python clean/audit_chars.py --interim --limit 20000 --source wiki_ur --contexts 20
+```
+
+## Normalize and filter by language (Part A, Step 5)
+
+`clean/normalize_filter.py` reads `data/interim/<source>.jsonl.gz` and works through each document in three steps:
+- runs `normalize()`;
+- drops the lines that are not Urdu (`clean/linefilter.py`): no letters, mostly not Urdu script, Sindhi, or Arabic/Persian with positive evidence;
+- drops the documents that end up mostly Sindhi or too short (10 words; 3 for UFAL's one-sentence documents).
+
+Code-mixed lines stay: an Urdu sentence with English names keeps its Urdu function words. Output goes to `data/clean/filtered/<source>.jsonl.gz`. Counts per step go to `data/stats/normalize.json` and `data/stats/langfilter.json`, a 2 MB sample to `data/samples/filtered/`, and up to 200 distinct dropped lines per reason to `data/samples/dropped_lines/<source>.jsonl`.
+
+```bash
+python clean/normalize_filter.py --limit 2000            # smoke run, every source
+python clean/normalize_filter.py --table                 # per-source MB in / after normalize / out, biggest drops
+```
+
+Full run (about 20 minutes on 7 workers for 9.6 GB), in tmux:
+
+```bash
+tmux new -s filter 'cd ~/Desktop/LLM/urdu-bpe && mkdir -p logs && caffeinate -i .venv/bin/python clean/normalize_filter.py --jobs 7 2>&1 | tee logs/normalize_filter_run.log'
 ```
 
 ## Rebuild the tokenizer from train.txt
