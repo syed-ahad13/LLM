@@ -42,7 +42,7 @@ make check   # forbidden-imports check only
 | `normalize.py`, `bpe.py`, `train_tokenizer.py`, `encode_corpus.py` | names required by the handout |
 | `common.py` | JSONL I/O, hashing, machine info, stats, timing, logging |
 | `collect/` | `sources.json` (licence/terms per source), `download.py`, `inspect_raw.py`, `polite.py` (HTTP etiquette), `robots.py`; `scrape/` (probe, crawler, report, one adapter per site in `scrape/sites/`) |
-| `clean/` | `extract_<source>.py` + `extract_all.py` (Step 3), `wikitext.py`, `peek.py`; audit, cleaning pipeline, split, data-card generator to come |
+| `clean/` | `extract_<source>.py` + `extract_all.py` (Step 3), `wikitext.py`, `peek.py`; `audit_chars.py` (Step 4 code-point audit); cleaning pipeline, split, data-card generator to come |
 | `analysis/` | Part C scripts (`analysis/samples/` holds the hand-picked inputs) |
 | `report/` | LaTeX report, built to `report/report.pdf` |
 | `evidence/` | scrape logs and robots.txt/terms snapshots |
