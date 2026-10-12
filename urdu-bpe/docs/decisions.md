@@ -216,3 +216,15 @@ Add one entry for each decision that affects the data, the tokenizer or the repo
   - VOA's 70 MB alone covers the 50 MB requirement.
   - DATA_CARD.md must state Hum Sub's small share.
   - Rerunning the same command later adds more posts, since the crawl resumes.
+
+### 2026-10-12: own collection finished: 77.16 MB (VOA Urdu 70.01 MB, Hum Sub 7.16 MB)
+- **Decision:** Accept the crawls as our own collection. Hum Sub's extractor goes to `humsub/3`, which drops the page links of multi-page posts (`.pagination` and the "مزید پڑھنے کے لیے اگلا صفحہ کا بٹن دبائیں" line, "press the next-page button to read more"). `pagination` and `page-links` join the generic junk list. Only page 1 of a multi-page post is kept.
+- **Options considered:** Fetching pages 2+ of multi-page posts. Rejected for now: it affects about 1% of posts (7 of 843) and would need crawler support for continuation pages.
+- **Evidence** (`evidence/scrape_report.md`):
+  - VOA Urdu: 16,325 articles from 21,849 fetched article URLs. 5,448 were media pages; 9 were connection errors after retries.
+  - Hum Sub: 843 posts from 1,145 fetched. 296 were BBC/DW/RSS reprints, 26% of fetches.
+  - No bot challenges, and no request refused by robots.txt.
+  - VOA publication dates 2010–2025-03, about 1,000 a year. Hum Sub 2016–2025.
+  - No VOA body line repeats in 0.5% or more of documents.
+  - Re-extracting VOA with the new generic list gives a byte-identical articles.jsonl (SHA-256 `23a640e4…`).
+- **Consequence:** Step 3 reads `data/raw/own_scrape/{voa_urdu,humsub}/articles.jsonl`. The remaining repeated lines are newspaper credits (بشکریہ … "courtesy of …") and "(جاری ہے)" ("to be continued"), left for the boilerplate-line step. The DATA_CARD.md genre table must show Hum Sub as about 9% of our own collection.

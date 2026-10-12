@@ -35,7 +35,7 @@ GENERIC_DROP_SELECTORS: tuple[str, ...] = (
     "figure", "figcaption", "button", "svg", "video", "audio", "picture", "object", "embed",
     "[class*=share]", "[class*=social]", "[class*=related]", "[class*=newsletter]", "[class*=subscribe]",
     "[class*=comment]", "[id*=comment]", "[class*=author]", "[class*=byline]", "[rel=author]",
-    "[class*=read-more]", "[class*=readmore]", "[class*=also-read]", "[class*=read-also]", "[class*=advert]", "[id*=advert]", "[class*=ad-slot]",
+    "[class*=read-more]", "[class*=readmore]", "[class*=also-read]", "[class*=read-also]", "[class*=pagination]", ".page-links", "[class*=advert]", "[id*=advert]", "[class*=ad-slot]",
 )
 
 ARABIC_LETTER = regex.compile(r"[\p{Arabic}&&\p{L}]", regex.V1)

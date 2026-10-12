@@ -81,7 +81,9 @@ def test_humsub_post() -> None:
         "دوسری شق",
         "پس نوشت: یہ آخری تجرباتی سطر ہے۔",
     ]
-    for junk in ("فرضی کالم نگار", "شیئر", "اشتہار", "کیپشن", "تبصرہ", "تعارف", "مزید پڑھیں", "صفحہ اول", "@"):
+    assert e.dropped_lines == 1  # the "press the next-page button" line
+    for junk in ("فرضی کالم نگار", "شیئر", "اشتہار", "کیپشن", "تبصرہ", "تعارف", "مزید پڑھیں", "صفحہ اول", "@",
+                 "Pages", "اگلا صفحہ"):
         assert junk not in e.text
 
 

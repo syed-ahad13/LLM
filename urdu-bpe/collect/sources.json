@@ -129,10 +129,10 @@
       "access_method": "scrape",
       "collected_by_us": true,
       "collection_date": "2026-10-11",
-      "raw_bytes": 449927,
-      "sha256": "6f39cffbbb4fa5065f7cc471f0c1ea12f99a7aafc0ddb99c59cdf69bf36e76e2",
-      "notes": "Numbers as of 2026-10-11T15:07:02+00:00 (collect/scrape/report.py). raw_bytes is the size of the articles.jsonl files (JSON Lines of extracted articles); text_bytes is their UTF-8 title+body text. sha256 is the SHA-256 of the sha256sum-style listing of the articles.jsonl files when there are several. Rerun the report after the crawls finish.",
-      "text_bytes": 413968,
+      "raw_bytes": 86642299,
+      "sha256": "91696eba1868069a782950078dc8db24723460e81d840aef262faeb976412861",
+      "notes": "Numbers as of 2026-10-12T03:38:49+00:00 (collect/scrape/report.py). raw_bytes is the size of the articles.jsonl files (JSON Lines of extracted articles); text_bytes is their UTF-8 title+body text. sha256 is the SHA-256 of the sha256sum-style listing of the articles.jsonl files when there are several. Rerun the report after the crawls finish.",
+      "text_bytes": 77161539,
       "sites": [
         {
           "site_id": "voa_urdu",
@@ -143,19 +143,19 @@
           "terms_snapshot": "evidence/terms/voa_urdu_20261011.txt",
           "robots_snapshot": "evidence/robots/voa_urdu_20261011.txt",
           "crawl_first_utc": "2026-10-11T15:02:23.025Z",
-          "crawl_last_utc": "2026-10-11T15:03:39.017Z",
-          "requests": 61,
-          "articles": 50,
-          "text_bytes": 348901,
+          "crawl_last_utc": "2026-10-11T23:34:40.459Z",
+          "requests": 21914,
+          "articles": 16325,
+          "text_bytes": 70006150,
           "articles_jsonl": "data/raw/own_scrape/voa_urdu/articles.jsonl",
-          "articles_jsonl_bytes": 380322,
-          "articles_jsonl_sha256": "c3c10ff1c528cc22e2480988ebf1406cc78085e30a5c793747d452ebd3f947f6",
+          "articles_jsonl_bytes": 79091379,
+          "articles_jsonl_sha256": "23a640e474a9e663bf812283485f5b5526dfe58ef1dbbb725532a5b95f710e34",
           "published_range": [
-            "2021-12-30",
-            "2025-01-31"
+            "2010-01-01",
+            "2025-03-15"
           ],
           "extractor_versions": {
-            "voa_urdu/1": 50
+            "voa_urdu/2": 16325
           }
         },
         {
@@ -167,19 +167,19 @@
           "terms_snapshot": "evidence/terms/humsub_20261011.txt",
           "robots_snapshot": "evidence/robots/humsub_20261011.txt",
           "crawl_first_utc": "2026-10-11T15:02:23.025Z",
-          "crawl_last_utc": "2026-10-11T15:06:26.433Z",
-          "requests": 13,
-          "articles": 10,
-          "text_bytes": 65067,
+          "crawl_last_utc": "2026-10-11T22:48:52.426Z",
+          "requests": 1295,
+          "articles": 843,
+          "text_bytes": 7155389,
           "articles_jsonl": "data/raw/own_scrape/humsub/articles.jsonl",
-          "articles_jsonl_bytes": 69605,
-          "articles_jsonl_sha256": "f1f3c796e5a0d0fa719866d75699148196a6bb05dd5b200a48220d1fada3f43d",
+          "articles_jsonl_bytes": 7550920,
+          "articles_jsonl_sha256": "dc552b1a7e388a5d0e3c381c43dcfb8b4c5e9e4b627ee24cbdfef51a952b4535",
           "published_range": [
             "2016-01-12",
-            "2016-02-12"
+            "2025-07-11"
           ],
           "extractor_versions": {
-            "humsub/1": 10
+            "humsub/3": 843
           }
         }
       ]

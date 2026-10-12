@@ -2,8 +2,10 @@
 
 Page structure (WordPress, checked on the probe's sample pages, 2026-10-11):
 - The story is article.post .entry-content; the title is h1.entry-title.
-- Inside .entry-content: share buttons (heateor), AdSense slots, ad-inserter blocks and
-  a comments widget (#wpdevar_comment_*, .fb-comments) are dropped.
+- Inside .entry-content: share buttons (heateor), AdSense slots, ad-inserter blocks,
+  a comments widget (#wpdevar_comment_*, .fb-comments) and the page links of multi-page
+  posts (.pagination, plus the "press the next-page button" line) are dropped. Only
+  page 1 of a multi-page post is collected (about 1% of posts).
 - Bylines (span.byline, meta author) sit outside .entry-content and are never read.
 - Reprints are skipped: posts in the bbc, dw or rsstest categories (feeds imported from
   other outlets) or credited to BBC/DW as author. BBC's and DW's robots.txt forbid
@@ -31,7 +33,7 @@ class HumSub(SiteAdapter):
     home_url: ClassVar[str] = "https://www.humsub.com.pk/"
     domain: ClassVar[str] = "humsub.com.pk"
     genre: ClassVar[str] = "opinion/blogs"
-    extractor_version: ClassVar[str] = "humsub/2"
+    extractor_version: ClassVar[str] = "humsub/3"
     terms_url: ClassVar[str | None] = None
     terms_summary: ClassVar[str] = (
         "No terms of use or privacy page is linked from the home page or article pages (probe, 2026-10-11). "
@@ -47,7 +49,10 @@ class HumSub(SiteAdapter):
     drop_selectors: ClassVar[tuple[str, ...]] = (
         ".heateor_sss_sharing_container", ".heateorSssClear", "ins.adsbygoogle", ".ai-viewports", "[class*=ai-insert]",
         ".fb-comments", "[id^=wpdevar_comment]", ".wp-caption", ".sharedaddy", ".jp-relatedposts", "[class*=code-block]",
+        ".pagination", ".page-links",
     )
+    # "Press the next-page button to read more" (دبائیں / دبائیے) above the page links of multi-page posts.
+    drop_line_res: ClassVar[tuple[re.Pattern[str], ...]] = (re.compile(r"اگلا صفحہ کا بٹن دبائی"),)
     title_selector: ClassVar[str | None] = "h1.entry-title"
 
     _POST_SITEMAP = re.compile(r"/post-sitemap\d*\.xml$")
