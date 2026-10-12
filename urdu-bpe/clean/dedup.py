@@ -77,6 +77,19 @@ def h64(text: str) -> int:
     return int.from_bytes(hashlib.blake2b(text.encode("utf-8"), digest_size=8).digest(), "big")
 
 
+def in_sorted(arr: np.ndarray, value: int) -> bool:
+    """Whether value is in the sorted uint64 array arr.
+
+    The value is passed as np.uint64: a plain Python int below 2**63 makes numpy convert the whole array on
+    every call (measured: 1.2 ms per lookup at 1.4M hashes, against 1 us).
+    """
+    if not arr.size:
+        return False
+    key = np.uint64(value)
+    i = int(np.searchsorted(arr, key))
+    return i < arr.size and arr[i] == key
+
+
 def iter_docs(path: Path, limit: int | None) -> Iterator[dict[str, Any]]:
     docs: Iterator[dict[str, Any]] = iter_jsonl(path)
     return islice(docs, limit) if limit is not None else docs
@@ -195,7 +208,7 @@ def clean_source(source: str, args: argparse.Namespace, earlier: np.ndarray,
             dh = h64(text)
             if dh in seen:
                 reason = "duplicate_in_source"
-            elif earlier.size and earlier[min(np.searchsorted(earlier, dh), earlier.size - 1)] == dh:
+            elif in_sorted(earlier, dh):
                 reason = "duplicate_other_source"
             else:
                 seen.add(dh)

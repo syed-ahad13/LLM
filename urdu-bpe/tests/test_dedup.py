@@ -125,3 +125,13 @@ def test_h64_is_stable() -> None:
     assert dedup.h64("abc") == 0xd8bb14d833d59559  # blake2b-64, big-endian: changing it changes which lines match
     assert dedup.h64("abc") == dedup.h64("abc") != dedup.h64("abd")
     assert 0 <= dedup.h64(BODY) < 1 << 64
+
+
+def test_in_sorted_small_and_large_values() -> None:
+    import numpy as np
+    arr = np.array(sorted([3, 1 << 40, (1 << 63) + 5, (1 << 64) - 1]), dtype=np.uint64)
+    for v in (3, 1 << 40, (1 << 63) + 5, (1 << 64) - 1):
+        assert dedup.in_sorted(arr, v)
+    for v in (0, 4, (1 << 63) + 4, (1 << 64) - 2):
+        assert not dedup.in_sorted(arr, v)
+    assert not dedup.in_sorted(np.empty(0, dtype=np.uint64), 3)
