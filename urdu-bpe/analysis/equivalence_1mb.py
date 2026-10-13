@@ -1,6 +1,6 @@
 """Part B: prove that the fast trainer learns the reference trainer's merges on the 1 MB sample.
 
-    python analysis/equivalence_1mb.py                     # -> docs/equivalence_1mb.md
+    python analysis/equivalence_1mb.py                     # -> docs/equivalence_1mb.md, data/stats/equivalence_1mb.json
     python analysis/equivalence_1mb.py --rerun-reference   # also time the reference trainer again here
 
 Trains BPETokenizer.train (fast) on data/samples/train_1mb.txt for as many
@@ -8,7 +8,8 @@ merges as tokenizer/reference_1mb_3000.json holds (Step 7, train_reference),
 and compares the two merge lists, and their pair counts, one by one. The
 reference's wall-clock time comes from its meta (same machine, Step 7) unless
 --rerun-reference trains it again in this process. Exits with status 1 if
-the merges differ.
+the merges differ. The same numbers go to data/stats/equivalence_1mb.json for the
+report (report/make_numbers.py).
 """
 
 import argparse
@@ -22,11 +23,12 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from bpe import BPETokenizer, count_words, token_display  # noqa: E402
-from common import machine_info, setup_logging, sha256_file  # noqa: E402
+from common import STATS_DIR, machine_info, setup_logging, sha256_file, write_json  # noqa: E402
 
 DEFAULT_INPUT = ROOT / "data" / "samples" / "train_1mb.txt"
 DEFAULT_REFERENCE = ROOT / "tokenizer" / "reference_1mb_3000.json"
 DEFAULT_OUT = ROOT / "docs" / "equivalence_1mb.md"
+DEFAULT_JSON = STATS_DIR / "equivalence_1mb.json"
 
 
 def first_difference(a: Sequence[object], b: Sequence[object]) -> int | None:
@@ -48,6 +50,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     p.add_argument("--input", type=Path, default=DEFAULT_INPUT)
     p.add_argument("--reference", type=Path, default=DEFAULT_REFERENCE)
     p.add_argument("--out", type=Path, default=DEFAULT_OUT)
+    p.add_argument("--json-out", type=Path, default=DEFAULT_JSON)
     p.add_argument("--rerun-reference", action="store_true", help="train the reference again and time it here")
     return p.parse_args(argv)
 
@@ -129,6 +132,16 @@ def main(argv: Sequence[str] | None = None) -> int:
             lines.append(f"- merge {i + 1}: {fast.merges[i]} / {ref.merges[i]}")
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    write_json(args.json_out, {
+        "created": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "input": rel(args.input),
+        "input_bytes": args.input.stat().st_size, "input_sha256": input_sha, "reference": rel(args.reference),
+        "merges_compared": min(len(fast.merges), n), "identical_merges": same, "identical_counts": counts_same,
+        "first_difference": None if same else diff + 1,
+        "reference_seconds": ref_seconds, "reference_rerun": args.rerun_reference, "reference_machine": ref_machine,
+        "fast_seconds": round(fast_seconds, 3), "fast_count_seconds": round(t1 - t0, 3),
+        "fast_train_seconds": round(t2 - t1, 3), "speedup": round(speedup, 1) if speedup else None,
+        "distinct_words": summary["distinct_words"], "word_occurrences": sum(counts.values()),
+        "machine": machine})
     print("\n".join(lines))
     print(f"\nwrote {args.out}")
     return 0 if same else 1

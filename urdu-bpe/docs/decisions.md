@@ -642,3 +642,23 @@ Add one entry for each decision that affects the data, the tokenizer or the repo
   - The report's Part C tables and figures are `\input`/`\includegraphics` from `report/tables/` and `report/figures/`.
   - Before the report, check the Ghalib and Iqbal texts against a printed source, then rerun `make analysis`.
   - The stubs were already a known gap (`docs/data_card_gaps.md`, "Bot-generated stubs", from 9 of 20 sampled articles in Step 3). Q1 now measures them: 19.5% of the Wikipedia documents in train.txt. That figure can replace the sample estimate in the gaps text.
+
+### 2026-10-13: Step 12: report, README and packaging
+- **Decision:**
+  - **Report.** `report/report.tex` (LuaLaTeX, babel with `bidi=basic`, Noto Naskh Arabic through HarfBuzz, `\ur{}` for inline Urdu) takes every number from `report/numbers.tex`. `report/make_numbers.py` writes that file from the JSON stats (`tokenizer/*train_log.json`, the tokenizer, `data/stats/*.json`, `data/final/{manifest,meta}.json`), together with the report's compact tables (`r_corpus`, `r_normalization`, `r_training`, `r_merges`, `r_longest`). A missing file or key stops the script, naming it. `tests/test_report_numbers.py` checks that every number macro used in `report.tex` is defined.
+  - **Build.** `make numbers` runs where the data is, and its output is committed. `make report` builds from the committed files with latexmk and fails if the PDF is over 4 pages. The page count comes from pdfinfo, else the PDF's page tree (the report writes uncompressed objects), else the LaTeX log. `\tracinglostchars=3` stops the build on any glyph missing from the fonts.
+  - **Q1 count corrected.** `analysis/merges_report.py` counted any single two-byte character as LETTER. Of the first 50 merges, 23 were reported as letters, but two are the punctuation marks ۔ (merge 30) and ، (merge 47). The new category CHAR holds them, so the count is 21 letters + 2. `make_numbers.py` counts these on the tokenizer itself.
+  - **Equivalence for the report.** `analysis/equivalence_1mb.py` also writes `data/stats/equivalence_1mb.json`, so the report's fast-trainer time comes from JSON.
+  - **README.** It now holds an overview, layout, setup and library policy, the handout's "Rebuild the tokenizer from train.txt", the full corpus rebuild, loading the data, and data access. The step-by-step command notes moved to `docs/pipeline.md`.
+  - **`make_submission.py`.**
+    - It runs every pre-flight check and reports all failures before writing anything: deliverables present, exactly 49,743 merges, at most 4 pages, no REVIEW markers, no PASTE placeholders, pytest and forbidden imports green.
+    - It checks the drive files against `manifest.json` and `meta.json`, including that the `.bin` files were encoded with the delivered tokenizer.
+    - The zip has a fixed member order and fixed timestamps, so the same tree gives byte-identical archives.
+  - **Placeholders left for the user.** The README's drive link is a PASTE placeholder, so `make submission` fails until it is filled in. The same holds for the data card's REVIEW markers.
+- **Options considered:**
+  - **Reusing the Step 11 merge table** (60 rows in one column). Rejected: it takes most of a page. `r_merges` sets the same 60 merges in five side-by-side blocks.
+  - **Rebuilding `numbers.tex` inside `make report`.** Rejected: the PDF could then not be built on a machine without the corpus.
+- **Evidence:** `tests/test_report_numbers.py` and `tests/test_make_submission.py`. On this machine `make_submission.py --skip-drive` fails exactly on the missing report.pdf, the 7 REVIEW markers and the README link placeholder.
+- **Consequence:**
+  - On the corpus machine, rerun `analysis/equivalence_1mb.py` and `make analysis` (the Q1 fix rewrites the generated blocks in `docs/analysis_notes.md`; text outside the markers is kept), then `make numbers`.
+  - The README's tokenizer sha256 is that of the delivered file. A rebuild reproduces `merges.txt` exactly, but not the JSON, whose `meta` records run times.

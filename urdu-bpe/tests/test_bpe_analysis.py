@@ -24,9 +24,14 @@ def reference(tmp_path: Path, merges: int = 60) -> tuple[Path, Path]:
 def test_equivalence_report(tmp_path: Path) -> None:
     sample, ref = reference(tmp_path)
     out = tmp_path / "equivalence.md"
-    assert equivalence_1mb.main(["--input", str(sample), "--reference", str(ref), "--out", str(out)]) == 0
+    js = tmp_path / "equivalence.json"
+    assert equivalence_1mb.main(["--input", str(sample), "--reference", str(ref), "--out", str(out),
+                                 "--json-out", str(js)]) == 0
     text = out.read_text(encoding="utf-8")
     assert "**Result: IDENTICAL.**" in text and "| Identical pair counts | yes |" in text and "Speed-up" in text
+    data = json.loads(js.read_text(encoding="utf-8"))
+    assert data["identical_merges"] and data["identical_counts"] and data["merges_compared"] == 60
+    assert data["speedup"] > 0 and data["reference_seconds"] > data["fast_seconds"] > 0
 
 
 def test_equivalence_reports_the_first_difference(tmp_path: Path) -> None:
@@ -37,7 +42,8 @@ def test_equivalence_reports_the_first_difference(tmp_path: Path) -> None:
     bad = tmp_path / "swapped.json"
     bad.write_text(json.dumps(data), encoding="utf-8")
     out = tmp_path / "equivalence.md"
-    assert equivalence_1mb.main(["--input", str(sample), "--reference", str(bad), "--out", str(out)]) == 1
+    assert equivalence_1mb.main(["--input", str(sample), "--reference", str(bad), "--out", str(out),
+                                 "--json-out", str(tmp_path / "e.json")]) == 1
     assert "first difference at merge 6" in out.read_text(encoding="utf-8")
 
 

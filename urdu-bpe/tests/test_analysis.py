@@ -34,7 +34,9 @@ COUNTS = {" کے": 6_000_000, "کے": 1_000, " ک": 2_250, "یں": 1_063, " نا
     (" نادر".encode(), "OTHER"),  # a word shape, but under 100 occurrences
     ("یں".encode(), "WORD"),
     (b" 123", "OTHER"),
-    ("،".encode(), "LETTER"),  # any single 2-byte character
+    ("،".encode(), "CHAR"),  # a single 2-byte character that is not a letter
+    ("۔".encode(), "CHAR"),
+    ("\u064f".encode(), "CHAR"),  # a lone pesh
     ("۔۔".encode(), "OTHER"),
 ])
 def test_category(token: bytes, expected: str) -> None:

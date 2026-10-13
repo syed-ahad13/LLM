@@ -1,6 +1,6 @@
 PYTHON ?= .venv/bin/python
 
-.PHONY: test check analysis
+.PHONY: test check analysis numbers report report-tools submission
 
 # Full test suite.
 test:
@@ -15,3 +15,20 @@ analysis:
 	$(PYTHON) analysis/merges_report.py
 	$(PYTHON) analysis/compare_tokenizers.py
 	$(PYTHON) analysis/failure_cases.py
+
+# Report (Step 12). numbers: report/numbers.tex and the report's own tables from the JSON stats (needs data/,
+# so run it where the corpus is, and commit the result). report: LuaLaTeX from the committed numbers.tex and
+# tables (no data needed), then fail if report.pdf is over 4 pages.
+numbers:
+	$(PYTHON) report/make_numbers.py
+
+report-tools:
+	$(PYTHON) report/checks.py tools
+
+report: report-tools
+	cd report && latexmk -lualatex -interaction=nonstopmode -halt-on-error -file-line-error report.tex
+	$(PYTHON) report/checks.py pages report/report.pdf --max 4
+
+# Pre-flight checks, submission/urdu_bpe_456094.zip and data/final/SHA256SUMS (make_submission.py).
+submission:
+	$(PYTHON) make_submission.py

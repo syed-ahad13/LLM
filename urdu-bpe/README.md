@@ -1,12 +1,31 @@
-# Urdu corpus + byte-level BPE
+# Urdu corpus + byte-level BPE tokenizer
 
-CS 417 Assignment 1 (NUST, Spring 2026). This repo builds a cleaned Urdu corpus of at least 500 MB, implements a byte-level BPE tokenizer from scratch, trains it to exactly 50,000 tokens, and compares it with GPT-2 and o200k_base.
+CS 417 Assignment 1 (NUST SEECS). We build a cleaned Urdu corpus of 1,299.86 MB, split by document into train, val and test (98/1/1).
+We train a byte-level BPE tokenizer, written from scratch in plain Python, on train.txt to exactly 50,000 tokens, and encode train and val into `train.bin` and `val.bin` for the next assignment.
+We then analyse what it learned against GPT-2 and o200k_base: [report/report.pdf](report/report.pdf) (4 pages) and [DATA_CARD.md](DATA_CARD.md).
 
-The handout is in [docs/assignment.md](docs/assignment.md). Project rules and specs are in [CLAUDE.md](CLAUDE.md), and decisions are logged in [docs/decisions.md](docs/decisions.md).
+The handout is [docs/assignment.md](docs/assignment.md). Our rules are in [CLAUDE.md](CLAUDE.md), every decision with its evidence is in [docs/decisions.md](docs/decisions.md), and the commands for each step are in [docs/pipeline.md](docs/pipeline.md).
+
+## Repository layout
+
+| Path | Contents |
+|---|---|
+| `normalize.py`, `bpe.py`, `train_tokenizer.py`, `encode_corpus.py` | the names the handout requires: Urdu normalization, `BPETokenizer` (pre-tokenizer, reference and fast trainers, encode/decode, save/load), the training CLI, the corpus encoder |
+| `common.py` | JSONL I/O, hashing, machine info, stats, timers, logging |
+| `collect/` | `sources.json` (licence and terms of every source), downloaders, and the polite scraper in `scrape/` (Steps 1-2) |
+| `clean/` | extractors, character audit, normalize + language filter, boilerplate and dedup, budget, split, corpus stats, data card (Steps 3-6) |
+| `analysis/` | Part C scripts and the hand-picked inputs in `analysis/samples/` (sources in `SOURCES.md`); the fast-vs-reference and scaling reports |
+| `report/` | `report.tex`, `make_numbers.py` (every number in the report, from the JSON stats), generated `tables/` and `figures/`, `report.pdf` |
+| `tokenizer/` | `urdu_bpe_50k.json` (all 49,743 merges in order), `urdu_bpe_50k.merges.txt` (readable), `train_log.json`; the 1 MB reference run |
+| `evidence/` | our own collection: robots.txt and terms snapshots, the probe and scrape reports, every request we made |
+| `docs/` | handout, decisions, pipeline, pre-tokenizer, equivalence, scaling, training run, analysis notes, cleaning detail |
+| `tests/` | `pytest -q`: every module, plus integrity checks that run against the real split and tokenizer when present |
+| `make_submission.py` | pre-flight checks, the submission archive and the shared-drive checksums |
+| `data/`, `logs/` | the corpus at each stage, caches and run logs (gitignored, never committed) |
 
 ## Setup
 
-You need Python 3.12. With [uv](https://docs.astral.sh/uv/):
+Python 3.12. With [uv](https://docs.astral.sh/uv/):
 
 ```bash
 uv venv --python 3.12
@@ -20,278 +39,127 @@ python3.12 -m venv .venv
 .venv/bin/pip install -r requirements.txt -r requirements-analysis.txt -r requirements-dev.txt
 ```
 
-| File | For | Packages |
+| File | For | Packages (versions pinned) |
 |---|---|---|
-| `requirements.txt` | implementation | regex, numpy, tqdm, requests, beautifulsoup4, lxml, pyarrow |
+| `requirements.txt` | the implementation | regex, numpy, tqdm, requests, beautifulsoup4, lxml, pyarrow |
 | `requirements-analysis.txt` | Part C only | tiktoken, tokenizers, matplotlib |
 | `requirements-dev.txt` | tests | pytest |
 
-All versions are pinned exactly.
-
-## Checks
-
-```bash
-make test    # full test suite (pytest -q)
-make check   # forbidden-imports check only
-```
-
-## Layout
-
-| Path | Contents |
-|---|---|
-| `normalize.py`, `bpe.py`, `train_tokenizer.py`, `encode_corpus.py` | names required by the handout |
-| `common.py` | JSONL I/O, hashing, machine info, stats, timing, logging |
-| `collect/` | `sources.json` (licence/terms per source), `download.py`, `inspect_raw.py`, `polite.py` (HTTP etiquette), `robots.py`; `scrape/` (probe, crawler, report, one adapter per site in `scrape/sites/`) |
-| `clean/` | `extract_<source>.py` + `extract_all.py` (Step 3), `wikitext.py`, `peek.py`; `audit_chars.py` (Step 4), `linefilter.py` + `normalize_filter.py` (Step 5), `dedup.py` (Step 5b); `budget.py`, `split.py`, `corpus_stats.py`, `data_card.py` (Step 6) |
-| `analysis/` | Part C scripts (`analysis/samples/` holds the hand-picked inputs) |
-| `report/` | LaTeX report, built to `report/report.pdf` |
-| `evidence/` | scrape logs and robots.txt/terms snapshots |
-| `tokenizer/` | saved tokenizer |
-| `data/{raw,interim,clean,final,stats,samples}` | corpus at each stage (gitignored) |
-| `logs/` | run logs (gitignored) |
-
-## Collect (Part A, Step 1)
-
-Every source, with its licence and terms, is listed in [collect/sources.json](collect/sources.json).
-
-```bash
-python collect/download.py --source all --dry-run        # every URL and target path; downloads nothing
-python collect/download.py --source wiki_ur              # resumable; rerun the same command after an interruption
-python collect/download.py --source fineweb2_urd --files 001_00000.parquet
-python collect/inspect_raw.py                            # files, first records, source-specific checks
-```
-
-Downloads go to `data/raw/<source>/` and are verified against each source's published checksum. They are recorded in `data/raw/<source>/MANIFEST.json` and in `sources.json`. Before the first download, put your contact email on one line in `collect/contact.local` (gitignored), or set `$URDU_BOT_CONTACT`. It goes into the User-Agent, and the scripts refuse to run without it. A source that needs a browser (robots.txt or HTTP 401/403) gets printed manual steps, and `--register-manual` records the file once you have placed it.
-
-## Collect our own text (Part A, Step 2)
-
-At least 50 MB must be collected by us, with evidence. `collect/scrape/` does it under the same etiquette as the downloader. Both robots.txt parsers (ours and `urllib.robotparser`) must allow every request. Requests are spaced by max(Crawl-delay, 1 s) plus jitter, with no cookies, no login, and no comments, bylines or user pages.
-
-```bash
-python collect/scrape/probe.py                                    # Phase A: robots, sitemaps, sample pages, terms per candidate
-python collect/scrape/crawl.py --site voa_urdu --limit 50 --max-sitemaps 1   # smoke test
-python collect/scrape/crawl.py --site voa_urdu --target-mb 70     # full crawl; resumable, rerun after an interruption
-python collect/scrape/crawl.py --site humsub --target-mb 20 --max-hours 7   # stops at whichever comes first
-python collect/scrape/crawl.py --site voa_urdu --reextract        # rebuild articles.jsonl from the HTML cache, no requests
-python collect/scrape/report.py                                   # Phase C: evidence/scrape_report.md and sources.json
-```
-
-The crawl writes `data/raw/own_scrape/<site>/articles.jsonl` and logs every request to `evidence/crawl_log_<site>.jsonl.gz`. The site choice and its evidence are in [evidence/probe_report.md](evidence/probe_report.md) and [docs/decisions.md](docs/decisions.md).
-
-## Extract plain text (Part A, Step 3)
-
-One extractor per source turns its raw container into `data/interim/<source>.jsonl.gz`, one document per line: `doc_id, source, genre, url, title, date, text, meta`. Nothing is normalized or filtered for language yet. Each extractor also writes a deterministic ~2 MB sample to `data/samples/<source>.sample.jsonl`, and its counts (records read, docs written, bytes, drops by reason) to `data/stats/extract.json`.
-
-| Source | Script | Notes |
-|---|---|---|
-| wiki_ur | `clean/extract_wiki.py` | our own wikitext stripper (`clean/wikitext.py`); ns 0 only; no redirects or disambiguation pages |
-| ufal_umc | `clean/extract_ufal.py` | order test decides the document unit (`--group auto`) |
-| urdu_news_1m | `clean/extract_news1m.py` | headline + story; `meta.punct_stripped` |
-| fineweb2_urd | `clean/extract_fineweb2.py` | `--keep-per-mille K` deterministic subsample |
-| makhzan | `clean/extract_makhzan.py` | `<body>` only; `--show-one` prints one raw file and its extraction |
-| own_scrape | `clean/extract_scrape.py` | repeated canonical URLs dropped |
-| cc100_ur | `clean/extract_cc100.py` | fallback, disabled |
-
-```bash
-python clean/extract_all.py --limit 2000                 # smoke run of every enabled source with raw data
-python clean/peek.py --source wiki_ur --n 1 --raw        # one article: raw wikitext, then the extracted text
-python clean/extract_all.py --wiki-jobs 7                # full run (see the tmux command below)
-python clean/extract_all.py --table                      # the per-source table from data/stats/extract.json
-```
-
-Full run, in tmux:
-
-```bash
-tmux new -s extract 'cd ~/Desktop/LLM/urdu-bpe && mkdir -p logs && .venv/bin/python clean/extract_all.py --wiki-jobs 7 2>&1 | tee logs/extract.log'
-```
-
-## Normalize Urdu (Part A, Step 4)
-
-`normalize.normalize(text)` maps Arabic yeh, kaf and heh (and ە, ة, ۀ) to their Urdu forms, and turns presentation forms into plain letters. It composes decomposed letters (NFC), removes tatweel and invisible characters, keeps ZWNJ only inside words, writes all digits as ASCII, and tidies whitespace. The rules, their order and the reasons are in the module docstring and in [docs/decisions.md](docs/decisions.md). The cleaning pipeline applies it, and the tokenizer never does.
-
-```bash
-python clean/audit_chars.py                  # code points that normalization acts on, per source (data/samples)
-python clean/audit_chars.py --normalized     # what is left after normalize(); should be only deliberate keeps
-python clean/audit_chars.py --interim --limit 20000 --source wiki_ur --contexts 20
-```
-
-## Normalize and filter by language (Part A, Step 5)
-
-`clean/normalize_filter.py` reads `data/interim/<source>.jsonl.gz` and works through each document in three steps:
-- runs `normalize()`;
-- drops the lines that are not Urdu (`clean/linefilter.py`): no letters, mostly not Urdu script, Sindhi, or Arabic/Persian with positive evidence;
-- drops the documents that end up mostly Sindhi or too short (10 words; 3 for UFAL's one-sentence documents).
-
-Code-mixed lines stay: an Urdu sentence with English names keeps its Urdu function words. Output goes to `data/clean/filtered/<source>.jsonl.gz`. Counts per step go to `data/stats/normalize.json` and `data/stats/langfilter.json`, a 2 MB sample to `data/samples/filtered/`, and up to 200 distinct dropped lines per reason to `data/samples/dropped_lines/<source>.jsonl`.
-
-```bash
-python clean/normalize_filter.py --limit 2000            # smoke run, every source
-python clean/normalize_filter.py --table                 # per-source MB in / after normalize / out, biggest drops
-```
-
-Full run (about 20 minutes on 7 workers for 9.6 GB), in tmux:
-
-```bash
-tmux new -s filter 'cd ~/Desktop/LLM/urdu-bpe && mkdir -p logs && caffeinate -i .venv/bin/python clean/normalize_filter.py --jobs 7 2>&1 | tee logs/normalize_filter_run.log'
-```
-
-## Boilerplate lines and exact duplicates (Part A, Step 5b)
-
-`clean/dedup.py` reads `data/clean/filtered/` and writes `data/clean/<source>.jsonl.gz`. For each document it:
-- removes any literal `<|endoftext|>`;
-- drops every line found in at least the source's cutoff number of documents (wire-agency credits, bylines, "مزید پڑھیں", section labels);
-- re-checks the minimum word count;
-- drops exact duplicate documents.
-
-Sources are processed in priority order (own_scrape, makhzan, wiki_ur, urdu_news_1m, ufal_umc, fineweb2_urd), so a document found in two sources stays in the earlier one. Stats go to `data/stats/boilerplate.json` and `dedup.json`. The most frequent removed lines go to `data/samples/boilerplate/<source>.jsonl`, with their document counts.
-
-```bash
-python clean/dedup.py --report               # per source: lines and MB removed at each cutoff, with examples
-python clean/dedup.py --limit 2000           # smoke run
-python clean/dedup.py --table
-```
-
-Full run (about 25 minutes, one process; it needs all sources in one run for cross-source dedup), in tmux:
-
-```bash
-tmux new -s dedup 'cd ~/Desktop/LLM/urdu-bpe && mkdir -p logs && caffeinate -i .venv/bin/python clean/dedup.py 2>&1 | tee logs/dedup_run.log'
-```
-
-## Budget, split and data card (Part A, Step 6)
-
-Step 5b leaves 9.19 GB of cleaned text, and the corpus targets 1.0-1.3 GB. Four scripts finish Part A:
-
-- `clean/budget.py` prints the cleaned MB per source and genre, then decides how many bytes each source contributes. A source is kept whole or subsampled deterministically: a document is kept when `int(blake2b(doc_id).hexdigest(), 16) % 10**6 < rate * 10**6`. By default FineWeb-2 is capped at 45% of the corpus, and Urdu News 1M at 10% because its punctuation was stripped at source. Sizes include the 13-byte `<|endoftext|>` after each document. The scan is cached in `data/stats/budget_scan.json`. Writes `data/final/budget.json`.
-- `clean/split.py` works per source: it sorts the kept doc_ids, shuffles them with `random.Random("1337:<source>")` and cuts 98/1/1 by count, with at least one val and one test document. It then shuffles each split across sources and writes every document followed by `<|endoftext|>`. A three-pass external shuffle (64 bucket files per split) keeps the text out of memory. Writes `data/final/{train,val,test}.txt`, the doc_ids in file order (`.ids`) and `manifest.json` (counts, bytes and sha256 per split and source).
-- `clean/corpus_stats.py` counts MB, MiB, documents, words and unique words per split, and writes `data/stats/corpus_totals.json`.
-- `clean/data_card.py` writes `DATA_CARD.md` and `docs/cleaning_detail.md` from the stats. The "Known gaps and biases" prose comes from `docs/data_card_gaps.md`, so edit it there.
-
-```bash
-python clean/budget.py                       # tables; says why no budget fits if the policy cannot be met
-python clean/budget.py --fill fineweb2_urd ufal_umc urdu_news_1m   # the budget in docs/decisions.md (Step 6)
-python clean/split.py                        # a few minutes
-python clean/corpus_stats.py
-python -m pytest -q -s tests/test_split.py   # integrity checks on the real files; -m "not slow" skips the rerun
-python clean/audit_chars.py && python clean/audit_chars.py --normalized   # both audits on the same samples
-python clean/data_card.py
-```
-
-## Pre-tokenizer and reference BPE (Part B, Step 7)
-
-`bpe.py` holds `BPETokenizer` and the pre-tokenizer pattern `URDU_PATTERN`. The pattern and the alternatives we considered are explained in [docs/pretokenizer.md](docs/pretokenizer.md). `bpe.py` imports only the standard library and `regex`.
-- `train_reference` is the reference trainer. It keeps every word occurrence and recounts all pairs after every merge. Ties go to the greater `(vocab[a], vocab[b])`.
-- `encode` / `decode` round-trip any Python string.
-- `save` writes `tokenizer/<name>.json` and a readable `tokenizer/<name>.merges.txt`.
-
-```bash
-python train_tokenizer.py --trainer reference --input data/final/train.txt --sample-mb 1 --vocab-size 3257 \
-    --out tokenizer/reference_1mb_3000.json --no-checks
-python -m pytest -q tests/test_bpe_reference.py -s   # -s prints what GPT-2's pattern does to اُردُو
-```
-
-`--sample-mb 1` takes whole documents from the start of train.txt, at most 1,000,000 bytes, and saves them as `data/samples/train_1mb.txt`. `clean/sample_1mb.py` writes the same file on its own. The 3,000-merge reference run takes a few minutes. It prints the first merges and the wall-clock time, which is also stored in the tokenizer's `meta`. Step 8's fast trainer must learn identical merges on the same sample.
-
-## Fast trainer, equivalence and scaling (Part B, Step 8)
-
-`BPETokenizer.train` is the fast trainer and learns exactly the reference trainer's merges. It uses the handout's three optimizations:
-1. **`count_words`** counts each distinct word once. It reads 16 MB blocks cut at document boundaries in a process pool, and caches the counts in `data/cache/`.
-2. **An index from each pair to the words that contain it,** so a merge rewrites only those words. Integer pair keys and a lazily repaired heap keep the spec's tie-break.
-3. **A per-word cache in `encode`.**
-
-The state and its invariants are described in `bpe.py`'s docstring. `train` can check them with `debug=N`, write checkpoints and resume from one.
-
-```bash
-python analysis/equivalence_1mb.py      # fast vs tokenizer/reference_1mb_3000.json on train_1mb.txt -> docs/equivalence_1mb.md
-python analysis/scaling.py              # 10 MB and 100 MB prefixes of train.txt, 49,743 merges each -> docs/scaling.md
-python train_tokenizer.py --input data/final/train.txt --vocab-size 50000 --out tokenizer/urdu_bpe_50k.json   # Step 9
-```
-
-## Train the tokenizer (Part B, Step 9)
-
-`train_tokenizer.py` trains on the training split only. It refuses any input not named `train.txt` unless `--sample-mb` is given, and always refuses validation or test text. It times four phases with `common.Timer`:
-1. word counting (process pool, cached in `data/cache/`);
-2. initialization;
-3. merges;
-4. save.
-
-It then runs the post-training checks on `data/final/val.txt`:
-- exactly 49,743 merges with IDs 257-49,999, none touching `<|endoftext|>`;
-- `load(save(tok))` identical on 5 MB of val.txt;
-- 1,000 random val documents round-trip;
-- merged tokens that repeat an earlier token's bytes are counted and reported;
-- tokens per word, bytes per token, and the share of single-token words.
-
-| Output | Contents |
-|---|---|
-| `tokenizer/urdu_bpe_50k.json`, `tokenizer/urdu_bpe_50k.merges.txt` | the tokenizer: every merge in order, readable form alongside |
-| `tokenizer/train_log.json` | phase times, merges per second (overall and per 5,000 merges), peak RSS, distinct words, pre-token count, train.txt bytes and sha256, command, UTC times, git commit, machine |
-| `docs/training_run.md` | one paragraph: phases, total, machine and check results |
-
-A `--sample-mb` run logs to `tokenizer/<name>.train_log.json` instead, so it never overwrites the full run's log. Checkpoints (`tokenizer/<name>.checkpoint.json`, every 5,000 merges) are not committed.
-
-```bash
-python train_tokenizer.py --input data/final/train.txt --sample-mb 50 --vocab-size 50000 \
-    --out tokenizer/smoke_50mb.json --workers 7       # smoke run on the first 50 MB
-python train_tokenizer.py --check-only               # rerun the checks on tokenizer/urdu_bpe_50k.json
-python -m pytest -q -s tests/test_trained_tokenizer.py
-```
-
-## Encode the corpus (Part B, Step 10)
-
-`encode_corpus.py` turns `train.txt` and `val.txt` into `train.bin` and `val.bin`: every token ID in file order as raw little-endian uint16 (2 bytes per ID, no header), with `<|endoftext|>` = 256 after each document. The next assignment reads them with `np.memmap(path, dtype="<u2", mode="r")`. `test.txt` is not encoded.
-- The input is read in 16 MB blocks cut after their last `<|endoftext|>` (the reader of `count_words`) and encoded in a process pool, in file order.
-- Each worker loads the tokenizer once and caches the token IDs of every word it has encoded (optimization 3).
-- Verification runs after every encode, and on its own with `--verify`. The `.bin` is decoded to bytes in 10M-ID chunks, and the sha256 of those bytes must equal the `.txt`'s sha256. The count of ID 256 must equal the `<|endoftext|>` count in the `.txt` and the document count in `data/final/manifest.json`.
-
-| Output | Contents |
-|---|---|
-| `data/final/train.bin`, `data/final/val.bin` | the token IDs (gitignored with the rest of `data/`) |
-| `data/final/meta.json` | vocab size, EOT ID, dtype, byte order, tokenizer and its sha256, `train_tokens`, `val_tokens`, the pattern; under `splits`, each encode's report (documents, bytes per token, tokens per word, cache hit rate per worker, time, MB/s, verification, sha256 of both files) |
-
-```bash
-python encode_corpus.py --input data/final/train.txt --sample-mb 20 --workers 7    # smoke run on the first 20 MB
-python encode_corpus.py --verify --input data/final/train.txt --out data/final/train.bin   # verification only
-python -m pytest -q tests/test_encode_corpus.py
-```
-
-Full runs, in tmux:
-
-```bash
-mkdir -p logs
-tmux new -s encode 'cd ~/Desktop/LLM/urdu-bpe && caffeinate -dimsu .venv/bin/python encode_corpus.py --tokenizer tokenizer/urdu_bpe_50k.json --input data/final/train.txt --out data/final/train.bin --workers 7 2>&1 | tee logs/encode_train.log; .venv/bin/python encode_corpus.py --tokenizer tokenizer/urdu_bpe_50k.json --input data/final/val.txt --out data/final/val.bin --workers 7 2>&1 | tee logs/encode_val.log'
-```
-
-## Analyse the tokenizer (Part C, Step 11)
-
-`make analysis` regenerates every Part C table, figure and draft in about 30 seconds. It needs the tokenizer, `data/final/{train,test}.txt`, `train.ids`, the word counts that Step 9 cached in `data/cache/`, and the hand-picked inputs in `analysis/samples/` (their sources are in [analysis/samples/SOURCES.md](analysis/samples/SOURCES.md)). Plots carry English labels only. Urdu goes into the LaTeX tables, wrapped in `\ur{...}`, which the report must define (e.g. `\newcommand{\ur}[1]{\texturdu{#1}}` with polyglossia).
-
-| Script | Question | Outputs in `report/` |
-|---|---|---|
-| `analysis/merges_report.py` | Q1: what did the merges learn? Merges 1-50 and every 5,000th, a category for each merged token (letter, space + lead byte, invalid UTF-8, word, ...), the first whole word, the 20 longest tokens traced to their sources in train.txt | `tables/merges.tex`, `tables/merges_longest.tex`, `figures/merge_categories.pdf` |
-| `analysis/compare_tokenizers.py` | Q2: tokens per word, bytes and characters per token, and words split into 3+ tokens, for ours, GPT-2, o200k_base and (downloaded without a login) XLM-RoBERTa, on test.txt and the seven samples | `tables/compare.tex`, `tables/compare_metrics.tex`, `figures/tokens_per_word.pdf` |
-| `analysis/failure_cases.py` | Q3: inputs and words ranked by our tokens per word and our-to-o200k ratio, three cases with token boundaries and their causes, and raw vs normalized text | `tables/failure_inputs.tex`, `tables/failure_words.tex`, `tables/failure_cases.tex`, `tables/normalization.tex` |
-
-The raw numbers go to `data/stats/analysis.json` (per-word counts to `analysis_words.json`). The drafts go to [docs/analysis_notes.md](docs/analysis_notes.md), between BEGIN/END markers that are rewritten on every run, so write your own text outside them. `tests/test_analysis.py` checks that each draft is exactly what the scripts produce from `analysis.json`. Only `compare_tokenizers.py` may import tiktoken and tokenizers, so it also stores the counts that `failure_cases.py` needs.
-
-```bash
-make analysis
-python analysis/failure_cases.py --cases roman_urdu diacritics names   # choose the three cases by hand
-python -m pytest -q tests/test_analysis.py
-```
+**Library policy.** The implementation (repo-root scripts, `collect/`, `clean/`) uses only the standard library, regex, numpy, tqdm and the collection tools (requests, beautifulsoup4, lxml; pyarrow only to read the FineWeb-2 parquet files). `bpe.py` itself imports only the standard library and regex. No tokenizer library or published BPE code is used. tiktoken and tokenizers appear only in `analysis/compare_tokenizers.py`, and matplotlib only in `analysis/`. `tests/test_forbidden_imports.py` enforces all of this (`make check`).
 
 ## Rebuild the tokenizer from train.txt
 
-From `data/final/train.txt` (Part A), in tmux:
+Put `train.txt` and `val.txt` from the shared drive (see [Data access](#data-access)) in `data/final/`, then run, in order:
 
 ```bash
-mkdir -p logs
-tmux new -s bpe 'cd ~/Desktop/LLM/urdu-bpe && caffeinate -dimsu .venv/bin/python train_tokenizer.py --input data/final/train.txt --vocab-size 50000 --out tokenizer/urdu_bpe_50k.json --workers 7 --checkpoint-every 5000 2>&1 | tee logs/train_tokenizer.log'
+# 1. environment
+uv venv --python 3.12 && uv pip install -r requirements.txt -r requirements-dev.txt
+
+# 2. train the tokenizer: fast trainer, 50,000 tokens, then the post-training checks on val.txt
+.venv/bin/python train_tokenizer.py --input data/final/train.txt --vocab-size 50000 \
+    --out tokenizer/urdu_bpe_50k.json --workers 7 --checkpoint-every 5000
+
+# 3. encode train and val with it
+.venv/bin/python encode_corpus.py --input data/final/train.txt --out data/final/train.bin --workers 7
+.venv/bin/python encode_corpus.py --input data/final/val.txt --out data/final/val.bin --workers 7
+
+# 4. verify: each .bin must decode to exactly the bytes of its .txt
+.venv/bin/python encode_corpus.py --verify --input data/final/train.txt --out data/final/train.bin
+.venv/bin/python encode_corpus.py --verify --input data/final/val.txt --out data/final/val.bin
+
+# 5. tests, including the checks on the trained tokenizer
+.venv/bin/python -m pytest -q
 ```
 
-If the run dies, rerun the same command with `--resume` added. It reloads the cached word counts and the merges in `tokenizer/urdu_bpe_50k.checkpoint.json`, replays them, and continues from the last checkpoint:
+If training stops, rerun step 2 with `--resume` added. It continues from `tokenizer/urdu_bpe_50k.checkpoint.json`, written every 5,000 merges, and reuses the cached word counts.
+
+Expected outputs:
+
+| Output | What to expect |
+|---|---|
+| `tokenizer/urdu_bpe_50k.json` | 49,743 merges with IDs 257-49,999 in learned order; vocabulary 50,000; `<|endoftext|>` = 256 |
+| `tokenizer/urdu_bpe_50k.merges.txt` | one readable line per merge; sha256 `6f07e0f13c0eabee4ee81b2aa09541830f75e2e72a4e9fffeb7ce8ea9b667c86`, identical on a rebuild |
+| the delivered `urdu_bpe_50k.json` | sha256 `4994584016fd841f873599b22e83b084e526092f3c14740fa56314bcc48e6ece`. A rebuild learns identical merges, but the file's `meta` records the new run's times and machine, so its sha256 differs; compare `merges.txt` |
+| `tokenizer/train_log.json`, `docs/training_run.md` | phase times, peak memory, machine, and "All post-training checks passed" |
+| `data/final/train.bin`, `val.bin`, `meta.json` | 179,309,360 and 1,888,474 tokens, raw little-endian uint16; `--verify` prints VERIFIED for both |
+| `pytest -q` | all tests pass; the one skip is the handout's missing sanity check (`docs/decisions.md`) |
+
+Measured on an Apple M2 (8 cores, 8 GB RAM, macOS 14.4.1, Python 3.12.15) with 7 workers:
+- **Training:** 76.5 s of wall clock: word counting 13.2 s, initialization 3.4 s, 49,743 merges 59.9 s, save 0.1 s. Peak memory 1.44 GB. The post-training checks add a few seconds.
+- **Encoding:** train.txt 23.8 s plus 12.1 s to verify; val.txt 1.6 s plus 0.2 s.
+
+## Rebuild the corpus (Part A, Steps 1-6)
+
+From an empty `data/`, in order. Downloads need a contact email in `collect/contact.local` (gitignored) for the User-Agent. The crawls take hours and the cleaning about an hour, so run them in tmux, as [docs/pipeline.md](docs/pipeline.md) shows.
 
 ```bash
-tmux new -s bpe 'cd ~/Desktop/LLM/urdu-bpe && caffeinate -dimsu .venv/bin/python train_tokenizer.py --input data/final/train.txt --vocab-size 50000 --out tokenizer/urdu_bpe_50k.json --workers 7 --checkpoint-every 5000 --resume 2>&1 | tee -a logs/train_tokenizer.log'
+.venv/bin/python collect/download.py --source all                     # Step 1: published corpora, checksums verified
+.venv/bin/python collect/scrape/crawl.py --site voa_urdu --target-mb 70   # Step 2: our own crawl
+.venv/bin/python collect/scrape/crawl.py --site humsub --target-mb 20 --max-hours 7
+.venv/bin/python collect/scrape/report.py                             #   evidence/scrape_report.md
+.venv/bin/python clean/extract_all.py --wiki-jobs 7                   # Step 3: plain text
+.venv/bin/python clean/audit_chars.py && .venv/bin/python clean/audit_chars.py --normalized   # Step 4
+.venv/bin/python clean/normalize_filter.py --jobs 7                   # Step 5: normalize + language filter
+.venv/bin/python clean/dedup.py                                       # Step 5b: boilerplate + exact dedup
+.venv/bin/python clean/budget.py --fill fineweb2_urd ufal_umc urdu_news_1m   # Step 6: byte budget
+.venv/bin/python clean/split.py && .venv/bin/python clean/corpus_stats.py
+.venv/bin/python -m pytest -q -s tests/test_split.py                  #   integrity checks on the split
+.venv/bin/python clean/data_card.py                                   #   DATA_CARD.md
 ```
 
-The same train.txt (same sha256) and the same code give the same merges.
+**Evidence for our own collection (76.01 MB in the corpus).** It is in `evidence/`:
+- `probe_report.md`: the site choice;
+- `scrape_report.md`: what was collected;
+- `crawl_log_<site>.jsonl.gz`: every request, with status and robots decision;
+- `robots/`, `terms/`: snapshots of each site's robots.txt and terms of use.
+
+## Loading the data
+
+```python
+import numpy as np
+from bpe import BPETokenizer
+
+ids = np.memmap("data/final/train.bin", dtype=np.uint16, mode="r")    # little-endian; "<u2" on any machine
+tok = BPETokenizer.load("tokenizer/urdu_bpe_50k.json")
+print(len(ids), tok.decode(ids[:200].tolist()))
+```
+
+- **Format.** Each `.bin` is a flat array of token IDs with no header. Every document is followed by `<|endoftext|>` = ID 256, and the vocabulary size is 50,000, so IDs fit in uint16.
+- **`data/final/meta.json`** records the vocabulary size, EOT ID, dtype and byte order. It also records the tokenizer with its sha256, the token counts, and each encode's report: documents, bytes per token, tokens per word, cache hit rate, time and verification.
+- **`data/final/manifest.json`** records the split: seed, budget, documents and bytes per split and source, and sha256 of each file.
+
+## Report, analysis and submission
+
+```bash
+make analysis     # Part C tables, figures and drafts (needs data/final and the cached word counts)
+make numbers      # report/numbers.tex and the report's tables from the JSON stats in data/ (commit the result)
+make report       # LuaLaTeX from the committed numbers and tables; fails if report.pdf is over 4 pages
+make submission   # pre-flight checks, submission/urdu_bpe_456094.zip, data/final/SHA256SUMS
+```
+
+`make report` needs LuaLaTeX, latexmk and the Noto Naskh Arabic font. `python report/checks.py tools` lists what is missing and how to install it; pdfinfo (poppler) is optional.
+
+## Data access
+
+**Download.** The corpus files go by shared-drive link: train.txt, val.txt, test.txt, train.bin, val.bin, meta.json, manifest.json and SHA256SUMS.
+
+Link: [PASTE shared-drive link here]
+
+Check the download with `cd data/final && shasum -a 256 -c SHA256SUMS`.
+
+**Licences.** The link is private to course staff, and the corpus must not be redistributed outside the course:
+- **Makhzan:** copyright, research use only, no republication. The instructor approved including it on condition the link stays private.
+- **UFAL Urdu Monolingual Corpus:** CC BY-NC-SA 3.0.
+- **Urdu News 1M:** CC BY 4.0, non-commercial research (left out of the final corpus).
+- **FineWeb-2:** ODC-By 1.0 plus the Common Crawl terms.
+- **Urdu Wikipedia:** CC BY-SA 4.0.
+- **Our crawl:** VOA's own text is public domain; Hum Sub posts are their authors' copyright.
+
+Every source and its licence is in [collect/sources.json](collect/sources.json) and [DATA_CARD.md](DATA_CARD.md).
+
+## Tests
+
+```bash
+make test     # pytest -q
+make check    # forbidden-imports check only
+```

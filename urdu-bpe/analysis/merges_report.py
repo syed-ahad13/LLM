@@ -7,8 +7,9 @@ Reads tokenizer/urdu_bpe_50k.json and the training word counts that Step 9 cache
 tokenizer's meta.input_sha256, the sha256 of train.txt).
 
 Each merged token gets one category, tested in this order:
-- LETTER: exactly one valid 2-byte UTF-8 character (lead byte 0xC2-0xDF plus a continuation byte), e.g.
-  D8 A7 = ا;
+- LETTER: exactly one valid 2-byte UTF-8 character (lead byte 0xC2-0xDF plus a continuation byte) that
+  is a letter (\\p{L}), e.g. D8 A7 = ا;
+- CHAR: any other single 2-byte character: punctuation such as ۔ and ، or a lone mark such as pesh;
 - SPACE+LEAD: 0x20 followed by an incomplete character (a lead byte and fewer continuation bytes than it
   needs), e.g. ␣\\xd8;
 - INVALID_START / INVALID_END: any other token that strict UTF-8 decoding rejects; it starts with a
@@ -51,8 +52,9 @@ from bpe import COUNT_BLOCK_BYTES, ENDOFTEXT, BPETokenizer, _iter_chunks, word_c
 from common import setup_logging  # noqa: E402
 
 SCRIPT = "analysis/merges_report.py"
-CATEGORIES = ("LETTER", "SPACE+LEAD", "INVALID_START", "INVALID_END", "SPACE+LETTER", "WORD", "OTHER")
-CATEGORY_LABELS = {"LETTER": "Letter (2 bytes)", "SPACE+LEAD": "Space + lead byte",
+CATEGORIES = ("LETTER", "CHAR", "SPACE+LEAD", "INVALID_START", "INVALID_END", "SPACE+LETTER", "WORD", "OTHER")
+CATEGORY_LABELS = {"LETTER": "Letter (2 bytes)", "CHAR": "Other character (2 bytes)",
+                   "SPACE+LEAD": "Space + lead byte",
                    "INVALID_START": "Invalid: starts mid-character", "INVALID_END": "Invalid: ends mid-character",
                    "SPACE+LETTER": "Space + one letter", "WORD": "Word", "OTHER": "Other"}
 WORD_RE = regex.compile(r" ?[\p{L}\p{M}\u200c]+")
@@ -102,7 +104,7 @@ def category(token: bytes, counts: Mapping[str, int], min_count: int = MIN_COUNT
             return "SPACE+LEAD"
         return "INVALID_START" if 0x80 <= token[0] <= 0xBF else "INVALID_END"
     if len(token) == 2 and 0xC2 <= token[0] <= 0xDF:
-        return "LETTER"
+        return "LETTER" if LETTER_RE.fullmatch(text) else "CHAR"
     if WORD_RE.fullmatch(text):
         core = text.lstrip(" ")
         letters = len(LETTER_RE.findall(core))
@@ -246,6 +248,7 @@ def analyse(tok: BPETokenizer, counts: Mapping[str, int], sources: dict[str, dic
         "tokenizer": str(TOKENIZER.relative_to(ROOT)), "merges": n, "min_count": min_count,
         "category_totals": dict(Counter(cats)),
         "early": {"letters": [{"rank": r["rank"], "token": r["token"]} for r in early if r["category"] == "LETTER"],
+                  "other_chars": [{"rank": r["rank"], "token": r["token"]} for r in early if r["category"] == "CHAR"],
                   "not_valid_utf8": [{"rank": r["rank"], "token": r["token"], "category": r["category"]}
                                      for r in early if r["category"] in ("SPACE+LEAD", "INVALID_START",
                                                                          "INVALID_END")],
@@ -328,7 +331,9 @@ def draft(analysis: dict[str, Any]) -> str:
 
     fw, any_w, lit = res["first_word"], res["first_word_any"], res["first_word_brief_literal"]
     b0, b_last = res["buckets"][0], res["buckets"][-1]
-    s1 = (f"Of the first {EARLY} merges, {len(letters)} rebuild a two-byte letter from its bytes ({listing(letters, 6)}). "
+    chars = res["early"].get("other_chars", [])
+    s1 = (f"Of the first {EARLY} merges, {len(letters)} rebuild a two-byte letter from its bytes ({listing(letters, 6)})"
+          + (f", and {len(chars)} another two-byte character ({listing(chars, 3)})" if chars else "") + ". "
           f"{len(invalid)} produce a token that is not valid UTF-8 on its own: {len(lead)} are a space plus the lead "
           f"byte of the next letter ({listing(lead, 3)}), the byte-level start of a word"
           + (f", and {len(cut)} end in the middle of a character ({listing(cut, 3)})" if cut else "") + ".")
