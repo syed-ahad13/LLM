@@ -556,3 +556,50 @@ Add one entry for each decision that affects the data, the tokenizer or the repo
     - on 5.0 MB of val: 1.178 tokens per word, 7.11 bytes per token, 88.3% of words a single token;
     - `tests/test_trained_tokenizer.py` and `tests/test_bpe_reference.py`: 39 passed, 1 skipped (the handout sanity check).
 - **Consequence:** the README's "Rebuild the tokenizer from train.txt" section now holds the exact commands, including the resume command. The finished tokenizer files and `train_log.json` are committed; checkpoints are gitignored.
+
+### 2026-10-13: Step 10: encode_corpus.py, train.bin and val.bin
+- **Decision:**
+  - **Format.** Raw little-endian uint16 (`"<u2"`), no header, every ID in file order, with `<|endoftext|>` = 256 after each document as in the `.txt`. The byte order is explicit, so the files read the same on any machine.
+  - **Encoding.** 16 MB blocks cut after their last `<|endoftext|>` (`bpe._iter_chunks`, the reader of `count_words`), so no document crosses a block. The pool runs in file order (`common.ordered_imap`, at most 2 x workers blocks in flight). Each worker loads the tokenizer in the pool initializer and keeps its own word cache.
+  - **Workers return `"<u2"` arrays, not lists.** The brief converts in the main process. A 16 MB block is about 2.3M IDs: 4.6 MB as uint16, about 80 MB as a pickled list of Python ints, with up to 14 blocks in flight. The main process still checks every block's maximum ID against the vocabulary size before `tofile()`.
+  - **The .bin is written under a temporary name** and renamed when complete, so a crashed run never leaves a valid-looking partial file.
+  - **Verification** compares bytes: the vocab entries of the IDs joined, against the sha256 of the `.txt`. Decoded strings are never compared, so a 10M-ID chunk edge inside a character changes nothing. A `.txt` is matched to its manifest split by sha256, so a sample run reports "not compared" instead of failing.
+  - **Words** for tokens per word are counted per document with `str.split()`, as in `clean/corpus_stats.py`. Splitting a whole block would glue each `<|endoftext|>` to its neighbours.
+  - **Cache counters in `bpe.py`.** `BPETokenizer.use_cache` (default True) and `cache_lookups`/`cache_misses` give the hit rate per worker, and let the tests turn the cache off. The counting costs one addition per `encode_ordinary` call and one per miss.
+  - **test.txt is refused.** The test split stays text, for Part C.
+  - **meta.json** holds the brief's fields, plus `read_with` and, under `splits`, each encode's report: the sha256 of both files, documents, words, cache, timings, git commit and machine.
+- **Options considered:**
+  - **`.npy` via `np.save`.** Rejected: the brief asks for flat arrays that the next assignment reads directly, and a header would shift every offset.
+  - **One big list, then one conversion.** Rejected: about 180M IDs as Python ints would take several GB.
+  - **Pool.imap.** Not used: its feeder thread reads the whole file into the task queue; `ordered_imap` gives the same order with a bounded window.
+- **Evidence:**
+  - `tests/test_encode_corpus.py` (10 tests):
+    - parallel (2 workers), serial and one-block encodes give identical files, equal to `encode` of the whole text;
+    - cache on and off give identical files;
+    - documents, words and bytes per token match the text;
+    - `np.memmap(dtype=np.uint16)` loads the IDs and decodes to the text;
+    - verification passes with 7-ID chunks, and detects a changed ID, an ID outside the vocabulary, a truncated file, dropped separators and a manifest count that disagrees;
+    - meta.json for both splits; refusals.
+  - Full suite: 5,641 passed, 1 skipped.
+  - Smoke run on the first 20 MB of train.txt (`--sample-mb 20`, Apple M2, 7 workers; 2 blocks, so 2 busy workers):
+    - 2,814,674 tokens, 15,189 documents, 7.10 bytes per token, 1.189 tokens per word;
+    - cache hit rate 95.5% (92.6% and 96.1% per worker);
+    - 2.0 s, 9.9 MB/s;
+    - verified in 0.2 s: sha256 of the decoded bytes = sha256 of the text (`1d96fcc0…`), 15,189 IDs 256 = 15,189 separators.
+  - Full runs (Apple M2, 8 GB RAM, 7 workers; `logs/encode_train.log`, `logs/encode_val.log`, `data/final/meta.json`):
+
+    | | train | val |
+    |---|---:|---:|
+    | Tokens | 179,309,360 | 1,888,474 |
+    | .bin bytes | 358,618,720 | 3,776,948 |
+    | Documents (ID 256) = separators = manifest | 941,950 | 9,613 |
+    | Bytes per token | 7.1025 | 7.1141 |
+    | Tokens per word | 1.1925 | 1.1904 |
+    | Cache hit rate (per worker) | 98.33% (98.26–98.36%) | 95.74% (1 block) |
+    | Encode | 23.8 s, 53.5 MB/s, 76 blocks | 1.6 s, 8.2 MB/s |
+    | Verify | 12.1 s | 0.2 s |
+    | sha256 of the decoded bytes = sha256 of the .txt | `aec4bbb7735e623f…` | `349df240a72cc576…` |
+    | sha256 of the .bin | `89ddb5b1bdac259a…` | `7cd18b10ccf0fca0…` |
+
+    Both VERIFIED. The 7 workers cached 2,833,524 words in all, about 2 x the 1,425,662 distinct words of train.txt, since each worker builds its own cache.
+- **Consequence:** the next assignment reads `data/final/train.bin` and `val.bin` with `np.memmap(path, dtype="<u2", mode="r")`; `meta.json` gives the vocab size, the EOT ID and the sha256 to check the files against.

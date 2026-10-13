@@ -302,6 +302,9 @@ class BPETokenizer:
             raise ValueError(f"special token IDs must be 256, 257, ... with no gaps, got {ids}")
         self.first_merge_id = 256 + len(self.special_tokens)
         self.meta: dict[str, Any] = {}
+        self.use_cache = True  # encode's per-word cache (optimization 3); False only to test that it changes nothing
+        self.cache_lookups = 0  # words encoded by encode_ordinary
+        self.cache_misses = 0  # of those, words not found in the cache
         self._reset()
 
     def _reset(self) -> None:
@@ -643,11 +646,19 @@ class BPETokenizer:
     def encode_ordinary(self, text: str) -> list[int]:
         """Encode text with no special tokens: a literal <|endoftext|> is ordinary text."""
         ids: list[int] = []
+        words = self.pretokenize(text)
+        self.cache_lookups += len(words)
+        if not self.use_cache:
+            for word in words:
+                ids.extend(self._encode_word(word))
+            self.cache_misses += len(words)
+            return ids
         cache = self._cache
-        for word in self.pretokenize(text):
+        for word in words:
             encoded = cache.get(word)
             if encoded is None:
                 encoded = cache[word] = self._encode_word(word)
+                self.cache_misses += 1
             ids.extend(encoded)
         return ids
 

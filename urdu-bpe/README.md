@@ -236,6 +236,31 @@ python train_tokenizer.py --check-only               # rerun the checks on token
 python -m pytest -q -s tests/test_trained_tokenizer.py
 ```
 
+## Encode the corpus (Part B, Step 10)
+
+`encode_corpus.py` turns `train.txt` and `val.txt` into `train.bin` and `val.bin`: every token ID in file order as raw little-endian uint16 (2 bytes per ID, no header), with `<|endoftext|>` = 256 after each document. The next assignment reads them with `np.memmap(path, dtype="<u2", mode="r")`. `test.txt` is not encoded.
+- The input is read in 16 MB blocks cut after their last `<|endoftext|>` (the reader of `count_words`) and encoded in a process pool, in file order.
+- Each worker loads the tokenizer once and caches the token IDs of every word it has encoded (optimization 3).
+- Verification runs after every encode, and on its own with `--verify`. The `.bin` is decoded to bytes in 10M-ID chunks, and the sha256 of those bytes must equal the `.txt`'s sha256. The count of ID 256 must equal the `<|endoftext|>` count in the `.txt` and the document count in `data/final/manifest.json`.
+
+| Output | Contents |
+|---|---|
+| `data/final/train.bin`, `data/final/val.bin` | the token IDs (gitignored with the rest of `data/`) |
+| `data/final/meta.json` | vocab size, EOT ID, dtype, byte order, tokenizer and its sha256, `train_tokens`, `val_tokens`, the pattern; under `splits`, each encode's report (documents, bytes per token, tokens per word, cache hit rate per worker, time, MB/s, verification, sha256 of both files) |
+
+```bash
+python encode_corpus.py --input data/final/train.txt --sample-mb 20 --workers 7    # smoke run on the first 20 MB
+python encode_corpus.py --verify --input data/final/train.txt --out data/final/train.bin   # verification only
+python -m pytest -q tests/test_encode_corpus.py
+```
+
+Full runs, in tmux:
+
+```bash
+mkdir -p logs
+tmux new -s encode 'cd ~/Desktop/LLM/urdu-bpe && caffeinate -dimsu .venv/bin/python encode_corpus.py --tokenizer tokenizer/urdu_bpe_50k.json --input data/final/train.txt --out data/final/train.bin --workers 7 2>&1 | tee logs/encode_train.log; .venv/bin/python encode_corpus.py --tokenizer tokenizer/urdu_bpe_50k.json --input data/final/val.txt --out data/final/val.bin --workers 7 2>&1 | tee logs/encode_val.log'
+```
+
 ## Rebuild the tokenizer from train.txt
 
 From `data/final/train.txt` (Part A), in tmux:
