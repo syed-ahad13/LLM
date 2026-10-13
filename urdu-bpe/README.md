@@ -42,7 +42,7 @@ make check   # forbidden-imports check only
 | `normalize.py`, `bpe.py`, `train_tokenizer.py`, `encode_corpus.py` | names required by the handout |
 | `common.py` | JSONL I/O, hashing, machine info, stats, timing, logging |
 | `collect/` | `sources.json` (licence/terms per source), `download.py`, `inspect_raw.py`, `polite.py` (HTTP etiquette), `robots.py`; `scrape/` (probe, crawler, report, one adapter per site in `scrape/sites/`) |
-| `clean/` | `extract_<source>.py` + `extract_all.py` (Step 3), `wikitext.py`, `peek.py`; `audit_chars.py` (Step 4), `linefilter.py` + `normalize_filter.py` (Step 5), `dedup.py` (Step 5b); budget, split, data-card generator to come |
+| `clean/` | `extract_<source>.py` + `extract_all.py` (Step 3), `wikitext.py`, `peek.py`; `audit_chars.py` (Step 4), `linefilter.py` + `normalize_filter.py` (Step 5), `dedup.py` (Step 5b); `budget.py`, `split.py`, `corpus_stats.py`, `data_card.py` (Step 6) |
 | `analysis/` | Part C scripts (`analysis/samples/` holds the hand-picked inputs) |
 | `report/` | LaTeX report, built to `report/report.pdf` |
 | `evidence/` | scrape logs and robots.txt/terms snapshots |
@@ -155,6 +155,25 @@ Full run (about 25 minutes, one process; it needs all sources in one run for cro
 
 ```bash
 tmux new -s dedup 'cd ~/Desktop/LLM/urdu-bpe && mkdir -p logs && caffeinate -i .venv/bin/python clean/dedup.py 2>&1 | tee logs/dedup_run.log'
+```
+
+## Budget, split and data card (Part A, Step 6)
+
+Step 5b leaves 9.19 GB of cleaned text, and the corpus targets 1.0-1.3 GB. Four scripts finish Part A:
+
+- `clean/budget.py` prints the cleaned MB per source and genre, then decides how many bytes each source contributes. A source is kept whole or subsampled deterministically: a document is kept when `int(blake2b(doc_id).hexdigest(), 16) % 10**6 < rate * 10**6`. By default FineWeb-2 is capped at 45% of the corpus, and Urdu News 1M at 10% because its punctuation was stripped at source. Sizes include the 13-byte `<|endoftext|>` after each document. The scan is cached in `data/stats/budget_scan.json`. Writes `data/final/budget.json`.
+- `clean/split.py` works per source: it sorts the kept doc_ids, shuffles them with `random.Random("1337:<source>")` and cuts 98/1/1 by count, with at least one val and one test document. It then shuffles each split across sources and writes every document followed by `<|endoftext|>`. A three-pass external shuffle (64 bucket files per split) keeps the text out of memory. Writes `data/final/{train,val,test}.txt`, the doc_ids in file order (`.ids`) and `manifest.json` (counts, bytes and sha256 per split and source).
+- `clean/corpus_stats.py` counts MB, MiB, documents, words and unique words per split, and writes `data/stats/corpus_totals.json`.
+- `clean/data_card.py` writes `DATA_CARD.md` and `docs/cleaning_detail.md` from the stats. The "Known gaps and biases" prose comes from `docs/data_card_gaps.md`, so edit it there.
+
+```bash
+python clean/budget.py                       # tables; says why no budget fits if the policy cannot be met
+python clean/budget.py --fill fineweb2_urd ufal_umc urdu_news_1m   # the budget in docs/decisions.md (Step 6)
+python clean/split.py                        # a few minutes
+python clean/corpus_stats.py
+python -m pytest -q -s tests/test_split.py   # integrity checks on the real files; -m "not slow" skips the rerun
+python clean/audit_chars.py && python clean/audit_chars.py --normalized   # both audits on the same samples
+python clean/data_card.py
 ```
 
 ## Rebuild the tokenizer from train.txt

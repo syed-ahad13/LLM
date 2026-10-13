@@ -1,6 +1,6 @@
 # Data card: Urdu corpus
 
-> **Stub.** A script in `clean/` will generate these tables from `data/stats/`. Do not fill in numbers by hand. The handout limits this card to one page.
+> **Stub.** `python clean/data_card.py` replaces this file with the generated card after the split (README.md, Step 6). Do not fill in numbers by hand. The handout limits this card to one page.
 
 **Definitions.**
 - MB = 10^6 bytes of UTF-8. MiB is also given.

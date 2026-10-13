@@ -429,3 +429,29 @@ Add one entry for each decision that affects the data, the tokenizer or the repo
   - Documents under the word minimum after boilerplate removal: UFAL 3,361, FineWeb 3,173, Wikipedia 146, news 5.
   - No literal `<|endoftext|>` was found in any source.
   - Cleaned sizes for Step 6 (MB): fineweb2_urd 5,893.90; urdu_news_1m 1,958.01; ufal_umc 702.21; wiki_ur 513.78; own_scrape 76.01; makhzan 50.75.
+
+### 2026-10-13: Step 6: byte budget, split and data card
+- **Decision:**
+  - **Sizes.** Budgets and shares count file bytes: the text plus the 13-byte `<|endoftext|>` written after each document. UFAL's 5.33M one-sentence documents carry 69 MB of separators, about 10% on top of their text.
+  - **Budget (proposed, waiting for approval).** The brief's rules cannot all hold. The four sources it keeps whole (UFAL 702.21, Wikipedia 513.78, own_scrape 76.01 and Makhzan 50.75 MB of text) already hold 1,342.75 MB, or 1,416 MB with separators, above the 1.3 GB ceiling. Proposed: keep the 1.3 GB ceiling; keep Wikipedia, own_scrape and Makhzan whole; fill FineWeb-2 up to its 45% cap; subsample UFAL into the rest (about 70 MB, rate about 0.09). Urdu News 1M gets nothing: `punct_stripped` holds for all its documents, so its cap is 10%, and no space is left. Command: `python clean/budget.py --fill fineweb2_urd ufal_umc urdu_news_1m`. The full-run numbers go here after the run.
+  - **Split.** Per source: sorted doc_ids, shuffled with `random.Random("1337:<source>")`, then train = n - 2k, val = k, test = k in that order, k = max(1, round(n/100)) rounded half up. A source with 0 kept documents is left out, and budget.py never leaves a source with 1 or 2. Each split is then shuffled across sources with `random.Random("1337:order:<split>")`.
+  - **External shuffle.** Pass 1 holds only doc_ids. Pass 2 writes each document to one of 64 bucket files per split by position. Pass 3 sorts one bucket at a time. `<split>.ids` lists the doc_ids in file order, so the integrity tests can check that no document is in two splits.
+- **Options considered** (projected from the Step 5b sizes, file MB):
+  - **A, proposed:** 1.3 GB with UFAL subsampled. FineWeb 585 (45%), Wikipedia 518 (39.8%), own 76 (5.9%), Makhzan 51 (3.9%), UFAL 70 (5.4%). UFAL is the source that adds least per byte: shuffled sentences with no document context, from 2014, with the largest separator overhead.
+  - **A2:** as A with `--cap fineweb2_urd=0.40`. FineWeb 520 (40%), UFAL 135 (10.4%).
+  - **B:** keep all four whole and allow 2.6 GB (`--total-mb 2600`). UFAL becomes 29.7% of the corpus. Rejected: twice the size, dominated by sentence-level 2014 text.
+  - **Keeping UFAL whole at about 1.6 GB.** Rejected: UFAL 48%, FineWeb 11%.
+  - **Urdu News 1M at its 10% cap.** Not proposed: its text lacks sentence punctuation and lost letters (اسلام آباد stored as اسلام باد); `--mb urdu_news_1m=X` adds it if wanted.
+- **Evidence:**
+  - Dry run on the four real sources present on the second machine (1.0 GB budget, `--fill ufal_umc`; 8-core M-series Mac, 16 GB RAM):
+    - budget scan 26 s, and its documents and MB match `dedup.json` exactly;
+    - split 53 s, peak RSS 0.8 GB;
+    - corpus_stats 11 s;
+    - every check in `tests/test_split.py` passed, including the rerun with identical sha256 and `normalize(doc) == doc` on 2,000 random documents.
+  - Smoke run of all six sources: 3,000 documents each.
+  - The copied `char_audit.json` comes from the smoke-run samples (179 Wikipedia documents) and `char_audit_normalized.json` from the full-run samples (870), so they cannot be subtracted. `data_card.py` refuses audits of different samples; rerun both before generating the card.
+  - Tests: `tests/test_budget.py`, `tests/test_split.py`, `tests/test_corpus_stats.py`, `tests/test_data_card.py`.
+- **Consequence:**
+  - Wikipedia is about 40% of any 1.3 GB budget that keeps it whole. That is the main genre bias in DATA_CARD.md.
+  - The FineWeb-2 text covers CC-MAIN-2021-10 to 2024-18 only, not 2013-2024.
+  - Revisit the budget if the tokenizer or the next assignment needs more data. B is one command away.
