@@ -176,6 +176,21 @@ python clean/audit_chars.py && python clean/audit_chars.py --normalized   # both
 python clean/data_card.py
 ```
 
+## Pre-tokenizer and reference BPE (Part B, Step 7)
+
+`bpe.py` holds `BPETokenizer` and the pre-tokenizer pattern `URDU_PATTERN`. The pattern and the alternatives we considered are explained in [docs/pretokenizer.md](docs/pretokenizer.md). `bpe.py` imports only the standard library and `regex`.
+- `train_reference` is the reference trainer. It keeps every word occurrence and recounts all pairs after every merge. Ties go to the greater `(vocab[a], vocab[b])`.
+- `encode` / `decode` round-trip any Python string.
+- `save` writes `tokenizer/<name>.json` and a readable `tokenizer/<name>.merges.txt`.
+
+```bash
+python clean/sample_1mb.py        # data/samples/train_1mb.txt: whole documents from the start of train.txt, at most 1,000,000 bytes
+python train_tokenizer.py --trainer reference --input data/samples/train_1mb.txt --vocab-size 3257 --name reference_1mb_3000
+python -m pytest -q tests/test_bpe_reference.py -s   # -s prints what GPT-2's pattern does to اُردُو
+```
+
+The 3,000-merge reference run takes a few minutes. It prints the first 30 merges and the wall-clock time, which is also stored in the tokenizer's `meta`. Step 8's fast trainer must learn identical merges on the same sample.
+
 ## Rebuild the tokenizer from train.txt
 
 Not written yet. The commands go here once Part B is done.

@@ -455,3 +455,23 @@ Add one entry for each decision that affects the data, the tokenizer or the repo
   - Wikipedia is about 40% of any 1.3 GB budget that keeps it whole. That is the main genre bias in DATA_CARD.md.
   - The FineWeb-2 text covers CC-MAIN-2021-10 to 2024-18 only, not 2013-2024.
   - Revisit the budget if the tokenizer or the next assignment needs more data. B is one command away.
+
+### 2026-10-13: Step 7: pre-tokenizer pattern and reference trainer
+- **Decision:**
+  - **Pre-tokenizer.** `bpe.URDU_PATTERN` as given in the Step 7 brief. A word is letters + marks + ZWNJ with an optional leading space; digits come in groups of up to 3; contractions match case-insensitively. Rationale and alternatives: [docs/pretokenizer.md](pretokenizer.md).
+  - **Reference trainer.** `BPETokenizer.train_reference` follows the brief: every occurrence is its own byte list, all pairs are recounted after every merge, and ties go to the greater `(vocab[a], vocab[b])` compared as bytes.
+  - **Ties on identical bytes.** The spec cannot decide one case. Two different merges can build the same string (`ab + c` and `a + bc`), and then two tied pairs can have identical bytes. Only in that case the greater pair of IDs wins, and a warning is logged. The fast trainer (Step 8) must use the same rule.
+  - **encode** merges the present pair with the lowest merge ID until none is left, with a per-word cache. **decode** uses UTF-8 with surrogatepass and falls back to replace when an ID sequence cuts a character.
+  - **Saved files.** `tokenizer/<name>.json` (format `urdu-bpe-v1`; `meta` also holds `merge_counts` when trained in the same process) and `tokenizer/<name>.merges.txt`. A bare `merges.txt` would be overwritten by the next tokenizer saved in `tokenizer/`.
+  - **1 MB sample.** `data/samples/train_1mb.txt` (`clean/sample_1mb.py`) is the longest prefix of train.txt that ends just after an `<|endoftext|>` and holds at most 1,000,000 bytes, separators included. train.txt is already shuffled across sources.
+  - **Handout sanity check.** The handout refers to a sanity check that it does not contain (2026-10-11 entry). `tests/test_bpe_reference.py::test_handout_sanity_check` is skipped with that reason, so the gap shows in every run. `test_tie_break_aaabdaaabac` (the Wikipedia BPE example, with a four-way tie at merge 4 that ID order gets wrong) stands in until the instructor answers.
+- **Options considered:**
+  - **Tie-breaking.** Ties by ID: rejected by the spec. Ties on identical bytes left to Counter order: rejected, because the fast trainer would visit pairs in a different order and could learn different merges.
+  - **The pattern.** See docs/pretokenizer.md: GPT-2's pattern, o200k_base's, and splitting by script.
+- **Evidence:**
+  - Tests: `tests/test_bpe_reference.py` (26 tests) and `tests/test_forbidden_imports.py` (bpe.py: stdlib and regex only).
+  - GPT-2's pattern cuts اُردُو into 5 pieces (`ا` `ُ` `رد` `ُ` `و`) and صورت‌حال into 3.
+  - Timing on a stand-in 1 MB (993,276 bytes from the four cleaned sources on the second machine; not the official sample): 3,000 merges in 189 s, 63 ms per merge, 62 MB peak RSS (Apple M1 Pro, Python 3.12.14).
+  - The first merges rebuild two-byte letters (ا, ی, ک, ر). Merges 3 and 4 are a space plus a lead byte (`␣\xd8`, `␣\xd9`), tokens that are not valid UTF-8 on their own.
+  - The official run on train_1mb.txt goes here when it is done.
+- **Consequence:** Part C's question on merges that are not valid UTF-8 has early examples. Step 8 compares its merges, and their counts (`meta.merge_counts`), with `tokenizer/reference_1mb_3000.json`.

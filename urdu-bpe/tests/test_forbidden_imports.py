@@ -12,6 +12,8 @@ Rules:
 - analysis/ may also import matplotlib.
 - tiktoken and tokenizers are allowed only in analysis/compare_tokenizers.py.
 - pytest is allowed only in tests/.
+- bpe.py may import only the standard library and regex (Step 7 brief): no
+  numpy, and none of our own modules.
 - Banned everywhere: BANNED, plus any third-party module with "bpe" in its
   name (our own bpe.py is a local module and fine).
 
@@ -36,6 +38,8 @@ IMPLEMENTATION_ALLOWED = frozenset({"regex", "numpy", "tqdm", "requests", "bs4",
 ANALYSIS_ONLY = frozenset({"matplotlib"})
 COMPARISON_ONLY = frozenset({"tiktoken", "tokenizers"})
 COMPARISON_FILE = Path("analysis/compare_tokenizers.py")
+BPE_FILE = Path("bpe.py")
+BPE_ALLOWED = frozenset({"regex"})
 TESTS_ONLY = frozenset({"pytest"})
 # Tokenizer/BPE libraries and Urdu NLP libraries. Third-party names containing
 # "bpe" (fastBPE, bpemb, ...) are caught separately.
@@ -108,6 +112,8 @@ def rule_for(module: str, rel: Path, local: set[str]) -> str | None:
         return None if in_analysis else "allowed only in analysis/"
     if module in TESTS_ONLY:
         return "allowed only in tests/"
+    if rel == BPE_FILE:
+        return None if module in STDLIB or module in BPE_ALLOWED else "bpe.py may import only the stdlib and regex"
     if module in STDLIB or module in IMPLEMENTATION_ALLOWED or module in local:
         return None
     if "bpe" in module.lower():
@@ -179,6 +185,9 @@ BASE = {"bpe.py": "", "common.py": "", "clean/extract.py": ""}
         ("bpe.py", "import importlib\nimportlib.import_module('tokenizers.models')\n", [("bpe.py", 2, "tokenizers")]),
         ("bpe.py", "from importlib import import_module\nimport_module('tiktoken')\n", [("bpe.py", 2, "tiktoken")]),
         ("bpe.py", "__import__('sentencepiece')\n", [("bpe.py", 1, "sentencepiece")]),
+        ("bpe.py", "import json, re\nimport regex\nfrom collections import Counter\n", []),
+        ("bpe.py", "import numpy as np\nimport common\n", [("bpe.py", 1, "numpy"), ("bpe.py", 2, "common")]),
+        ("clean/bpe.py", "import numpy\n", []),
         ("train_tokenizer.py", "import bpe\nimport common\n", []),
         ("train_tokenizer.py", "import fastbpe\n", [("train_tokenizer.py", 1, "fastbpe")]),
         ("train_tokenizer.py", "from transformers import AutoTokenizer\n", [("train_tokenizer.py", 1, "transformers")]),
