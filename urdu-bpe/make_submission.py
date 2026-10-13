@@ -14,6 +14,10 @@ before anything is written:
   meta.json, manifest.json);
 - the tokenizer has exactly 49,743 merges (vocabulary 50,000);
 - report/report.pdf has at most 4 pages;
+- the shared-drive link is set in drive_link.local (gitignored), and no file of
+  the archive contains a Google Drive URL: this repository is public and the
+  link must stay private to course staff, so it goes only into the README
+  inside the archive, between the DRIVE LINK markers;
 - DATA_CARD.md has no <!-- REVIEW --> marker left;
 - no PASTE placeholder (an opening square bracket followed by PASTE, as the
   briefs write them) is left in any file of the archive or in report/report.tex;
@@ -52,6 +56,9 @@ EXPECTED_MERGES = 49_743
 EXPECTED_VOCAB = 50_000
 MAX_PAGES = 4
 REVIEW = "<!-- REVIEW -->"
+DRIVE_LINK_FILE = "drive_link.local"
+DRIVE_PREFIX = "https://" + "drive.google.com/"  # built here so this file is not a leak itself
+LINK_BEGIN, LINK_END = "<!-- DRIVE LINK -->", "<!-- /DRIVE LINK -->"
 PLACEHOLDER = "[" + "PASTE"  # built here so this file does not match itself
 ARCHIVE_ITEMS = (
     "normalize.py", "bpe.py", "train_tokenizer.py", "encode_corpus.py", "common.py", "make_submission.py",
@@ -102,7 +109,22 @@ def archive_members(root: Path, items: Iterable[str] = ARCHIVE_ITEMS) -> list[Pa
     return sorted(p for p in out if not excluded(p) or str(p) in items)
 
 
-def write_archive(root: Path, members: Sequence[Path], out: Path, regno: str = REGNO) -> Path:
+def read_drive_link(root: Path) -> str | None:
+    path = root / DRIVE_LINK_FILE
+    if not path.is_file():
+        return None
+    lines = [line.strip() for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+    return lines[0] if lines else None
+
+
+def readme_with_link(text: str, link: str) -> str:
+    """The README with the text between the DRIVE LINK markers replaced by the link."""
+    start, end = text.index(LINK_BEGIN), text.index(LINK_END) + len(LINK_END)
+    return text[:start] + f"Link (private to course staff): <{link}>" + text[end:]
+
+
+def write_archive(root: Path, members: Sequence[Path], out: Path, regno: str = REGNO,
+                  link: str | None = None) -> Path:
     out.parent.mkdir(parents=True, exist_ok=True)
     tmp = out.with_name(out.name + ".tmp")
     with zipfile.ZipFile(tmp, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as z:
@@ -110,7 +132,10 @@ def write_archive(root: Path, members: Sequence[Path], out: Path, regno: str = R
             info = zipfile.ZipInfo(f"urdu_bpe_{regno}/{rel.as_posix()}", date_time=FIXED_TIME)
             info.compress_type = zipfile.ZIP_DEFLATED
             info.external_attr = 0o644 << 16
-            z.writestr(info, (root / rel).read_bytes())
+            data = (root / rel).read_bytes()
+            if rel == Path("README.md") and link:
+                data = readme_with_link(data.decode("utf-8"), link).encode("utf-8")
+            z.writestr(info, data)
     tmp.replace(out)
     return out
 
@@ -185,6 +210,26 @@ def check_markers(root: Path, members: Sequence[Path], rep: Report) -> None:
     rep.check(not found, f"no {PLACEHOLDER} ...] placeholders left", ", ".join(found[:10]))
 
 
+def check_drive_link(root: Path, members: Sequence[Path], rep: Report) -> str | None:
+    link = read_drive_link(root)
+    rep.check(bool(link) and link.startswith(DRIVE_PREFIX), f"shared-drive link set in {DRIVE_LINK_FILE}",
+              link or f"create {DRIVE_LINK_FILE} with the folder's {DRIVE_PREFIX}... link")
+    readme = root / "README.md"
+    text = readme.read_text(encoding="utf-8") if readme.is_file() else ""
+    rep.check(LINK_BEGIN in text and LINK_END in text, "README has the DRIVE LINK markers")
+    leaked = []
+    for rel in members:
+        path = root / rel
+        if path.suffix in TEXT_SUFFIXES and path.is_file():
+            try:
+                if DRIVE_PREFIX in path.read_text(encoding="utf-8"):
+                    leaked.append(str(rel))
+            except UnicodeDecodeError:
+                pass
+    rep.check(not leaked, "no Google Drive URL in the committed files (the repo is public)", ", ".join(leaked))
+    return link
+
+
 def run_pytest(root: Path, args: Sequence[str]) -> tuple[bool, str]:
     out = subprocess.run([sys.executable, "-m", "pytest", "-q", *args], cwd=root, capture_output=True, text=True)
     last = (out.stdout.strip().splitlines() or ["(no output)"])[-1]
@@ -248,6 +293,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     check_tokenizer(root, rep)
     check_report(root, rep)
     check_markers(root, members, rep)
+    link = check_drive_link(root, members, rep)
     files = [] if args.skip_drive else drive_bundle(root, rep)
     if args.skip_tests:
         print("  [SKIP] pytest (--skip-tests): this is not a full pre-flight")
@@ -259,7 +305,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             print(f"  - {f}")
         return 1
 
-    write_archive(root, members, out, args.regno)
+    write_archive(root, members, out, args.regno, link)
     size = out.stat().st_size
     print(f"\nwrote {out.relative_to(root) if out.is_relative_to(root) else out}: {len(members)} files, "
           f"{size / 1e6:.2f} MB, sha256 {sha256(out)}")

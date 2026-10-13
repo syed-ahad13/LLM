@@ -82,7 +82,7 @@ Expected outputs:
 | the delivered `urdu_bpe_50k.json` | sha256 `4994584016fd841f873599b22e83b084e526092f3c14740fa56314bcc48e6ece`. A rebuild learns identical merges, but the file's `meta` records the new run's times and machine, so its sha256 differs; compare `merges.txt` |
 | `tokenizer/train_log.json`, `docs/training_run.md` | phase times, peak memory, machine, and "All post-training checks passed" |
 | `data/final/train.bin`, `val.bin`, `meta.json` | 179,309,360 and 1,888,474 tokens, raw little-endian uint16; `--verify` prints VERIFIED for both |
-| `pytest -q` | all tests pass; the one skip is the handout's missing sanity check (`docs/decisions.md`) |
+| `pytest -q` | all tests pass, none skipped (with data/final present) |
 
 Measured on an Apple M2 (8 cores, 8 GB RAM, macOS 14.4.1, Python 3.12.15) with 7 workers:
 - **Training:** 76.5 s of wall clock: word counting 13.2 s, initialization 3.4 s, 49,743 merges 59.9 s, save 0.1 s. Peak memory 1.44 GB. The post-training checks add a few seconds.
@@ -133,7 +133,7 @@ print(len(ids), tok.decode(ids[:200].tolist()))
 ```bash
 make analysis     # Part C tables, figures and drafts (needs data/final and the cached word counts)
 make numbers      # report/numbers.tex and the report's tables from the JSON stats in data/ (commit the result)
-make report       # LuaLaTeX from the committed numbers and tables; fails if report.pdf is over 4 pages
+make report       # LuaLaTeX from the committed numbers and tables; fails on a missing glyph or over 4 pages
 make submission   # pre-flight checks, submission/urdu_bpe_456094.zip, data/final/SHA256SUMS
 ```
 
@@ -143,7 +143,9 @@ make submission   # pre-flight checks, submission/urdu_bpe_456094.zip, data/fina
 
 **Download.** The corpus files go by shared-drive link: train.txt, val.txt, test.txt, train.bin, val.bin, meta.json, manifest.json and SHA256SUMS.
 
-Link: [PASTE shared-drive link here]
+<!-- DRIVE LINK -->
+Link: in the submitted copy of this README. This repository is public and the link must stay private to course staff, so the link is not committed: `make_submission.py` reads it from `drive_link.local` (gitignored) and writes it here, in the archive only.
+<!-- /DRIVE LINK -->
 
 Check the download with `cd data/final && shasum -a 256 -c SHA256SUMS`.
 

@@ -7,6 +7,10 @@
 # Your User-Agent contact address (collect/polite.py); never committed because the repo is public
 /collect/contact.local
 
+# The shared-drive link (make_submission.py puts it in the archived README only; the repo is public)
+/drive_link.local
+/submission/
+
 # Trainer checkpoints (train_tokenizer.py); the finished tokenizer is committed
 /tokenizer/*.checkpoint.json
 /tokenizer/*.checkpoint.merges.txt

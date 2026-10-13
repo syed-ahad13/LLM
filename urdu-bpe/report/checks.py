@@ -2,6 +2,7 @@
 
     python report/checks.py tools                       # lualatex, latexmk, pdfinfo, Noto Naskh Arabic
     python report/checks.py pages report/report.pdf --max 4
+    python report/checks.py glyphs report/report.log    # fails on any character missing from the fonts
 
 tools prints what is missing and how to install it on macOS (Homebrew) or
 Debian/Ubuntu, and exits 1 if the build cannot run. pdfinfo (poppler) is
@@ -87,6 +88,18 @@ def pages(pdf: Path, max_pages: int) -> int:
     return 0 if ok else 1
 
 
+def glyphs(log: Path) -> int:
+    """Fail if LuaTeX logged a character missing from the fonts (\\tracinglostchars=2 in report.tex)."""
+    if not log.exists():
+        raise SystemExit(f"no {log}")
+    missing = sorted(set(re.findall(r"Missing character: There is no (.+?) in font (.+?)!", log.read_text(
+        encoding="utf-8", errors="replace"))))
+    for char, font in missing:
+        print(f"missing glyph {char} in {font}")
+    print(f"{log}: {len(missing)} missing glyph(s)")
+    return 1 if missing else 0
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -94,8 +107,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     pg = sub.add_parser("pages")
     pg.add_argument("pdf", type=Path)
     pg.add_argument("--max", type=int, default=4)
+    gl = sub.add_parser("glyphs")
+    gl.add_argument("log", type=Path)
     args = p.parse_args(argv)
-    return tools() if args.cmd == "tools" else pages(args.pdf, args.max)
+    if args.cmd == "tools":
+        return tools()
+    return pages(args.pdf, args.max) if args.cmd == "pages" else glyphs(args.log)
 
 
 if __name__ == "__main__":

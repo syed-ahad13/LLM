@@ -27,6 +27,7 @@ report-tools:
 
 report: report-tools
 	cd report && latexmk -lualatex -interaction=nonstopmode -halt-on-error -file-line-error report.tex
+	$(PYTHON) report/checks.py glyphs report/report.log
 	$(PYTHON) report/checks.py pages report/report.pdf --max 4
 
 # Pre-flight checks, submission/urdu_bpe_456094.zip and data/final/SHA256SUMS (make_submission.py).

@@ -13,6 +13,9 @@ from bpe import BPETokenizer
 from report import checks
 
 FAKE_PDF = b"%PDF-1.5\n1 0 obj << /Type /Pages /Kids [2 0 R 3 0 R 4 0 R] /Count 3 >> endobj\n%%EOF\n"
+LINK = "https://" + "drive.google.com/drive/folders/test-folder"  # split so this file is not a leak itself
+README = ("# x\n## Rebuild the tokenizer from train.txt\n## Data access\n<!-- DRIVE LINK -->\n"
+          "Link: in the submitted copy.\n<!-- /DRIVE LINK -->\n")
 
 
 @pytest.fixture(autouse=True)
@@ -30,7 +33,7 @@ def tree(root: Path, merges: int = 5) -> Path:
         "analysis/merges_report.py": "", "analysis/samples/news.txt": "خبر", "analysis/samples/SOURCES.md": "",
         "tests/test_x.py": "", "requirements.txt": "", "requirements-analysis.txt": "", "requirements-dev.txt": "",
         "Makefile": "", "pytest.ini": "", "DATA_CARD.md": "# Data card\n",
-        "README.md": "# x\n## Rebuild the tokenizer from train.txt\n", "evidence/robots/a.txt": "",
+        "README.md": README, "drive_link.local": LINK + "\n", "evidence/robots/a.txt": "",
         "docs/decisions.md": "", "report/report.tex": "x", "report/report.aux": "x", "logs/run.log": "x",
         "data/final/train.txt": "secret", "tokenizer/urdu_bpe_50k.merges.txt": "", "tokenizer/train_log.json": "{}",
         "tokenizer/urdu_bpe_50k.checkpoint.json": "{}", ".DS_Store": "",
@@ -96,8 +99,10 @@ def test_archive_is_reproducible(tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 
 @pytest.mark.parametrize("breakage, message", [
     (lambda r: (r / "DATA_CARD.md").write_text("- <!-- REVIEW --> draft\n"), "REVIEW markers"),
-    (lambda r: (r / "README.md").write_text("## Rebuild the tokenizer from train.txt\nlink: [" + "PASTE link]\n"),
-     "placeholders"),
+    (lambda r: (r / "README.md").write_text(README + "link: [" + "PASTE link]\n"), "placeholders"),
+    (lambda r: (r / "drive_link.local").unlink(), "shared-drive link set"),
+    (lambda r: (r / "docs" / "decisions.md").write_text("folder: " + LINK), "no Google Drive URL"),
+    (lambda r: (r / "README.md").write_text("## Rebuild the tokenizer from train.txt\n"), "DRIVE LINK markers"),
     (lambda r: (r / "report" / "report.tex").write_text("[" + "PASTE course]"), "placeholders"),
     (lambda r: (r / "report" / "report.pdf").write_bytes(FAKE_PDF.replace(b"/Count 3", b"/Count 5")), "4 pages"),
     (lambda r: (r / "encode_corpus.py").unlink(), "encode_corpus.py"),
@@ -140,3 +145,13 @@ def test_pdf_pages_fallbacks(tmp_path: Path) -> None:
     (tmp_path / "r.log").write_text("Output written on r.pdf (4 pages, 123 bytes).")
     assert checks.pdf_pages(pdf) == (4, "LaTeX log")
     assert checks.pages(pdf, 4) == 0 and checks.pages(pdf, 3) == 1
+
+
+def test_link_goes_only_into_the_archived_readme(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    root = tree(tmp_path)
+    assert run(root, "--skip-drive", monkeypatch=monkeypatch) == 0
+    with zipfile.ZipFile(root / "submission" / "urdu_bpe_456094.zip") as z:
+        readme = z.read("urdu_bpe_456094/README.md").decode("utf-8")
+        assert not any(n.endswith("drive_link.local") for n in z.namelist())
+    assert f"Link (private to course staff): <{LINK}>" in readme and "<!-- DRIVE LINK -->" not in readme
+    assert LINK not in (root / "README.md").read_text(encoding="utf-8")

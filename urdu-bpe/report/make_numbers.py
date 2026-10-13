@@ -66,7 +66,7 @@ SOURCE_GENRES = {"fineweb2_urd": "web", "wiki_ur": "encyclopedia", "own_scrape":
                  "ufal_umc": "mixed", "makhzan": "journalism, essays", "urdu_news_1m": "news"}
 # The normalization rules of normalize.py (clean/data_card.py RULES, same order), as LaTeX.
 RULE_LABELS = [
-    r"Presentation forms $\to$ letters (\ur{ﷲ} $\to$ \ur{اللہ})",
+    r"Presentation forms $\to$ plain letters",
     r"Arabic yeh \ur{ي ى} $\to$ Urdu yeh \ur{ی}",
     r"Arabic kaf \ur{ك} $\to$ \ur{ک} (Sindhi \ur{ڪ} kept)",
     r"Arabic heh \ur{ه} $\to$ \ur{ہ}; \ur{ة} $\to$ \ur{ۃ}; \ur{ۀ} $\to$ \ur{ۂ}",
@@ -151,6 +151,26 @@ def is_valid(b: bytes) -> bool:
     except UnicodeDecodeError:
         return False
     return True
+
+
+EARLY_CATEGORIES = ("Two-byte letter", "Other two-byte character", "Space + lead byte (not valid UTF-8)",
+                    "Ends mid-character (not valid UTF-8)", "Space + one letter", "Longer piece")
+
+
+def early_category(token: bytes) -> str:
+    """The category of an early merged token, from its bytes alone (Q2 of the report)."""
+    if not is_valid(token):
+        rest = token[1:]
+        if token[:1] == b" " and rest and 0xC2 <= rest[0] <= 0xF4 and len(rest) == 1:
+            return EARLY_CATEGORIES[2]
+        return EARLY_CATEGORIES[3]
+    text = token.decode("utf-8")
+    if len(token) == 2 and len(text) == 1:
+        return EARLY_CATEGORIES[0] if is_letter(token) else EARLY_CATEGORIES[1]
+    core = text[1:] if text.startswith(" ") else None
+    if core and len(regex.findall(r"\p{L}", core)) == 1 and regex.fullmatch(r"[\p{L}\p{M}]+", core):
+        return EARLY_CATEGORIES[4]
+    return EARLY_CATEGORIES[5]
 
 
 def rank_of(tok: BPETokenizer, token: str) -> int | None:
@@ -270,6 +290,15 @@ def numbers(inp: dict[str, Any]) -> dict[str, str]:
     m.update(QOneLetterShareFirst=pct(b0["shares"]["LETTER"], 0), QOneWordShareFirst=pct(b0["shares"]["WORD"], 0),
              QOneLetterShareLast=pct(bl["shares"]["LETTER"], 0), QOneWordShareLast=pct(bl["shares"]["WORD"], 0),
              QOneLastBucket=f"{n(bl['ranks'][0])}--{n(bl['ranks'][1])}", QOneFirstBucket=f"1--{n(b0['ranks'][1])}")
+    steps = list(range(EVERY, len(tok.merges) + 1, EVERY))
+    if steps[-1] != len(tok.merges):
+        steps.append(len(tok.merges))
+    arabic_word = regex.compile(r" ?[\p{Script=Arabic}\p{M}\u200c]*\p{Script=Arabic}[\p{Script=Arabic}\p{M}\u200c]*")
+    words_at = [r for r in steps if is_valid(tok.vocab[first + r - 1]) and arabic_word.fullmatch(
+        tok.vocab[first + r - 1].decode("utf-8")) and len(regex.findall(r"\p{L}", tok.vocab[first + r - 1].decode(
+            "utf-8"))) >= 2]
+    m["QOneStepTotal"], m["QOneStepWords"] = n(len(steps)), n(len(words_at))
+    m["QOneStepOtherList"] = ", ".join(tok_tex(tok, r) for r in steps if r not in words_at) or "none"
     by_len = sorted(range(1, len(tok.merges) + 1), key=lambda r: (-len(tok.vocab[first + r - 1]), r))[:LONGEST]
     m["QOneLongestMax"] = n(len(tok.vocab[first + by_len[0] - 1]))
     m["QOneLongestMin"] = n(len(tok.vocab[first + by_len[-1] - 1]))
@@ -385,6 +414,14 @@ def tables(inp: dict[str, Any], out_dir: Path) -> list[Path]:
         ranks.append(len(tok.merges))
     entries = [[n(r), tok_tex(tok, r)] for r in ranks]
     written.append(table(out_dir / "r_merges.tex", "rl" * 5, ["Rank", "Token"] * 5, blocks(entries, 5)))
+
+    groups: dict[str, list[int]] = {c: [] for c in EARLY_CATEGORIES}
+    for r in range(1, EARLY + 1):
+        groups[early_category(tok.vocab[first + r - 1])].append(r)
+    rows = [[c, n(len(rs)), ", ".join(f"{tok_tex(tok, r)}\\,{r}" for r in rs) or "--"]
+            for c, rs in groups.items() if rs]
+    written.append(table(out_dir / "r_early.tex", r"lrp{0.62\linewidth}",
+                         [f"Merges 1--{EARLY}", "Count", "Tokens and their ranks"], rows))
 
     by_len = sorted(range(1, len(tok.merges) + 1), key=lambda r: (-len(tok.vocab[first + r - 1]), r))[:LONGEST]
     entries = [[n(r), tok_tex(tok, r), n(len(tok.vocab[first + r - 1]))] for r in by_len]

@@ -662,3 +662,25 @@ Add one entry for each decision that affects the data, the tokenizer or the repo
 - **Consequence:**
   - On the corpus machine, rerun `analysis/equivalence_1mb.py` and `make analysis` (the Q1 fix rewrites the generated blocks in `docs/analysis_notes.md`; text outside the markers is kept), then `make numbers`.
   - The README's tokenizer sha256 is that of the delivered file. A rebuild reproduces `merges.txt` exactly, but not the JSON, whose `meta` records run times.
+
+### 2026-10-13: Step 12, part 2: five answers, the sanity check, the drive link, the final data card
+- **Decision:**
+  - **Five answers.** The handout asks for five answers and numbers three questions; its question 1 asks three separate things. The report answers five, each with its own table:
+    - Q1: merges 1-50 and every 5,000th;
+    - Q2: which early merges rebuild a two-byte letter and which are not valid UTF-8 (new table `r_early`);
+    - Q3: the first whole word and the 20 longest tokens;
+    - Q4: the comparison with other tokenizers;
+    - Q5: three inputs handled badly.
+
+    This replaces the "waiting for the instructor" notes of 2026-10-11 and Step 11.
+  - **Sanity check.** The reference trainer's sanity check is `test_tie_break_aaabdaaabac`: the classic BPE example, whose fourth merge is a tie only the spec's bytes comparison resolves. The skipped placeholder test is gone.
+  - **Drive link.** The GitHub repository is public (`gh repo view`: PUBLIC), and Makhzan was approved only on condition that the link stays private to course staff. So the link lives in the gitignored `drive_link.local`, and `make_submission.py` writes it into the README inside the zip only. Pre-flight fails if the link is missing, or if any archived file contains a Google Drive URL.
+  - **Data card.** The gaps bullets in `docs/data_card_gaps.md` are final, with no REVIEW markers. Urdu News 1M is described as left out. The stub bullet cites the Part C finding. The regional bullet now names only the sources whose origin we know. `DATA_CARD.md` was re-rendered with the generator's own `fill()`; the values were recovered from the committed card by matching the old template, a round trip checked to reproduce the old section exactly.
+  - **Report robustness.**
+    - `\textvisiblespace` is drawn with rules.
+    - Missing glyphs are logged (`\tracinglostchars=2`), and `make report` fails listing them (`report/checks.py glyphs`).
+    - One `\tablefont` switch sets every table's size.
+    - "Of the 10 tokens sampled every 5,000 merges, 7 are whole Urdu words or names" is generated. An earlier draft said all of them were, which the tokenizer contradicts (␣×, aga, ␣org).
+  - **Hand-off.** `HANDOFF.md` lists the steps for the corpus machine (equivalence JSON, make analysis, data card, make numbers, make report, make submission, upload, commit).
+- **Options considered:** Rebuilding the corpus from `data/raw` on this machine to produce the stats here. Started, then stopped at the user's request: it takes about an hour, and the corpus machine already has the data.
+- **Consequence:** the report cannot be compiled on this machine (no TeX), so the first build happens on the corpus machine. Its glyph and page checks are automatic.

@@ -210,9 +210,13 @@ def draft(analysis: dict[str, Any]) -> str:
     return "\n\n".join(parts)
 
 
-Q45_NOTE = ("The handout says \"Answer five questions\" but lists three (docs/assignment.md, Part C; logged in "
-            "docs/decisions.md on 2026-10-11). Questions 4 and 5 are waiting for the instructor; nothing is "
-            "generated for them.")
+Q45_NOTE = (
+    '"Answer five questions": the handout numbers three, and its question 1 asks three separate things, so '
+    'the report gives five answers, each with its own table. Q1, the merges 1-50 and every 5,000th '
+    '(report/tables/r_merges.tex); Q2, which early merges rebuild a two-byte letter and which are not valid '
+    'UTF-8 on their own (r_early.tex); Q3, the first whole word and the 20 longest tokens (r_longest.tex); '
+    'Q4, tokens per word against GPT-2, o200k_base and xlm-roberta-base (compare.tex); Q5, three inputs our '
+    'tokenizer handles badly (failure_cases.tex).')
 
 
 # ---------------------------------------------------------------------------
@@ -285,7 +289,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     for path in write_tables(res, args.tables_dir):
         log.info("wrote %s", path)
     update_notes("q3", "Q3. Three inputs our tokenizer handles badly", draft(analysis), args.notes)
-    update_notes("q4_q5", "Questions 4 and 5", Q45_NOTE, args.notes)
+    update_notes("q4_q5", "The five answers", Q45_NOTE, args.notes)
     log.info("chose %s; updated %s and %s", chosen, args.analysis_json, args.notes)
     print(draft(analysis))
     return 0

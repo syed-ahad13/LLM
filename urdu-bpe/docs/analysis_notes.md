@@ -55,8 +55,8 @@ Normalized: پاکستان | ␣کی | ␣حکومت | ␣نے | ␣کہا | ␣
 Tables: `report/tables/failure_inputs.tex`, `failure_words.tex`, `failure_cases.tex`, `normalization.tex`.
 <!-- END generated:q3 -->
 
-## Questions 4 and 5
+## The five answers
 
 <!-- BEGIN generated:q4_q5 -->
-The handout says "Answer five questions" but lists three (docs/assignment.md, Part C; logged in docs/decisions.md on 2026-10-11). Questions 4 and 5 are waiting for the instructor; nothing is generated for them.
+"Answer five questions": the handout numbers three, and its question 1 asks three separate things, so the report gives five answers, each with its own table. Q1, the merges 1-50 and every 5,000th (report/tables/r_merges.tex); Q2, which early merges rebuild a two-byte letter and which are not valid UTF-8 on their own (r_early.tex); Q3, the first whole word and the 20 longest tokens (r_longest.tex); Q4, tokens per word against GPT-2, o200k_base and xlm-roberta-base (compare.tex); Q5, three inputs our tokenizer handles badly (failure_cases.tex).
 <!-- END generated:q4_q5 -->

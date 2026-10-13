@@ -124,13 +124,6 @@ def test_special_token_ids_must_follow_the_bytes() -> None:
         BPETokenizer(special_tokens={"<|x|>": 300})
 
 
-@pytest.mark.skip(reason="the handout says 'test it on the sanity check below' but contains no sanity check "
-                         "(docs/decisions.md, 2026-10-11); waiting for the instructor. "
-                         "test_tie_break_aaabdaaabac stands in until then")
-def test_handout_sanity_check() -> None:
-    raise AssertionError("paste the handout's sanity check here once the instructor provides it")
-
-
 # ---------------------------------------------------------------------------
 # Reference trainer
 # ---------------------------------------------------------------------------
@@ -139,6 +132,9 @@ AAAB = [b"aa", b"aaa", b"aaab", b"daaab", b"daaaba", b"daaabac", b"aaabdaaabac"]
 
 
 def test_tie_break_aaabdaaabac() -> None:
+    """The reference trainer's sanity check (the handout names one but does not print it): the classic BPE
+    example "aaabdaaabac", trained to the end, must give these seven merges in this order. Merge 4 is a
+    four-way tie that only the spec's bytes comparison resolves this way."""
     tok = BPETokenizer()
     tok.train_reference("aaabdaaabac", vocab_size=257 + 7)
     assert [tok.vocab[257 + i] for i in range(7)] == AAAB

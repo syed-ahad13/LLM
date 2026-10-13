@@ -1,5 +1,6 @@
-% Assignment 1 report. Build: make report (report/make_numbers.py, then latexmk -lualatex, then the
-% 4-page check). Every number is a macro from numbers.tex; every table is generated (tables/*.tex).
+% Assignment 1 report. Build: make numbers (where the data is), then make report (latexmk -lualatex, the
+% missing-glyph check and the 4-page check). Every number is a macro from numbers.tex; every table is
+% generated (tables/*.tex).
 \documentclass[10pt]{article}
 \usepackage[margin=1.8cm]{geometry}
 \usepackage[english, bidi=basic]{babel}
@@ -12,7 +13,10 @@
 \hypersetup{colorlinks=true, linkcolor=black, citecolor=black, urlcolor=blue!50!black,
   pdftitle={Urdu Corpus and a From-Scratch Byte-Level BPE Tokenizer}, pdfauthor={Syed Abdul Ahad}}
 \newcommand{\ur}[1]{\foreignlanguage{urdu}{#1}}
-\tracinglostchars=3            % a glyph missing from the fonts stops the build
+% A visible space drawn with rules, so it never depends on a font having U+2423.
+\DeclareRobustCommand{\textvisiblespace}{\mbox{\kern.06em\vrule height .3ex depth 0pt width .4pt%
+  \vbox{\hrule width .3em height .4pt}\vrule height .3ex depth 0pt width .4pt\kern.06em}}
+\tracinglostchars=2             % log every glyph missing from the fonts; checks.py glyphs fails on them
 \pdfvariable objcompresslevel=0 % keep /Count readable for the page check
 \setlength{\parskip}{3pt}
 \setlength{\parindent}{0pt}
@@ -21,6 +25,8 @@
 \setlength{\abovecaptionskip}{3pt}
 \renewcommand{\arraystretch}{1.05}
 \input{numbers}
+% Size of every table: \footnotesize keeps the report within 4 pages; \scriptsize if it ever runs over.
+\newcommand{\tablefont}{\footnotesize}
 
 \title{\vspace{-1.6cm}\textbf{Urdu Corpus and a From-Scratch Byte-Level BPE Tokenizer}}
 \author{Syed Abdul Ahad \quad Registration No.\ 456094 \quad CS-13\\
@@ -32,34 +38,34 @@
 
 \section{Corpus}
 We collected and cleaned \CorpusMB~MB (\CorpusMiB~MiB) of Urdu: \CorpusDocs{} documents, \CorpusWords{} words
-and \CorpusUniqueWords{} unique words, from \SourcesAll{} sources in \GenresCount{} genres (Table~\ref{tab:corpus}). Of
-it, \OwnMB~MB is our own crawl of VOA Urdu and Hum Sub, which obeyed robots.txt and crawl delays (evidence in
-\texttt{evidence/}). The pipeline is extract $\to$ normalize $\to$ line language filter $\to$ boilerplate-line
-removal $\to$ exact document dedup $\to$ a byte budget: FineWeb-2 is capped at \FineWebCap{} and subsampled
-deterministically by \texttt{blake2b(doc\_id)}, UFAL is subsampled, and Urdu News 1M is left out
-(\NewsShare) because its punctuation and some letters were stripped at source. The split is 98/1/1 by document,
+and \CorpusUniqueWords{} unique words from \SourcesAll{} sources in \GenresCount{} genres
+(Table~\ref{tab:corpus}). \OwnMB~MB of it is our own crawl of VOA Urdu and Hum Sub, which obeyed robots.txt and
+crawl delays (evidence in \texttt{evidence/}). The pipeline is extract $\to$ normalize $\to$ line language
+filter $\to$ boilerplate-line removal $\to$ exact document dedup $\to$ a byte budget: FineWeb-2 is capped at
+\FineWebCap{} and subsampled deterministically by \texttt{blake2b(doc\_id)}, UFAL is subsampled, and Urdu News 1M
+is left out because its punctuation and some letters were stripped at source. The split is 98/1/1 by document,
 stratified by source, seed \Seed: train \TrainMB~MB, val \ValMB~MB, test \TestMB~MB, each document followed by
-\texttt{<|endoftext|>}. Licences, cleaning losses per step and known biases (Wikipedia is \WikiShare{} of the
-text, much of it bot-made stubs) are in \texttt{DATA\_CARD.md}.
+\texttt{<|endoftext|>}. Licences, the loss at each cleaning step and the known biases (Wikipedia is
+\WikiShare{} of the text, much of it bot-made stubs) are in \texttt{DATA\_CARD.md}.
 
-\begin{table}[!htb]\centering\small
+\begin{table}[!htb]\centering\tablefont
 \input{tables/r_corpus}
 \caption{Sources. Cleaned: after dedup; Corpus: bytes in train+val+test; Kept: budget rate.}\label{tab:corpus}
 \end{table}
 
 \section{Normalization}
 \texttt{normalize(text)} (\texttt{normalize.py}) applies the rules of Table~\ref{tab:norm} in order; the counts
-are the occurrences it changed in the Step~4 audit samples (\AuditChars{} characters).
-On the whole corpus it shrank the text from \NormInMB{} to \NormOutMB~MB (\NormShrink). Digits become ASCII,
-which the audit found far more common than Urdu digits and which costs one byte instead of two.
+are the occurrences it changed in the Step~4 audit samples (\AuditChars{} characters). On the whole corpus it
+shrank the text from \NormInMB{} to \NormOutMB~MB (\NormShrink). Digits become ASCII, which the audit found far
+more common than Urdu digits and which costs one byte instead of two.
 \textbf{ZWNJ.} We keep ZWNJ only between two Arabic-script letters and remove it elsewhere. Removing it
 everywhere would join compounds that writers separate on purpose: the Makhzan sample holds \ZwnjMakhzan{}
-ZWNJs, \ZwnjMakhzanBetween{} of them between two letters, \ZwnjMakhzanTeh{} after \ur{ت} as in
+ZWNJs, \ZwnjMakhzanBetween{} of them between two letters and \ZwnjMakhzanTeh{} after \ur{ت}, as in
 \ur{صورت‌حال}. Keeping every ZWNJ would keep invisible noise next to spaces and punctuation. Over all audit
-samples \ZwnjRemoved{} of \ZwnjRaw{} ZWNJs were removed and \ZwnjKept{} kept inside words; the pre-tokenizer
-treats a kept ZWNJ as part of the word.
+samples \ZwnjRemoved{} of \ZwnjRaw{} ZWNJs were removed and \ZwnjKept{} kept inside words, where the
+pre-tokenizer treats them as part of the word.
 
-\begin{table}[!htb]\centering\small
+\begin{table}[!htb]\centering\tablefont
 \input{tables/r_normalization}
 \caption{Normalization rules and the occurrences each changed in the audit samples.}\label{tab:norm}
 \end{table}
@@ -76,90 +82,102 @@ URDU_PATTERN = (r"(?i:'s|'t|'re|'ve|'m|'ll|'d)"   # English contractions (code-m
 \end{small}
 GPT-2's pattern (\verb/ ?\p{L}+/ for words) has no \verb/\p{M}/: a diacritic falls into its punctuation class
 and ends the word. It cuts the handout's \ur{اُردُو} into \GptCountHandout{} pieces (\GptPiecesHandout), our
-\ur{اُردو} into \GptCountPlain{} (\GptPiecesPlain) and the ZWNJ compound into \GptCountZwnj{}
+\ur{اُردو} into \GptCountPlain{} (\GptPiecesPlain) and a ZWNJ compound into \GptCountZwnj{}
 (\GptPiecesZwnj), so BPE would learn bare marks and bare ZWNJs as tokens. Our word class adds \verb/\p{M}/
 and ZWNJ, so each of these is one piece (\OurPiecesHandout; \OurPiecesZwnj). A leading space belongs to the
-following word, as in GPT-2, and \ur{۔} is its own piece, so \ur{ہے} is learned once rather than once more
-with the full stop. Digits come in groups of at most three (2024\ur{ء} $\to$ \OurPiecesYear), which caps number
-tokens at \NumberPieces{} strings. Every character matches exactly one alternative, so the pieces always join back to
-the text (tested on random strings from all Unicode planes). We considered o200k\_base's pattern: it also has \verb/\p{M}/ but
-splits ZWNJ compounds and attaches any one leading symbol, such as an opening quote, to the word.
+following word, as in GPT-2, and \ur{۔} is its own piece, so \ur{ہے} is learned once rather than again with
+the full stop. Digits come in groups of at most three (2024\ur{ء} $\to$ \OurPiecesYear), which caps number
+tokens at \NumberPieces{} strings. Every character matches exactly one alternative, so the pieces always join
+back to the text (tested on random strings from all Unicode planes). We considered o200k\_base's pattern: it
+also has \verb/\p{M}/, but it splits ZWNJ compounds and attaches any one leading symbol, such as an opening
+quote, to the word.
 
 \section{Training}
 \textbf{Reference and fast trainers.} The reference trainer keeps every word occurrence and recounts all pairs
 after each merge. The fast trainer counts each distinct word once (in a process pool), keeps an index from each
-pair to the words that contain it so a merge rewrites only those words, and picks the next pair from a
+pair to the words that contain it so that a merge rewrites only those words, and takes the next pair from a
 lazily repaired heap whose key reverses byte order, so ties go to the greater \texttt{(bytes\_a, bytes\_b)} as
-the spec requires. On the \RefSampleBytes-byte sample both learned \EqMerges{} merges that are \EqVerdict{},
-pair counts included: the reference took \RefSeconds~s, the fast trainer \FastSeconds~s
-(\Speedup$\times$). Both also agree on random small-alphabet corpora trained to exhaustion
-(\texttt{tests/test\_bpe\_fast.py}).
+the spec requires. On the \RefSampleBytes-byte sample both learned \EqMerges{} merges that are \EqVerdict,
+pair counts included: the reference took \RefSeconds~s, the fast trainer \FastSeconds~s (\Speedup$\times$).
+Both also agree on random small-alphabet corpora trained to exhaustion (\texttt{tests/test\_bpe\_fast.py}).
 
 \textbf{Full run.} On train.txt (\RunTrainMB~MB, \RunPretokens{} pre-tokens, \RunDistinct{} distinct) the fast
 trainer learned \RunMergesDone{} merges (vocabulary \RunVocab) in \RunTotal~s of wall clock
-(Table~\ref{tab:train}; \RunMergesPerSec{} merges/s), peak memory \RunPeakGB~GB, on an \MachineCPU{}
+(Table~\ref{tab:train}; \RunMergesPerSec{} merges/s), with peak memory \RunPeakGB~GB, on an \MachineCPU{}
 (\MachineCores{} cores, \MachineRAM~GiB RAM, \MachineOS, Python \MachinePython). Post-training checks
-\ChecksVerdict: IDs \MergeIdFirst--\MergeIdLast, no merge with \texttt{<|endoftext|>}, \RoundTripDocs{} random val documents
-round-trip, \RepeatTokens{} tokens repeat an earlier token's bytes. Encoded with this tokenizer, train.bin
-holds \TrainTokens{} tokens (\TrainBytesPerToken{} bytes/token) and val.bin \ValTokens; both decode back to
-exactly the bytes of their .txt.
+\ChecksVerdict: IDs \MergeIdFirst--\MergeIdLast, no merge uses \texttt{<|endoftext|>}, \RoundTripDocs{} random
+val documents round-trip, and \RepeatTokens{} tokens repeat an earlier token's bytes. Encoded with this
+tokenizer, train.bin holds \TrainTokens{} tokens (\TrainBytesPerToken{} bytes per token) and val.bin
+\ValTokens; both decode back to exactly the bytes of their .txt.
 
-\begin{table}[!htb]\centering\small
+\begin{table}[!htb]\centering\tablefont
 \input{tables/r_training}
 \caption{Wall clock of the full training run per phase.}\label{tab:train}
 \end{table}
 
 \section{Analysis}
-\textbf{Q1: What did the merges learn?} Of the first \QOneEarly{} merges (Table~\ref{tab:merges}),
-\QOneLetters{} rebuild a two-byte letter from its bytes (\QOneLetterList, \dots) and \QOneChars{} rebuild
-two-byte punctuation (\QOneCharList). \QOneInvalid{} are not valid UTF-8 on their own (\QOneInvalidList): a
-space plus the lead byte of the next letter, or a token that ends mid-character. The first whole word is
-\QOneFirstWord{} at merge \QOneFirstWordRank{} (\QOneFirstWordCount{} occurrences in train.txt). Letters fall
-from \QOneLetterShareFirst{} of merges \QOneFirstBucket{} to \QOneLetterShareLast{} of merges
-\QOneLastBucket, while words rise from \QOneWordShareFirst{} to \QOneWordShareLast. The 20 longest tokens
-(\QOneLongestMin--\QOneLongestMax{} bytes, Table~\ref{tab:longest}) are whole words, but \QOneLongestWiki{} of
-them come almost only from Wikipedia: \QOneStubShare{} of its \QOneWikiDocs{} training documents are templated
-stubs (asteroids, railway stations, US places), which is why \ur{اسٹیشن} is already merge \QOneStationRank.
+The handout's question 1 asks three things, answered as Q1--Q3; its questions 2 and 3 are Q4 and Q5.
 
-\begin{table}[!htb]\centering\footnotesize
+\textbf{Q1: What did the merges learn?} Table~\ref{tab:merges} lists merges 1--50 and every 5,000th. The
+vocabulary is built bottom-up: letters make up \QOneLetterShareFirst{} of merges \QOneFirstBucket{} and
+\QOneLetterShareLast{} of merges \QOneLastBucket, while whole words rise from \QOneWordShareFirst{} to
+\QOneWordShareLast. Of the \QOneStepTotal{} tokens sampled every 5,000 merges, \QOneStepWords{} are
+whole Urdu words or names; the others (\QOneStepOtherList) come from web text.
+
+\begin{table}[!htb]\centering\tablefont
 \input{tables/r_merges}
 \caption{Merges 1--50, every 5,000th, and the last. \textvisiblespace{} is a space; \texttt{\textbackslash xNN}
 is a byte that is not valid UTF-8 on its own.}\label{tab:merges}
 \end{table}
 
-\begin{table}[!htb]\centering\footnotesize
+\textbf{Q2: Which early merges rebuild a letter, and which are not valid UTF-8?} Of the first \QOneEarly{}
+merges (Table~\ref{tab:early}), \QOneLetters{} rebuild a two-byte Urdu letter from its two bytes and
+\QOneChars{} rebuild two-byte punctuation (\QOneCharList). \QOneInvalid{} are not valid UTF-8 on their own
+(\QOneInvalidList): a space followed by the lead byte of the next letter, merged early because nearly every word
+starts with a space and one of a few lead bytes, or a letter followed by half of the next one.
+
+\begin{table}[!htb]\centering\tablefont
+\input{tables/r_early}
+\caption{The first 50 merges by kind.}\label{tab:early}
+\end{table}
+
+\textbf{Q3: When does the first whole word appear, and what are the longest tokens?} The first whole word is
+\QOneFirstWord{} (``of''), at merge \QOneFirstWordRank; it occurs \QOneFirstWordCount{} times in train.txt.
+The 20 longest tokens (\QOneLongestMin--\QOneLongestMax{} bytes, Table~\ref{tab:longest}) are all whole words,
+but \QOneLongestWiki{} of them come almost only from Wikipedia: \QOneStubShare{} of its \QOneWikiDocs{}
+training documents are templated stubs (asteroids, railway stations, US places), which is why
+\ur{اسٹیشن} (``station'') is already merge \QOneStationRank.
+
+\begin{table}[!htb]\centering\tablefont
 \input{tables/r_longest}
 \caption{The 20 longest tokens.}\label{tab:longest}
 \end{table}
 
-\textbf{Q2: How does it compare with existing tokenizers?} On test.txt (\QTwoTestWords{} words) ours needs
+\textbf{Q4: How does it compare with existing tokenizers?} On test.txt (\QTwoTestWords{} words) ours needs
 \QTwoOurs{} tokens per word, GPT-2 \QTwoGpt, o200k\_base \QTwoOk{} and \QTwoHFName{} \QTwoHF{}
 (Table~\ref{tab:compare}). GPT-2's English-trained byte vocabulary spends a token on almost every Urdu letter
-(\QTwoGptBpt{} bytes/token against our \QTwoOursBpt) and splits \QTwoGptThree{} of words into three or more
-tokens (ours \QTwoOursThree). Ours is the most efficient on \QTwoWins{} of \QTwoInputs{} inputs; it loses on
-Roman Urdu, Urdu with English words, and numbers.
+(\QTwoGptBpt{} bytes per token against our \QTwoOursBpt) and splits \QTwoGptThree{} of words into three or
+more tokens (ours \QTwoOursThree). Ours is the most efficient on \QTwoWins{} of the \QTwoInputs{} inputs and
+loses only on Roman Urdu, Urdu with English words, and numbers.
 
-\begin{table}[!htb]\centering\small
+\begin{table}[!htb]\centering\tablefont
 \input{tables/compare}
 \caption{Tokens per word (\texttt{str.split()} words; lower is better; best in bold).}\label{tab:compare}
 \end{table}
 
-\textbf{Q3: Three inputs our tokenizer handles badly} (Table~\ref{tab:failures}).
-\emph{\QThreeALabel} costs \QThreeAOurs{} tokens per word against \QThreeAOk{} for o200k\_base: only
-\QThreeLatinShare{} of the pre-tokens in train.txt contain a Latin letter, so few Latin words were merged.
-\emph{\QThreeBLabel} costs \QThreeBOurs{} (o200k\_base \QThreeBOk): only \QThreeDiacriticShare{} of the
-pre-tokens carry a diacritic, and each mark sits between two letters, so the merges learned for the bare word
-no longer apply. \emph{\QThreeCLabel} costs \QThreeCOurs{} (o200k\_base \QThreeCOk): the pre-tokenizer cuts
-digit runs into groups of three and isolates every separator, so phone and ID numbers fall apart. The same
+\textbf{Q5: Three inputs our tokenizer handles badly} (Table~\ref{tab:failures}). \emph{\QThreeALabel} costs
+\QThreeAOurs{} tokens per word against \QThreeAOk{} for o200k\_base: only \QThreeLatinShare{} of the
+pre-tokens in train.txt contain a Latin letter, so few Latin words were merged. \emph{\QThreeBLabel} costs
+\QThreeBOurs{} (o200k\_base \QThreeBOk): only \QThreeDiacriticShare{} of the pre-tokens carry a diacritic, and
+each mark sits between two letters, so the merges learned for the bare word no longer apply.
+\emph{\QThreeCLabel} costs \QThreeCOurs{} (o200k\_base \QThreeCOk): the pre-tokenizer cuts digit runs into
+groups of three and isolates every separator, so phone and ID numbers fall apart. The same
 \QThreeNormWords-word sentence typed with Arabic kaf, yeh and heh costs us \QThreeNormRaw{} tokens against
-\QThreeNormNormalized{} normalized: text must be normalized the same way before encoding.
+\QThreeNormNormalized{} normalized, so text must be normalized the same way before it is encoded.
 
-\begin{table}[!htb]\centering\footnotesize
+\begin{table}[!htb]\centering\tablefont
 \input{tables/failure_cases}
-\caption{The first words of each bad input as our tokens (separated by \textbar).}\label{tab:failures}
+\caption{The first words of each bad input as our tokens, separated by \textbar.}\label{tab:failures}
 \end{table}
-
-\textbf{Q4 and Q5.} The handout announces five questions but lists three; we will answer the other two once
-the instructor provides them.
 
 \end{document}
