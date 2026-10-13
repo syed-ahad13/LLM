@@ -503,3 +503,29 @@ Add one entry for each decision that affects the data, the tokenizer or the repo
 - **Consequence:**
   - The full 50,000-token training (Step 9) should take minutes, not hours.
   - FineWeb's web text adds English, URLs and numbers, so expect more distinct words than the stand-in. `docs/scaling.md` gives the real estimate.
+
+### 2026-10-13: Step 9: train_tokenizer.py, the full-run CLI
+- **Decision:**
+  - **Only the training split.** `train_tokenizer.py` trains only on a file named `train.txt`. Another name is accepted only with `--sample-mb`. A file named `val*`/`test*`, or the `--val` file itself, is always refused: validation and test text never shape the merges, and val.txt is read only by the post-training checks.
+  - **`--sample-mb X`** trains on the first X MB of train.txt, cut at a document boundary, and saves it as `data/samples/train_<X>mb.txt`. The Step 7 reference run is now `--trainer reference --sample-mb 1`, which writes exactly the Step 7 sample. The tokenizer's `meta.input_sha256` is the sha256 of the text actually trained on, so `analysis/equivalence_1mb.py` can check it.
+  - **Phases.** The fast trainer is split into `prepare_training()` and `run_merges()`, so each phase gets its own `common.Timer`: count_words, init, merges, save. `train()` still runs both.
+  - **Checkpoints and resume.** Checkpoints record the merge time so far, so a resumed run reports the whole merge time.
+  - **Logs.** A full run writes `tokenizer/train_log.json` and the paragraph in `docs/training_run.md`. A sample run writes `tokenizer/<name>.train_log.json`, so it never overwrites them. `--check-only` reruns the checks and rewrites both.
+  - **Post-training checks** (`post_training_checks`, used by the script and by `tests/test_trained_tokenizer.py`):
+    - merge count, IDs and vocab size;
+    - no merge uses ID 256;
+    - `load(save(tok))` identical on 5 MB of val.txt;
+    - 1,000 random val documents round-trip;
+    - tokens repeating an earlier token's bytes: counted and reported, not a failure.
+  - **Metrics** on 5 MB of val.txt: tokens per `str.split()` word, bytes per token, and the share of words for which " " + word is one token, the form a word takes after a space in running text.
+- **Options considered:**
+  - **A fixed `tokenizer/train_log.json` for every run.** Rejected: a smoke run would overwrite the full run's log.
+  - **Timing init and merges from `train()`'s own summary.** Rejected: the brief asks for `common.Timer` per phase, and `bpe.py` may not import `common`.
+- **Evidence:**
+  - Tests: `tests/test_trained_tokenizer.py` covers phases and log fields, the refusals, sample runs, resume (identical merges), `--check-only`, and reference = fast through the CLI. Its five checks on the real tokenizer were run against a smoke tokenizer through `URDU_TOKENIZER`/`URDU_VAL`.
+  - Smoke run on a stand-in (the first 50 MB of the four-source dry-run train.txt; Apple M1 Pro), `--sample-mb 50 --vocab-size 50000`:
+    - phases: count_words 1.16 s, init 0.40 s, merges 6.70 s (7,425 merges/s; 1,023/s in the first 5,000), save 0.11 s; 8.4 s in total; peak RSS 352 MB;
+    - all checks passed: 49,743 merges, IDs 257-49,999, 0 merges with ID 256, save/load identical on 4.83 MB of val, 1,000/1,000 round trips, 0 repeated tokens;
+    - on 4.83 MB of val: 1.19 tokens per word, 6.94 bytes per token, 87.5% of words a single token.
+  - The official numbers come from the run on the corpus machine (`tokenizer/train_log.json`, `docs/training_run.md`).
+- **Consequence:** the README's "Rebuild the tokenizer from train.txt" section now holds the exact commands, including the resume command. The finished tokenizer files and `train_log.json` are committed; checkpoints are gitignored.

@@ -75,7 +75,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     fast_seconds = t2 - t0
     log.info("fast: count_words %.2f s, train %.2f s", t1 - t0, t2 - t1)
 
-    ref_seconds = ref.meta.get("train_seconds")
+    ref_seconds = (ref.meta.get("phase_seconds") or {}).get("train_reference", ref.meta.get("train_seconds"))
     ref_machine = (ref.meta.get("machine") or {}).get("cpu_model")
     rerun_same = None
     if args.rerun_reference:

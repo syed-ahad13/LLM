@@ -208,15 +208,23 @@ def _file_sha256(path: Path) -> str:
     return h.hexdigest()
 
 
+def word_counts_cache_path(cache_dir: str | os.PathLike[str], file_sha256: str, pattern: str = URDU_PATTERN,
+                           special_tokens: Sequence[str] = (ENDOFTEXT,)) -> Path:
+    """Where count_words caches the counts of a file with this sha256, pattern and special tokens."""
+    config = hashlib.sha256(json.dumps([pattern, sorted(special_tokens)]).encode("utf-8")).hexdigest()
+    return Path(cache_dir) / f"word_counts_{file_sha256[:16]}_{config[:12]}.pkl"
+
+
 def count_words(source: str | os.PathLike[str], workers: int | None = None, *, pattern: str = URDU_PATTERN,
                 special_tokens: Sequence[str] = (ENDOFTEXT,), cache_dir: str | os.PathLike[str] | None = None,
-                block_bytes: int = COUNT_BLOCK_BYTES) -> dict[str, int]:
+                block_bytes: int = COUNT_BLOCK_BYTES, file_sha256: str | None = None) -> dict[str, int]:
     """Count the pre-tokenized words of a text (str) or of a file (a path object): {word: occurrences}.
 
     The special tokens split the text and are not counted. A file is read in blocks of block_bytes, each cut
     after its last special token so no document is split, and the blocks are counted in a pool of workers
     (default: all cores but one). With cache_dir, the counts of a file are pickled under a key made of the
-    file's sha256, the pattern and the special tokens, and a rerun loads them instead of counting again.
+    file's sha256, the pattern and the special tokens, and a rerun loads them instead of counting again;
+    file_sha256 saves hashing the file again when the caller already has it.
     """
     specials = tuple(special_tokens)
     if not isinstance(source, os.PathLike):
@@ -224,9 +232,8 @@ def count_words(source: str | os.PathLike[str], workers: int | None = None, *, p
     path = Path(source)
     cache_path = None
     if cache_dir is not None:
-        config = hashlib.sha256(json.dumps([pattern, sorted(specials)]).encode("utf-8")).hexdigest()
-        file_sha = _file_sha256(path)
-        cache_path = Path(cache_dir) / f"word_counts_{file_sha[:16]}_{config[:12]}.pkl"
+        file_sha = file_sha256 or _file_sha256(path)
+        cache_path = word_counts_cache_path(cache_dir, file_sha, pattern, specials)
         if cache_path.exists():
             with open(cache_path, "rb") as f:
                 cached = pickle.load(f)
@@ -270,6 +277,17 @@ def count_words(source: str | os.PathLike[str], workers: int | None = None, *, p
         finally:
             tmp.unlink(missing_ok=True)
     return counts
+
+
+class TrainState:
+    """The fast trainer's state: built by prepare_training(), updated by run_merges() (invariants above)."""
+
+    def __init__(self, *, words: list[list[int]], freqs: list[int], pair_counts: dict[int, int],
+                 where: dict[int, list[int]], heap: list[tuple[int, bytes, bytes, int]], rk: list[bytes],
+                 n_target: int, resumed: int, prior_merge_seconds: float) -> None:
+        self.words, self.freqs, self.pair_counts, self.where = words, freqs, pair_counts, where
+        self.heap, self.rk, self.n_target, self.resumed = heap, rk, n_target, resumed
+        self.prior_merge_seconds = prior_merge_seconds
 
 
 class BPETokenizer:
@@ -390,7 +408,7 @@ class BPETokenizer:
               checkpoint_every: int = 5000, checkpoint_path: str | os.PathLike[str] | None = None,
               resume: bool = False, debug: int = 0) -> dict[str, Any]:
         """Learn vocab_size - 257 merges from {word: count} (see count_words), exactly as train_reference would
-        from the text those words came from.
+        from the text those words came from: prepare_training() followed by run_merges().
 
         log_every: log progress (and append to self.train_log) every this many merges; 0 turns it off.
         checkpoint_every / checkpoint_path: save the merges so far every this many merges.
@@ -398,6 +416,18 @@ class BPETokenizer:
         debug: if > 0, check the invariants: the merged pair is gone after every merge, no word is appended
             twice to a pair's list, and every debug merges pair_counts equals a full recount (small inputs).
         """
+        start = time.perf_counter()
+        state = self.prepare_training(word_counts, vocab_size, checkpoint_path=checkpoint_path, resume=resume)
+        setup_seconds = time.perf_counter() - start
+        summary = self.run_merges(state, log_every=log_every, checkpoint_every=checkpoint_every,
+                                  checkpoint_path=checkpoint_path, debug=debug)
+        return {**summary, "setup_seconds": round(setup_seconds, 2),
+                "seconds": round(time.perf_counter() - start, 2)}
+
+    def prepare_training(self, word_counts: Mapping[str, int], vocab_size: int, *,
+                         checkpoint_path: str | os.PathLike[str] | None = None, resume: bool = False) -> "TrainState":
+        """Phase 2 of the fast trainer: the distinct words as token IDs, the pair counts, the pair -> words index
+        and the heap. With resume, the merges in checkpoint_path are loaded and replayed on every word first."""
         n_target = vocab_size - self.first_merge_id
         if n_target < 0:
             raise ValueError(f"vocab_size must be at least {self.first_merge_id}, got {vocab_size}")
@@ -405,6 +435,7 @@ class BPETokenizer:
             raise ValueError(f"vocab_size {vocab_size} does not fit the 16-bit IDs of the pair keys")
         start = time.perf_counter()
         self._reset()
+        prior_merge_seconds = 0.0
         if resume:
             if checkpoint_path is None or not Path(checkpoint_path).exists():
                 raise FileNotFoundError(f"no checkpoint to resume from: {checkpoint_path}")
@@ -417,13 +448,11 @@ class BPETokenizer:
             for a, b in done.merges:
                 self._add_merge(a, b)
             self.merge_counts = list(done.merge_counts)
+            prior_merge_seconds = float(done.meta.get("merge_seconds", 0.0))
             log.info("resuming from %s after %d merges", checkpoint_path, len(self.merges))
         resumed = len(self.merges)
-        vocab, merges, merge_counts = self.vocab, self.merges, self.merge_counts
-        rk = [reverse_key(vocab[i]) for i in range(self.first_merge_id + resumed)]
+        rk = [reverse_key(self.vocab[i]) for i in range(self.first_merge_id + resumed)]
 
-        # Distinct words as token IDs (replaying the checkpoint's merges when resuming), then the pair counts,
-        # the pair -> words index and the heap.
         words: list[list[int]] = []
         freqs: list[int] = []
         encode_bytes = self._encode_bytes
@@ -449,14 +478,22 @@ class BPETokenizer:
                     lst.append(wid)
         heap = [(-c, rk[k >> 16], rk[k & 0xFFFF], -k) for k, c in pair_counts.items()]
         heapq.heapify(heap)
-        setup_seconds = time.perf_counter() - start
         log.info("fast trainer: %d distinct words, %d pairs, set up in %.1f s", len(words), len(pair_counts),
-                 setup_seconds)
+                 time.perf_counter() - start)
+        return TrainState(words=words, freqs=freqs, pair_counts=pair_counts, where=where, heap=heap, rk=rk,
+                          n_target=n_target, resumed=resumed, prior_merge_seconds=prior_merge_seconds)
 
+    def run_merges(self, state: "TrainState", *, log_every: int = 1000, checkpoint_every: int = 5000,
+                   checkpoint_path: str | os.PathLike[str] | None = None, debug: int = 0) -> dict[str, Any]:
+        """Phase 3 of the fast trainer: merge until state.n_target merges (or no pair is left). See train()."""
+        start = time.perf_counter()
+        words, freqs, pair_counts, where = state.words, state.freqs, state.pair_counts, state.where
+        heap, rk, n_target, resumed = state.heap, state.rk, state.n_target, state.resumed
+        vocab, merges, merge_counts = self.vocab, self.merges, self.merge_counts
         heappush, heappop, add_merge = heapq.heappush, heapq.heappop, self._add_merge
         self.train_log = []
         compactions = 0
-        t_last, m_last = time.perf_counter(), len(merges)
+        t_last, m_last = start, len(merges)
         while len(merges) < n_target:
             # Pop until an entry's count is the pair's current count.
             pk = -1
@@ -557,7 +594,7 @@ class BPETokenizer:
                 heap = [(-c, rk[k >> 16], rk[k & 0xFFFF], -k) for k, c in pair_counts.items()]
                 heapq.heapify(heap)
                 compactions += 1
-            if log_every and m % log_every == 0:
+            if log_every and (m % log_every == 0 or m == n_target):
                 now = time.perf_counter()
                 entry = {"merge": m, "count": count, "token": token_display(vocab[z]),
                          "seconds": round(now - start, 2),
@@ -569,13 +606,16 @@ class BPETokenizer:
                          entry["peak_rss_mb"])
                 t_last, m_last = now, m
             if checkpoint_path and checkpoint_every and m % checkpoint_every == 0 and m < n_target:
-                self.save(checkpoint_path, meta={"checkpoint": True, "merges_done": m})
+                self.save(checkpoint_path, meta={"checkpoint": True, "merges_done": m, "merge_seconds": round(
+                    state.prior_merge_seconds + time.perf_counter() - start, 2)})
 
+        state.heap = heap
         self._cache.clear()
         seconds = time.perf_counter() - start
         return {"trainer": "fast", "merges": len(merges), "resumed_from": resumed, "distinct_words": len(words),
-                "setup_seconds": round(setup_seconds, 2), "merge_seconds": round(seconds - setup_seconds, 2),
-                "seconds": round(seconds, 2), "heap_compactions": compactions, "peak_rss_mb": round(_peak_rss_mb(), 1)}
+                "merge_seconds": round(seconds, 2),
+                "merge_seconds_total": round(state.prior_merge_seconds + seconds, 2),
+                "heap_compactions": compactions, "peak_rss_mb": round(_peak_rss_mb(), 1)}
 
     # ------------------------------------------------------------------
     # Encoding and decoding

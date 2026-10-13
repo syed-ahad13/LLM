@@ -55,7 +55,7 @@ def test_scaling_run_and_report(tmp_path: Path) -> None:
     results = {size: scaling.run_one(path, 300, 1, tmp_path / "cache", profile=(size == 2))
                for size, path in ((1, small), (2, large))}
     assert results[1]["train"]["merges"] == 300 and results[2]["distinct_words"] >= results[1]["distinct_words"]
-    assert [e["merge"] for e in results[2]["train_log"]] == []  # log_every=1000 > 300 merges
+    assert [e["merge"] for e in results[2]["train_log"]] == [300]  # log_every=1000: only the final merge
     text = scaling.report(results, 10_000_000, 300, large)
     assert "| Prefix | Words |" in text and "## Estimate for the full train.txt" in text
     assert "Super-linear?" in text and "## cProfile" in text and "ncalls" in text

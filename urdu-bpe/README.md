@@ -184,12 +184,12 @@ python clean/data_card.py
 - `save` writes `tokenizer/<name>.json` and a readable `tokenizer/<name>.merges.txt`.
 
 ```bash
-python clean/sample_1mb.py        # data/samples/train_1mb.txt: whole documents from the start of train.txt, at most 1,000,000 bytes
-python train_tokenizer.py --trainer reference --input data/samples/train_1mb.txt --vocab-size 3257 --name reference_1mb_3000
+python train_tokenizer.py --trainer reference --input data/final/train.txt --sample-mb 1 --vocab-size 3257 \
+    --out tokenizer/reference_1mb_3000.json --no-checks
 python -m pytest -q tests/test_bpe_reference.py -s   # -s prints what GPT-2's pattern does to اُردُو
 ```
 
-The 3,000-merge reference run takes a few minutes. It prints the first 30 merges and the wall-clock time, which is also stored in the tokenizer's `meta`. Step 8's fast trainer must learn identical merges on the same sample.
+`--sample-mb 1` takes whole documents from the start of train.txt, at most 1,000,000 bytes, and saves them as `data/samples/train_1mb.txt`. `clean/sample_1mb.py` writes the same file on its own. The 3,000-merge reference run takes a few minutes. It prints the first merges and the wall-clock time, which is also stored in the tokenizer's `meta`. Step 8's fast trainer must learn identical merges on the same sample.
 
 ## Fast trainer, equivalence and scaling (Part B, Step 8)
 
@@ -203,9 +203,52 @@ The state and its invariants are described in `bpe.py`'s docstring. `train` can 
 ```bash
 python analysis/equivalence_1mb.py      # fast vs tokenizer/reference_1mb_3000.json on train_1mb.txt -> docs/equivalence_1mb.md
 python analysis/scaling.py              # 10 MB and 100 MB prefixes of train.txt, 49,743 merges each -> docs/scaling.md
-python train_tokenizer.py --name urdu_bpe_50k   # fast trainer on train.txt to 50,000 tokens (Step 9)
+python train_tokenizer.py --input data/final/train.txt --vocab-size 50000 --out tokenizer/urdu_bpe_50k.json   # Step 9
+```
+
+## Train the tokenizer (Part B, Step 9)
+
+`train_tokenizer.py` trains on the training split only. It refuses any input not named `train.txt` unless `--sample-mb` is given, and always refuses validation or test text. It times four phases with `common.Timer`:
+1. word counting (process pool, cached in `data/cache/`);
+2. initialization;
+3. merges;
+4. save.
+
+It then runs the post-training checks on `data/final/val.txt`:
+- exactly 49,743 merges with IDs 257-49,999, none touching `<|endoftext|>`;
+- `load(save(tok))` identical on 5 MB of val.txt;
+- 1,000 random val documents round-trip;
+- merged tokens that repeat an earlier token's bytes are counted and reported;
+- tokens per word, bytes per token, and the share of single-token words.
+
+| Output | Contents |
+|---|---|
+| `tokenizer/urdu_bpe_50k.json`, `tokenizer/urdu_bpe_50k.merges.txt` | the tokenizer: every merge in order, readable form alongside |
+| `tokenizer/train_log.json` | phase times, merges per second (overall and per 5,000 merges), peak RSS, distinct words, pre-token count, train.txt bytes and sha256, command, UTC times, git commit, machine |
+| `docs/training_run.md` | one paragraph: phases, total, machine and check results |
+
+A `--sample-mb` run logs to `tokenizer/<name>.train_log.json` instead, so it never overwrites the full run's log. Checkpoints (`tokenizer/<name>.checkpoint.json`, every 5,000 merges) are not committed.
+
+```bash
+python train_tokenizer.py --input data/final/train.txt --sample-mb 50 --vocab-size 50000 \
+    --out tokenizer/smoke_50mb.json --workers 7       # smoke run on the first 50 MB
+python train_tokenizer.py --check-only               # rerun the checks on tokenizer/urdu_bpe_50k.json
+python -m pytest -q -s tests/test_trained_tokenizer.py
 ```
 
 ## Rebuild the tokenizer from train.txt
 
-Not written yet. The commands go here once Part B is done.
+From `data/final/train.txt` (Part A), in tmux:
+
+```bash
+mkdir -p logs
+tmux new -s bpe 'cd ~/Desktop/LLM/urdu-bpe && caffeinate -dimsu .venv/bin/python train_tokenizer.py --input data/final/train.txt --vocab-size 50000 --out tokenizer/urdu_bpe_50k.json --workers 7 --checkpoint-every 5000 2>&1 | tee logs/train_tokenizer.log'
+```
+
+If the run dies, rerun the same command with `--resume` added. It reloads the cached word counts and the merges in `tokenizer/urdu_bpe_50k.checkpoint.json`, replays them, and continues from the last checkpoint:
+
+```bash
+tmux new -s bpe 'cd ~/Desktop/LLM/urdu-bpe && caffeinate -dimsu .venv/bin/python train_tokenizer.py --input data/final/train.txt --vocab-size 50000 --out tokenizer/urdu_bpe_50k.json --workers 7 --checkpoint-every 5000 --resume 2>&1 | tee -a logs/train_tokenizer.log'
+```
+
+The same train.txt (same sha256) and the same code give the same merges.

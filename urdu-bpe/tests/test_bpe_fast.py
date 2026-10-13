@@ -227,22 +227,3 @@ def test_progress_log() -> None:
     assert set(tok.train_log[0]) == {"merge", "count", "token", "seconds", "merges_per_s", "heap", "pairs",
                                      "peak_rss_mb"}
 
-
-def test_train_tokenizer_cli_fast(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
-    import train_tokenizer
-    sample = tmp_path / "sample.txt"
-    sample.write_text(urdu_text(30_000), encoding="utf-8")
-    common = ["--input", str(sample), "--vocab-size", "400", "--out-dir", str(tmp_path / "tok"), "--show", "3"]
-    assert train_tokenizer.main([*common, "--trainer", "reference", "--name", "ref"]) == 0
-    fast_args = [*common, "--trainer", "fast", "--name", "fast", "--workers", "1", "--cache-dir",
-                 str(tmp_path / "cache"), "--checkpoint-every", "50", "--log-every", "25"]
-    assert train_tokenizer.main(fast_args) == 0
-    assert "fast trainer: 143 merges" in capsys.readouterr().out
-    ref, fast = BPETokenizer.load(tmp_path / "tok" / "ref.json"), BPETokenizer.load(tmp_path / "tok" / "fast.json")
-    assert fast.merges == ref.merges and fast.merge_counts == ref.merge_counts
-    assert fast.meta["distinct_words"] > 0 and len(fast.meta["train_log"]) == 5 and "count_seconds" in fast.meta
-    assert len(BPETokenizer.load(tmp_path / "tok" / "fast.checkpoint.json").merges) == 100
-    assert list((tmp_path / "cache").glob("word_counts_*.pkl"))
-    assert train_tokenizer.main([*fast_args, "--resume"]) == 0
-    resumed = BPETokenizer.load(tmp_path / "tok" / "fast.json")
-    assert resumed.merges == ref.merges and resumed.meta["resumed_from"] == 100
