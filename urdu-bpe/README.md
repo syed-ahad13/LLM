@@ -261,6 +261,24 @@ mkdir -p logs
 tmux new -s encode 'cd ~/Desktop/LLM/urdu-bpe && caffeinate -dimsu .venv/bin/python encode_corpus.py --tokenizer tokenizer/urdu_bpe_50k.json --input data/final/train.txt --out data/final/train.bin --workers 7 2>&1 | tee logs/encode_train.log; .venv/bin/python encode_corpus.py --tokenizer tokenizer/urdu_bpe_50k.json --input data/final/val.txt --out data/final/val.bin --workers 7 2>&1 | tee logs/encode_val.log'
 ```
 
+## Analyse the tokenizer (Part C, Step 11)
+
+`make analysis` regenerates every Part C table, figure and draft in about 30 seconds. It needs the tokenizer, `data/final/{train,test}.txt`, `train.ids`, the word counts that Step 9 cached in `data/cache/`, and the hand-picked inputs in `analysis/samples/` (their sources are in [analysis/samples/SOURCES.md](analysis/samples/SOURCES.md)). Plots carry English labels only. Urdu goes into the LaTeX tables, wrapped in `\ur{...}`, which the report must define (e.g. `\newcommand{\ur}[1]{\texturdu{#1}}` with polyglossia).
+
+| Script | Question | Outputs in `report/` |
+|---|---|---|
+| `analysis/merges_report.py` | Q1: what did the merges learn? Merges 1-50 and every 5,000th, a category for each merged token (letter, space + lead byte, invalid UTF-8, word, ...), the first whole word, the 20 longest tokens traced to their sources in train.txt | `tables/merges.tex`, `tables/merges_longest.tex`, `figures/merge_categories.pdf` |
+| `analysis/compare_tokenizers.py` | Q2: tokens per word, bytes and characters per token, and words split into 3+ tokens, for ours, GPT-2, o200k_base and (downloaded without a login) XLM-RoBERTa, on test.txt and the seven samples | `tables/compare.tex`, `tables/compare_metrics.tex`, `figures/tokens_per_word.pdf` |
+| `analysis/failure_cases.py` | Q3: inputs and words ranked by our tokens per word and our-to-o200k ratio, three cases with token boundaries and their causes, and raw vs normalized text | `tables/failure_inputs.tex`, `tables/failure_words.tex`, `tables/failure_cases.tex`, `tables/normalization.tex` |
+
+The raw numbers go to `data/stats/analysis.json` (per-word counts to `analysis_words.json`). The drafts go to [docs/analysis_notes.md](docs/analysis_notes.md), between BEGIN/END markers that are rewritten on every run, so write your own text outside them. `tests/test_analysis.py` checks that each draft is exactly what the scripts produce from `analysis.json`. Only `compare_tokenizers.py` may import tiktoken and tokenizers, so it also stores the counts that `failure_cases.py` needs.
+
+```bash
+make analysis
+python analysis/failure_cases.py --cases roman_urdu diacritics names   # choose the three cases by hand
+python -m pytest -q tests/test_analysis.py
+```
+
 ## Rebuild the tokenizer from train.txt
 
 From `data/final/train.txt` (Part A), in tmux:

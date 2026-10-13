@@ -603,3 +603,42 @@ Add one entry for each decision that affects the data, the tokenizer or the repo
 
     Both VERIFIED. The 7 workers cached 2,833,524 words in all, about 2 x the 1,425,662 distinct words of train.txt, since each worker builds its own cache.
 - **Consequence:** the next assignment reads `data/final/train.bin` and `val.bin` with `np.memmap(path, dtype="<u2", mode="r")`; `meta.json` gives the vocab size, the EOT ID and the sha256 to check the files against.
+
+### 2026-10-13: Step 11: Part C analysis
+- **Decision:**
+  - **Samples.** The seven hand-picked inputs were drafted by Claude at the user's request (`analysis/samples/SOURCES.md`):
+    - news: a 2012 VOA Urdu story copied from test.txt (public domain);
+    - poetry: a Ghalib ghazal, typed from memory, to check against a printed source;
+    - diacritics: three Iqbal couplets, typed from memory, plus our own dictionary entries, all diacritized by us;
+    - Roman Urdu, numbers and dates, names, and the Urdu + English paragraph: written for the assignment;
+    - no Makhzan text anywhere.
+  - **WORD needs at least two letters.** The brief's test (a whole pre-token at least 100 times) also passes single letters that stand alone in abbreviations: ␣ک (merge 10) would be the "first word". A space plus one letter gets its own category, SPACE+LETTER. The "first whole word" is the first WORD with a leading space, ␣کے at merge 27. The word ending یں (merge 20) passes the test without a space. `analysis.json` keeps both alternatives.
+  - **Tracing the longest tokens.** Each is searched for in the train.txt documents and counted by source (train.ids gives the source). Three template sentences, found by reading those documents, are counted the same way.
+  - **A fourth tokenizer.** The brief's optional Hugging Face tokenizer is FacebookAI/xlm-roberta-base: its `tokenizer.json` downloads without a login and is cached in `data/cache/hf/`.
+  - **Per-word counts.** Each distinct word is encoded as " " + word, as after a space in running text. The share of words split into 3+ tokens is weighted by occurrences. Tokens per word always comes from encoding the whole text.
+  - **tiktoken only in compare_tokenizers.py.** That script also counts what question 3 needs (per-word counts, excerpts, the normalization sentence). `failure_cases.py` reads them from `data/stats/`.
+  - **The three cases** are chosen by the lowest sum of two ranks among the seven samples: rank by our tokens per word, and rank by our-to-o200k ratio. test.txt is ranked but is not a hand-picked input. `--cases` overrides the choice.
+  - **Drafts are generated** between markers in `docs/analysis_notes.md`, so their numbers always come from `analysis.json`. `tests/test_analysis.py` checks this.
+  - **Questions 4 and 5** do not exist in the handout (2026-10-11 entry); the notes say so.
+- **Evidence** (`make analysis`, 27 s; `data/stats/analysis.json`):
+  - Q1:
+    - 23 of the first 50 merges rebuild a two-byte letter;
+    - 4 of them are not valid UTF-8: ␣\xd8 at 3 and ␣\xd9 at 5 (space + lead byte), ا\xd8 at 12 and ␣ا\xd8 at 35 (ending mid-character);
+    - the first whole word is ␣کے at merge 27;
+    - letters are 70% of merges 1-10 and 0% after 10,000; words are 71% of merges 10,001-49,743;
+    - the longest tokens (25-29 bytes) are all words, not junk.
+  - Q1 data-quality finding: templated Urdu Wikipedia stubs.
+    - 26,065 asteroid, 26,182 railway-station and 5,467 US census-place documents in train.txt: 19.5% of its 296,444 Wikipedia documents.
+    - This is why ␣اسٹیشن ("station") is merge 363.
+    - The last merge, 49,743, is ␣org, a piece of web addresses.
+  - Q2, tokens per word on test.txt: ours 1.19, GPT-2 5.99, o200k_base 1.63, XLM-R 1.36. Ours is best on 5 of 8 inputs and loses on Urdu + English, Roman Urdu, and numbers and dates.
+  - Q3 cases:
+    - Roman Urdu: 2.47 tokens per word against 1.56 for o200k; 1.06% of training pre-tokens contain a Latin letter;
+    - diacritics: 2.73; تَشَکُّر takes 5 tokens, تشکر 1; 0.64% of training pre-tokens carry a diacritic;
+    - numbers and dates: 1.52 against 1.38 for XLM-R; 35202-1234567-1 takes 8 tokens.
+  - Q3 normalization: the raw sentence costs us 73 tokens, the normalized one 27. Arabic kaf/yeh/heh occur 0 times in the training pre-tokens.
+  - Tests: `tests/test_analysis.py` (28); `tests/test_forbidden_imports.py` green.
+- **Consequence:**
+  - The report's Part C tables and figures are `\input`/`\includegraphics` from `report/tables/` and `report/figures/`.
+  - Before the report, check the Ghalib and Iqbal texts against a printed source, then rerun `make analysis`.
+  - The stubs were already a known gap (`docs/data_card_gaps.md`, "Bot-generated stubs", from 9 of 20 sampled articles in Step 3). Q1 now measures them: 19.5% of the Wikipedia documents in train.txt. That figure can replace the sample estimate in the gaps text.
