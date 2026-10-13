@@ -1,0 +1,52 @@
+{
+  "trainer": "reference",
+  "command": "python train_tokenizer.py --trainer reference --input data/final/train.txt --sample-mb 1 --vocab-size 3257 --out tokenizer/reference_1mb_3000.json --no-checks",
+  "out": "tokenizer/reference_1mb_3000.json",
+  "vocab_size": 3257,
+  "train_txt": {
+    "path": "data/final/train.txt",
+    "bytes": 1273551819,
+    "sha256": "aec4bbb7735e623f8dada27c77eb6a93adf722de241357f0137926919c5203c6"
+  },
+  "sample_mb": 1.0,
+  "trained_on": {
+    "path": "/Users/noorfatima/Desktop/LLM/urdu-bpe/data/samples/train_1mb.txt",
+    "bytes": 986230,
+    "sha256": "045863a0aefcf748df9102dd458ab554389a85c9e0d5535c07aff6ea909d17e9"
+  },
+  "started_utc": "2026-10-13T14:53:35Z",
+  "git": {
+    "hash": "654102d9281b4356ee9aecfedaa816fc9b9c6c00",
+    "dirty": true
+  },
+  "word_occurrences": 131789,
+  "distinct_words": null,
+  "workers": 1,
+  "resumed_from": 0,
+  "merges": 3000,
+  "phases": {
+    "read": 0.0,
+    "train_reference": 151.14,
+    "save": 0.01
+  },
+  "total_seconds": 151.15,
+  "finished_utc": "2026-10-13T14:56:07Z",
+  "merges_per_s_overall": 19.8,
+  "peak_rss_mb": {
+    "trainer": 88.8,
+    "count_workers": 5.6
+  },
+  "machine": {
+    "os": "Darwin",
+    "os_version": "macOS 14.4.1",
+    "kernel": "23.4.0",
+    "arch": "arm64",
+    "cpu_model": "Apple M2",
+    "physical_cores": 8,
+    "logical_cores": 8,
+    "ram_bytes": 8589934592,
+    "python_version": "3.12.15",
+    "regex_version": "2026.9.29",
+    "numpy_version": "2.5.4"
+  }
+}

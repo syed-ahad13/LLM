@@ -433,16 +433,34 @@ Add one entry for each decision that affects the data, the tokenizer or the repo
 ### 2026-10-13: Step 6: byte budget, split and data card
 - **Decision:**
   - **Sizes.** Budgets and shares count file bytes: the text plus the 13-byte `<|endoftext|>` written after each document. UFAL's 5.33M one-sentence documents carry 69 MB of separators, about 10% on top of their text.
-  - **Budget (proposed, waiting for approval).** The brief's rules cannot all hold. The four sources it keeps whole (UFAL 702.21, Wikipedia 513.78, own_scrape 76.01 and Makhzan 50.75 MB of text) already hold 1,342.75 MB, or 1,416 MB with separators, above the 1.3 GB ceiling. Proposed: keep the 1.3 GB ceiling; keep Wikipedia, own_scrape and Makhzan whole; fill FineWeb-2 up to its 45% cap; subsample UFAL into the rest (about 70 MB, rate about 0.09). Urdu News 1M gets nothing: `punct_stripped` holds for all its documents, so its cap is 10%, and no space is left. Command: `python clean/budget.py --fill fineweb2_urd ufal_umc urdu_news_1m`. The full-run numbers go here after the run.
+  - **Budget (option A, approved 2026-10-13).** The brief's rules cannot all hold. The four sources it keeps whole (UFAL 702.21, Wikipedia 513.78, own_scrape 76.01 and Makhzan 50.75 MB of text) already hold 1,342.75 MB, or 1,416 MB with separators, above the 1.3 GB ceiling. Chosen: keep the 1.3 GB ceiling; keep Wikipedia, own_scrape and Makhzan whole; fill FineWeb-2 up to its 45% cap; subsample UFAL into the rest. Urdu News 1M gets nothing: `punct_stripped` holds for all its documents, so its cap is 10%, and no space is left. Command: `python clean/budget.py --fill fineweb2_urd ufal_umc urdu_news_1m`.
+  - **Full-run budget** (file MB, separators included):
+
+    | Source | Rule | Rate | Docs | File MB | Share |
+    |---|---|---:|---:|---:|---:|
+    | fineweb2_urd | fill | 0.0986 | 150,664 | 584.93 | 45.00% |
+    | wiki_ur | full | 1.0000 | 302,494 | 517.71 | 39.83% |
+    | own_scrape | full | 1.0000 | 16,950 | 76.23 | 5.86% |
+    | ufal_umc | fill | 0.0910 | 484,805 | 70.16 | 5.40% |
+    | makhzan | full | 1.0000 | 6,263 | 50.83 | 3.91% |
+    | urdu_news_1m | fill | 0 | 0 | 0 | 0% |
+    | **total** | | | 961,176 | 1,299.86 | 100% |
   - **Split.** Per source: sorted doc_ids, shuffled with `random.Random("1337:<source>")`, then train = n - 2k, val = k, test = k in that order, k = max(1, round(n/100)) rounded half up. A source with 0 kept documents is left out, and budget.py never leaves a source with 1 or 2. Each split is then shuffled across sources with `random.Random("1337:order:<split>")`.
   - **External shuffle.** Pass 1 holds only doc_ids. Pass 2 writes each document to one of 64 bucket files per split by position. Pass 3 sorts one bucket at a time. `<split>.ids` lists the doc_ids in file order, so the integrity tests can check that no document is in two splits.
 - **Options considered** (projected from the Step 5b sizes, file MB):
-  - **A, proposed:** 1.3 GB with UFAL subsampled. FineWeb 585 (45%), Wikipedia 518 (39.8%), own 76 (5.9%), Makhzan 51 (3.9%), UFAL 70 (5.4%). UFAL is the source that adds least per byte: shuffled sentences with no document context, from 2014, with the largest separator overhead.
+  - **A, chosen:** 1.3 GB with UFAL subsampled. FineWeb 585 (45%), Wikipedia 518 (39.8%), own 76 (5.9%), Makhzan 51 (3.9%), UFAL 70 (5.4%). UFAL is the source that adds least per byte: shuffled sentences with no document context, from 2014, with the largest separator overhead.
   - **A2:** as A with `--cap fineweb2_urd=0.40`. FineWeb 520 (40%), UFAL 135 (10.4%).
   - **B:** keep all four whole and allow 2.6 GB (`--total-mb 2600`). UFAL becomes 29.7% of the corpus. Rejected: twice the size, dominated by sentence-level 2014 text.
   - **Keeping UFAL whole at about 1.6 GB.** Rejected: UFAL 48%, FineWeb 11%.
   - **Urdu News 1M at its 10% cap.** Not proposed: its text lacks sentence punctuation and lost letters (اسلام آباد stored as اسلام باد); `--mb urdu_news_1m=X` adds it if wanted.
 - **Evidence:**
+  - Full run on the corpus machine (Apple M2, 8 cores, 8 GB RAM, Python 3.12.15), all six sources:
+    - budget scan 37 s (FineWeb-2 the longest at 36 s);
+    - split 38.7 s (pass 1 16.1 s, pass 2 19.1 s, pass 3 3.5 s);
+    - train.txt 941,950 documents, 1,273.55 MB, sha256 `aec4bbb7735e623f…`; val.txt 9,613 documents, 13.43 MB; test.txt 9,613 documents, 12.87 MB;
+    - 153,465,131 words and 1,232,737 unique words in all (train: 150,358,660 and 1,215,902);
+    - all 17 tests in `tests/test_split.py` passed, including the rerun with identical sha256;
+    - both character audits rerun on the same samples before `data_card.py`.
   - Dry run on the four real sources present on the second machine (1.0 GB budget, `--fill ufal_umc`; 8-core M-series Mac, 16 GB RAM):
     - budget scan 26 s, and its documents and MB match `dedup.json` exactly;
     - split 53 s, peak RSS 0.8 GB;
@@ -473,7 +491,7 @@ Add one entry for each decision that affects the data, the tokenizer or the repo
   - GPT-2's pattern cuts اُردُو into 5 pieces (`ا` `ُ` `رد` `ُ` `و`) and صورت‌حال into 3.
   - Timing on a stand-in 1 MB (993,276 bytes from the four cleaned sources on the second machine; not the official sample): 3,000 merges in 189 s, 63 ms per merge, 62 MB peak RSS (Apple M1 Pro, Python 3.12.14).
   - The first merges rebuild two-byte letters (ا, ی, ک, ر). Merges 3 and 4 are a space plus a lead byte (`␣\xd8`, `␣\xd9`), tokens that are not valid UTF-8 on their own.
-  - The official run on train_1mb.txt goes here when it is done.
+  - Official run on `data/samples/train_1mb.txt` (986,230 bytes, sha256 `045863a0aefcf748…`; Apple M2, Python 3.12.15): 3,000 merges in 151.1 s, 19.8 merges per second, 88.8 MB peak RSS. The first merges again rebuild two-byte letters (ا, ی, ک, ر); here a space plus a lead byte comes at merges 3 and 5 (`␣\xd8`, `␣\xd9`).
 - **Consequence:** Part C's question on merges that are not valid UTF-8 has early examples. Step 8 compares its merges, and their counts (`meta.merge_counts`), with `tokenizer/reference_1mb_3000.json`.
 
 ### 2026-10-13: Step 8: fast trainer
@@ -499,7 +517,12 @@ Add one entry for each decision that affects the data, the tokenizer or the repo
       - 100 MB: 13.1 s in total, 282,608 distinct words, peak RSS 455 MB.
     - Fits: distinct words grow as bytes^0.62, training time as distinct words^1.13, memory as distinct words^0.82. Estimate for that 980 MB file: about 1.2 minutes and 1.4 GB.
     - cProfile (100 MB): the time is in `train`'s own loop and in `dict.get`.
-  - The official numbers come from `analysis/equivalence_1mb.py` and `analysis/scaling.py` on the real train_1mb.txt and train.txt; they are written to `docs/equivalence_1mb.md` and `docs/scaling.md`.
+  - Official runs on the corpus machine (Apple M2, 8 GB RAM; [docs/equivalence_1mb.md](equivalence_1mb.md), [docs/scaling.md](scaling.md)):
+    - train_1mb.txt: identical 3,000 merges and pair counts; fast 0.32 s against the reference's 151.1 s (465x); 14,996 distinct words.
+    - Prefixes of train.txt, 49,743 merges each:
+      - 10 MB: 2.2 s in total, 63,750 distinct words, peak RSS 138 MB.
+      - 100 MB: 10.5 s in total, 276,536 distinct words, peak RSS 410 MB.
+    - Fits: distinct words grow as bytes^0.64, training time as distinct words^1.17, memory as distinct words^0.74. Estimate for the 1,274 MB train.txt: 1,399,203 distinct words, 1.3 minutes, 1.4 GB. The full run (Step 9) gave 1,425,662 distinct words, 76.5 s and 1.44 GB.
 - **Consequence:**
   - The full 50,000-token training (Step 9) should take minutes, not hours.
   - FineWeb's web text adds English, URLs and numbers, so expect more distinct words than the stand-in. `docs/scaling.md` gives the real estimate.
@@ -527,5 +550,9 @@ Add one entry for each decision that affects the data, the tokenizer or the repo
     - phases: count_words 1.16 s, init 0.40 s, merges 6.70 s (7,425 merges/s; 1,023/s in the first 5,000), save 0.11 s; 8.4 s in total; peak RSS 352 MB;
     - all checks passed: 49,743 merges, IDs 257-49,999, 0 merges with ID 256, save/load identical on 4.83 MB of val, 1,000/1,000 round trips, 0 repeated tokens;
     - on 4.83 MB of val: 1.19 tokens per word, 6.94 bytes per token, 87.5% of words a single token.
-  - The official numbers come from the run on the corpus machine (`tokenizer/train_log.json`, `docs/training_run.md`).
+  - Full run on the corpus machine (Apple M2, 8 cores, 8 GB RAM, Python 3.12.15; `tokenizer/train_log.json`, [docs/training_run.md](training_run.md)), `--workers 7`, on train.txt (1,273.55 MB, 170,041,947 pre-tokens, 1,425,662 distinct words):
+    - phases: count_words 13.2 s, init 3.4 s, merges 59.9 s (831 merges/s), save 0.1 s; 76.5 s in total; peak RSS 1.44 GB in the trainer, 0.28 GB in a counting worker;
+    - all checks passed: 49,743 merges, IDs 257-49,999, 0 merges with ID 256, save/load identical on 5.0 MB of val, 1,000/1,000 round trips, 0 repeated tokens;
+    - on 5.0 MB of val: 1.178 tokens per word, 7.11 bytes per token, 88.3% of words a single token;
+    - `tests/test_trained_tokenizer.py` and `tests/test_bpe_reference.py`: 39 passed, 1 skipped (the handout sanity check).
 - **Consequence:** the README's "Rebuild the tokenizer from train.txt" section now holds the exact commands, including the resume command. The finished tokenizer files and `train_log.json` are committed; checkpoints are gitignored.

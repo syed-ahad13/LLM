@@ -1,0 +1,655 @@
+{
+  "trainer": "fast",
+  "command": "python train_tokenizer.py --input data/final/train.txt --vocab-size 50000 --out tokenizer/urdu_bpe_50k.json --workers 7 --checkpoint-every 5000",
+  "out": "tokenizer/urdu_bpe_50k.json",
+  "vocab_size": 50000,
+  "train_txt": {
+    "path": "data/final/train.txt",
+    "bytes": 1273551819,
+    "sha256": "aec4bbb7735e623f8dada27c77eb6a93adf722de241357f0137926919c5203c6"
+  },
+  "sample_mb": null,
+  "trained_on": {
+    "path": "data/final/train.txt",
+    "bytes": 1273551819,
+    "sha256": "aec4bbb7735e623f8dada27c77eb6a93adf722de241357f0137926919c5203c6"
+  },
+  "started_utc": "2026-10-13T14:57:21Z",
+  "git": {
+    "hash": "654102d9281b4356ee9aecfedaa816fc9b9c6c00",
+    "dirty": true
+  },
+  "distinct_words": 1425662,
+  "word_occurrences": 170041947,
+  "count_words_cached": false,
+  "workers": 7,
+  "resumed_from": 0,
+  "heap_compactions": 0,
+  "merge_seconds_before_resume": 0.0,
+  "progress": [
+    {
+      "merge": 1000,
+      "count": 60125,
+      "token": "␣آیا",
+      "seconds": 38.49,
+      "merges_per_s": 26.0,
+      "heap": 155730,
+      "pairs": 148558,
+      "peak_rss_mb": 1121.8
+    },
+    {
+      "merge": 2000,
+      "count": 25987,
+      "token": "␣ویب",
+      "seconds": 42.31,
+      "merges_per_s": 261.3,
+      "heap": 255617,
+      "pairs": 242585,
+      "peak_rss_mb": 1135.4
+    },
+    {
+      "merge": 3000,
+      "count": 14799,
+      "token": "␣فائنل",
+      "seconds": 44.38,
+      "merges_per_s": 483.7,
+      "heap": 337308,
+      "pairs": 318945,
+      "peak_rss_mb": 1136.4
+    },
+    {
+      "merge": 4000,
+      "count": 9549,
+      "token": "␣انعقاد",
+      "seconds": 45.05,
+      "merges_per_s": 1490.9,
+      "heap": 413565,
+      "pairs": 388890,
+      "peak_rss_mb": 1137.0
+    },
+    {
+      "merge": 5000,
+      "count": 6766,
+      "token": "␣بیگم",
+      "seconds": 46.85,
+      "merges_per_s": 555.4,
+      "heap": 486420,
+      "pairs": 454507,
+      "peak_rss_mb": 1137.2
+    },
+    {
+      "merge": 6000,
+      "count": 5069,
+      "token": "موجود",
+      "seconds": 47.3,
+      "merges_per_s": 2252.1,
+      "heap": 547817,
+      "pairs": 508606,
+      "peak_rss_mb": 1141.9
+    },
+    {
+      "merge": 7000,
+      "count": 3973,
+      "token": "␣مبارکباد",
+      "seconds": 48.99,
+      "merges_per_s": 589.3,
+      "heap": 601992,
+      "pairs": 556310,
+      "peak_rss_mb": 1141.9
+    },
+    {
+      "merge": 8000,
+      "count": 3173,
+      "token": "␣بیٹری",
+      "seconds": 49.29,
+      "merges_per_s": 3376.7,
+      "heap": 651019,
+      "pairs": 597281,
+      "peak_rss_mb": 1141.9
+    },
+    {
+      "merge": 9000,
+      "count": 2602,
+      "token": "␣برانچ",
+      "seconds": 49.57,
+      "merges_per_s": 3571.3,
+      "heap": 698761,
+      "pairs": 638182,
+      "peak_rss_mb": 1141.9
+    },
+    {
+      "merge": 10000,
+      "count": 2180,
+      "token": "␣صحبت",
+      "seconds": 51.16,
+      "merges_per_s": 629.4,
+      "heap": 743695,
+      "pairs": 676841,
+      "peak_rss_mb": 1143.6
+    },
+    {
+      "merge": 11000,
+      "count": 1833,
+      "token": "␣گرجا",
+      "seconds": 51.4,
+      "merges_per_s": 4043.8,
+      "heap": 781520,
+      "pairs": 708674,
+      "peak_rss_mb": 1146.7
+    },
+    {
+      "merge": 12000,
+      "count": 1571,
+      "token": "␣کلائنٹ",
+      "seconds": 51.61,
+      "merges_per_s": 4769.8,
+      "heap": 819842,
+      "pairs": 741241,
+      "peak_rss_mb": 1152.6
+    },
+    {
+      "merge": 13000,
+      "count": 1364,
+      "token": "اوس",
+      "seconds": 51.8,
+      "merges_per_s": 5432.6,
+      "heap": 854217,
+      "pairs": 769889,
+      "peak_rss_mb": 1157.8
+    },
+    {
+      "merge": 14000,
+      "count": 1193,
+      "token": "ایئر",
+      "seconds": 51.98,
+      "merges_per_s": 5446.6,
+      "heap": 887202,
+      "pairs": 797575,
+      "peak_rss_mb": 1163.9
+    },
+    {
+      "merge": 15000,
+      "count": 1053,
+      "token": "␣الاٹ",
+      "seconds": 52.16,
+      "merges_per_s": 5743.8,
+      "heap": 917758,
+      "pairs": 822584,
+      "peak_rss_mb": 1170.3
+    },
+    {
+      "merge": 16000,
+      "count": 939,
+      "token": "␣ہچکچاہٹ",
+      "seconds": 53.71,
+      "merges_per_s": 644.9,
+      "heap": 945564,
+      "pairs": 845128,
+      "peak_rss_mb": 1175.7
+    },
+    {
+      "merge": 17000,
+      "count": 842,
+      "token": "آگے",
+      "seconds": 53.86,
+      "merges_per_s": 6556.3,
+      "heap": 972823,
+      "pairs": 867474,
+      "peak_rss_mb": 1182.0
+    },
+    {
+      "merge": 18000,
+      "count": 759,
+      "token": "␣چغتائی",
+      "seconds": 54.02,
+      "merges_per_s": 6256.1,
+      "heap": 1001279,
+      "pairs": 890175,
+      "peak_rss_mb": 1184.2
+    },
+    {
+      "merge": 19000,
+      "count": 691,
+      "token": "␣اسپورٹ",
+      "seconds": 54.15,
+      "merges_per_s": 7715.6,
+      "heap": 1026932,
+      "pairs": 910483,
+      "peak_rss_mb": 1187.5
+    },
+    {
+      "merge": 20000,
+      "count": 633,
+      "token": "␣×",
+      "seconds": 54.3,
+      "merges_per_s": 6716.1,
+      "heap": 1050454,
+      "pairs": 928537,
+      "peak_rss_mb": 1191.1
+    },
+    {
+      "merge": 21000,
+      "count": 580,
+      "token": "␣سریش",
+      "seconds": 54.48,
+      "merges_per_s": 5415.9,
+      "heap": 1073098,
+      "pairs": 946286,
+      "peak_rss_mb": 1196.0
+    },
+    {
+      "merge": 22000,
+      "count": 533,
+      "token": "␣پاکر",
+      "seconds": 54.59,
+      "merges_per_s": 8893.4,
+      "heap": 1095011,
+      "pairs": 963245,
+      "peak_rss_mb": 1197.1
+    },
+    {
+      "merge": 23000,
+      "count": 491,
+      "token": "␣submarine",
+      "seconds": 54.71,
+      "merges_per_s": 8999.5,
+      "heap": 1115715,
+      "pairs": 979360,
+      "peak_rss_mb": 1201.4
+    },
+    {
+      "merge": 24000,
+      "count": 454,
+      "token": "adelphia",
+      "seconds": 54.83,
+      "merges_per_s": 8270.3,
+      "heap": 1137643,
+      "pairs": 996316,
+      "peak_rss_mb": 1204.8
+    },
+    {
+      "merge": 25000,
+      "count": 422,
+      "token": "␣قرطبی",
+      "seconds": 54.93,
+      "merges_per_s": 9713.1,
+      "heap": 1157145,
+      "pairs": 1011181,
+      "peak_rss_mb": 1207.6
+    },
+    {
+      "merge": 26000,
+      "count": 393,
+      "token": "␣دمہ",
+      "seconds": 56.47,
+      "merges_per_s": 649.2,
+      "heap": 1176251,
+      "pairs": 1025752,
+      "peak_rss_mb": 1211.6
+    },
+    {
+      "merge": 27000,
+      "count": 366,
+      "token": "ski",
+      "seconds": 56.57,
+      "merges_per_s": 9891.8,
+      "heap": 1194920,
+      "pairs": 1039837,
+      "peak_rss_mb": 1215.2
+    },
+    {
+      "merge": 28000,
+      "count": 341,
+      "token": "␣سندھیا",
+      "seconds": 56.67,
+      "merges_per_s": 10365.4,
+      "heap": 1212594,
+      "pairs": 1053157,
+      "peak_rss_mb": 1218.1
+    },
+    {
+      "merge": 29000,
+      "count": 319,
+      "token": "␣نقاشی",
+      "seconds": 56.75,
+      "merges_per_s": 11534.9,
+      "heap": 1228437,
+      "pairs": 1065374,
+      "peak_rss_mb": 1221.5
+    },
+    {
+      "merge": 30000,
+      "count": 301,
+      "token": "␣قطعا",
+      "seconds": 56.84,
+      "merges_per_s": 11803.8,
+      "heap": 1244747,
+      "pairs": 1077442,
+      "peak_rss_mb": 1223.9
+    },
+    {
+      "merge": 31000,
+      "count": 285,
+      "token": "␣تاجدار",
+      "seconds": 56.97,
+      "merges_per_s": 7774.8,
+      "heap": 1258587,
+      "pairs": 1087762,
+      "peak_rss_mb": 1226.6
+    },
+    {
+      "merge": 32000,
+      "count": 269,
+      "token": "␣سبطین",
+      "seconds": 57.05,
+      "merges_per_s": 12345.8,
+      "heap": 1273546,
+      "pairs": 1098747,
+      "peak_rss_mb": 1229.0
+    },
+    {
+      "merge": 33000,
+      "count": 254,
+      "token": "سزا",
+      "seconds": 57.13,
+      "merges_per_s": 12559.9,
+      "heap": 1287795,
+      "pairs": 1109121,
+      "peak_rss_mb": 1231.6
+    },
+    {
+      "merge": 34000,
+      "count": 241,
+      "token": "jo",
+      "seconds": 57.21,
+      "merges_per_s": 12715.5,
+      "heap": 1302018,
+      "pairs": 1119598,
+      "peak_rss_mb": 1233.5
+    },
+    {
+      "merge": 35000,
+      "count": 229,
+      "token": "aga",
+      "seconds": 57.29,
+      "merges_per_s": 12785.8,
+      "heap": 1315927,
+      "pairs": 1130117,
+      "peak_rss_mb": 1236.5
+    },
+    {
+      "merge": 36000,
+      "count": 218,
+      "token": "آتے",
+      "seconds": 57.41,
+      "merges_per_s": 7928.1,
+      "heap": 1328371,
+      "pairs": 1139131,
+      "peak_rss_mb": 1240.5
+    },
+    {
+      "merge": 37000,
+      "count": 208,
+      "token": "␣Gm",
+      "seconds": 57.48,
+      "merges_per_s": 15111.7,
+      "heap": 1339742,
+      "pairs": 1147242,
+      "peak_rss_mb": 1243.1
+    },
+    {
+      "merge": 38000,
+      "count": 197,
+      "token": "چمپ",
+      "seconds": 57.55,
+      "merges_per_s": 14023.7,
+      "heap": 1352090,
+      "pairs": 1156029,
+      "peak_rss_mb": 1245.7
+    },
+    {
+      "merge": 39000,
+      "count": 188,
+      "token": "عطیہ",
+      "seconds": 57.62,
+      "merges_per_s": 14518.2,
+      "heap": 1362979,
+      "pairs": 1163800,
+      "peak_rss_mb": 1248.2
+    },
+    {
+      "merge": 40000,
+      "count": 180,
+      "token": "␣ہرقسم",
+      "seconds": 57.68,
+      "merges_per_s": 16126.1,
+      "heap": 1373906,
+      "pairs": 1171322,
+      "peak_rss_mb": 1250.6
+    },
+    {
+      "merge": 41000,
+      "count": 173,
+      "token": "␣Pont",
+      "seconds": 57.81,
+      "merges_per_s": 7690.2,
+      "heap": 1384302,
+      "pairs": 1178599,
+      "peak_rss_mb": 1255.5
+    },
+    {
+      "merge": 42000,
+      "count": 165,
+      "token": "مالا",
+      "seconds": 57.87,
+      "merges_per_s": 16213.1,
+      "heap": 1394610,
+      "pairs": 1185974,
+      "peak_rss_mb": 1256.1
+    },
+    {
+      "merge": 43000,
+      "count": 159,
+      "token": "␣رکتے",
+      "seconds": 57.93,
+      "merges_per_s": 16196.1,
+      "heap": 1404436,
+      "pairs": 1192742,
+      "peak_rss_mb": 1257.3
+    },
+    {
+      "merge": 44000,
+      "count": 153,
+      "token": "␣Lang",
+      "seconds": 59.45,
+      "merges_per_s": 659.9,
+      "heap": 1414154,
+      "pairs": 1199583,
+      "peak_rss_mb": 1258.7
+    },
+    {
+      "merge": 45000,
+      "count": 147,
+      "token": "␣جالبی",
+      "seconds": 59.55,
+      "merges_per_s": 9746.6,
+      "heap": 1422990,
+      "pairs": 1205646,
+      "peak_rss_mb": 1428.5
+    },
+    {
+      "merge": 46000,
+      "count": 141,
+      "token": "وینشن",
+      "seconds": 59.68,
+      "merges_per_s": 7725.2,
+      "heap": 1431503,
+      "pairs": 1211588,
+      "peak_rss_mb": 1433.3
+    },
+    {
+      "merge": 47000,
+      "count": 136,
+      "token": "minal",
+      "seconds": 59.74,
+      "merges_per_s": 17436.4,
+      "heap": 1440660,
+      "pairs": 1217839,
+      "peak_rss_mb": 1434.5
+    },
+    {
+      "merge": 48000,
+      "count": 131,
+      "token": "پہچان",
+      "seconds": 59.78,
+      "merges_per_s": 22504.4,
+      "heap": 1448170,
+      "pairs": 1222980,
+      "peak_rss_mb": 1436.2
+    },
+    {
+      "merge": 49000,
+      "count": 127,
+      "token": "␣سیموئلز",
+      "seconds": 59.84,
+      "merges_per_s": 18808.3,
+      "heap": 1456526,
+      "pairs": 1228877,
+      "peak_rss_mb": 1438.1
+    },
+    {
+      "merge": 49743,
+      "count": 124,
+      "token": "␣org",
+      "seconds": 59.87,
+      "merges_per_s": 20396.3,
+      "heap": 1462321,
+      "pairs": 1232809,
+      "peak_rss_mb": 1439.4
+    }
+  ],
+  "merges_per_s_windows": [
+    {
+      "from": 1,
+      "to": 5000,
+      "seconds": 46.85,
+      "merges_per_s": 106.7
+    },
+    {
+      "from": 5001,
+      "to": 10000,
+      "seconds": 4.31,
+      "merges_per_s": 1160.1
+    },
+    {
+      "from": 10001,
+      "to": 15000,
+      "seconds": 1.0,
+      "merges_per_s": 5000.0
+    },
+    {
+      "from": 15001,
+      "to": 20000,
+      "seconds": 2.14,
+      "merges_per_s": 2336.4
+    },
+    {
+      "from": 20001,
+      "to": 25000,
+      "seconds": 0.63,
+      "merges_per_s": 7936.5
+    },
+    {
+      "from": 25001,
+      "to": 30000,
+      "seconds": 1.91,
+      "merges_per_s": 2617.8
+    },
+    {
+      "from": 30001,
+      "to": 35000,
+      "seconds": 0.45,
+      "merges_per_s": 11111.1
+    },
+    {
+      "from": 35001,
+      "to": 40000,
+      "seconds": 0.39,
+      "merges_per_s": 12820.5
+    },
+    {
+      "from": 40001,
+      "to": 45000,
+      "seconds": 1.87,
+      "merges_per_s": 2673.8
+    },
+    {
+      "from": 45001,
+      "to": 49743,
+      "seconds": 0.32,
+      "merges_per_s": 14821.9
+    }
+  ],
+  "merges": 49743,
+  "phases": {
+    "count_words": 13.17,
+    "init": 3.36,
+    "merges": 59.87,
+    "save": 0.1
+  },
+  "total_seconds": 76.51,
+  "finished_utc": "2026-10-13T14:58:38Z",
+  "merges_per_s_overall": 830.8,
+  "peak_rss_mb": {
+    "trainer": 1439.4,
+    "count_workers": 281.4
+  },
+  "machine": {
+    "os": "Darwin",
+    "os_version": "macOS 14.4.1",
+    "kernel": "23.4.0",
+    "arch": "arm64",
+    "cpu_model": "Apple M2",
+    "physical_cores": 8,
+    "logical_cores": 8,
+    "ram_bytes": 8589934592,
+    "python_version": "3.12.15",
+    "regex_version": "2026.9.29",
+    "numpy_version": "2.5.4"
+  },
+  "checks": {
+    "merges": 49743,
+    "vocab_size": 50000,
+    "val": "/Users/noorfatima/Desktop/LLM/urdu-bpe/data/final/val.txt",
+    "merge_ids": [
+      257,
+      49999
+    ],
+    "merges_touching_256": 0,
+    "tokens_repeating_earlier_bytes": 0,
+    "repeat_examples": [],
+    "save_load": {
+      "identical_merges": true,
+      "identical_encodings": true,
+      "docs": 3452,
+      "bytes": 4954111
+    },
+    "round_trip": {
+      "docs": 1000,
+      "failures": 0
+    },
+    "metrics": {
+      "docs": 3452,
+      "bytes": 4954111,
+      "words": 591274,
+      "tokens": 696671,
+      "tokens_per_word": 1.1783,
+      "bytes_per_token": 7.1111,
+      "single_token_word_share": 0.8826,
+      "definitions": "words: str.split(); a word is single-token if ' ' + word encodes to one token"
+    },
+    "failures": [],
+    "passed": true,
+    "seconds": 1.6
+  }
+}
