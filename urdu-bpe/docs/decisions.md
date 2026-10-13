@@ -475,3 +475,31 @@ Add one entry for each decision that affects the data, the tokenizer or the repo
   - The first merges rebuild two-byte letters (ا, ی, ک, ر). Merges 3 and 4 are a space plus a lead byte (`␣\xd8`, `␣\xd9`), tokens that are not valid UTF-8 on their own.
   - The official run on train_1mb.txt goes here when it is done.
 - **Consequence:** Part C's question on merges that are not valid UTF-8 has early examples. Step 8 compares its merges, and their counts (`meta.merge_counts`), with `tokenizer/reference_1mb_3000.json`.
+
+### 2026-10-13: Step 8: fast trainer
+- **Decision:** `BPETokenizer.train` keeps the state below and updates it incrementally; `bpe.py`'s module docstring states the invariants.
+  - **Words.** One list of token IDs per distinct word, with its count (optimization 1, `count_words`).
+  - **Pair counts.** `pair_counts` keyed by `(a << 16) | b`, weighted by word count, overlaps included: exactly what the reference recounts.
+  - **Pair index.** `where`, from each pair to the words that hold or held it (optimization 2). Stale entries are skipped when used. A pair's entry is deleted once its count reaches 0: every new adjacency involves the token just created, so a dead pair can never come back.
+  - **Heap.** Entries `(-count, rk[a], rk[b], -pk)`, repaired lazily: an entry is used only if its count is current, a higher stale count is pushed again with the current count, a lower one is dropped. Only increases push.
+  - **rk.** `reverse_key` turns the greatest `(bytes_a, bytes_b)` into the heap minimum, compared as bytes in C.
+  - **`-pk`, not `pk`.** The brief's key ends in `pk`. `-pk` makes the rare tie between pairs with identical bytes go to the greater IDs, as `train_reference` does (Step 7 entry).
+  - **count_words** cuts 16 MB blocks after their last `<|endoftext|>`, counts them in a pool with at most 2 x workers blocks in flight, and caches the result in `data/cache/`, keyed by the file's sha256, the pattern and the special tokens.
+  - **Checkpoints.** `train(..., debug=N)` asserts the invariants: the merged pair is gone; no word is appended twice to a pair's list; a full recount every N merges. Checkpoints hold merges and counts, and `resume` replays them on every word.
+- **Options considered:**
+  - **Rebuild the heap, or take the max of `pair_counts`, after every merge.** Rejected: O(pairs) per merge, with hundreds of thousands of pairs.
+  - **Decrease-key on the heap.** Rejected: `heapq` has none, so it would need a hand-written indexed heap; lazy repair does the same job with the standard library.
+  - **Update only the pairs next to each merge site.** Not done: subtracting all old pairs of an affected word and adding all new ones is simpler to prove correct, and words are short. The profile shows the time in this loop, so revisit it only if the full run is slow.
+- **Evidence:**
+  - `tests/test_bpe_fast.py`: 300 random corpora (alphabets {a, b, c, space}, four Urdu letters + space + pesh, digits + punctuation; 50–3,000 characters; some with separators), trained to exhaustion by both trainers. The merges, the pair counts, the vocabulary, the encodings and the early-stop warning are identical in every case. Also: `reverse_key` on 100,000 random pairs (prefixes included), checkpoint/resume, heap rebuilds, and count_words on files read in odd block sizes with 1 and 2 workers.
+  - Stand-ins on the second machine (Apple M1 Pro, 16 GB; not the official sample):
+    - 1 MB from the four cleaned sources: identical 3,000 merges and counts; fast 0.36 s against the reference's 189.2 s (522x).
+    - Prefixes of the four-source dry-run train.txt, 49,743 merges each:
+      - 10 MB: 3.0 s in total, 67,819 distinct words, peak RSS 142 MB.
+      - 100 MB: 13.1 s in total, 282,608 distinct words, peak RSS 455 MB.
+    - Fits: distinct words grow as bytes^0.62, training time as distinct words^1.13, memory as distinct words^0.82. Estimate for that 980 MB file: about 1.2 minutes and 1.4 GB.
+    - cProfile (100 MB): the time is in `train`'s own loop and in `dict.get`.
+  - The official numbers come from `analysis/equivalence_1mb.py` and `analysis/scaling.py` on the real train_1mb.txt and train.txt; they are written to `docs/equivalence_1mb.md` and `docs/scaling.md`.
+- **Consequence:**
+  - The full 50,000-token training (Step 9) should take minutes, not hours.
+  - FineWeb's web text adds English, URLs and numbers, so expect more distinct words than the stand-in. `docs/scaling.md` gives the real estimate.

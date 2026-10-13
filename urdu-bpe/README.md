@@ -191,6 +191,21 @@ python -m pytest -q tests/test_bpe_reference.py -s   # -s prints what GPT-2's pa
 
 The 3,000-merge reference run takes a few minutes. It prints the first 30 merges and the wall-clock time, which is also stored in the tokenizer's `meta`. Step 8's fast trainer must learn identical merges on the same sample.
 
+## Fast trainer, equivalence and scaling (Part B, Step 8)
+
+`BPETokenizer.train` is the fast trainer and learns exactly the reference trainer's merges. It uses the handout's three optimizations:
+1. **`count_words`** counts each distinct word once. It reads 16 MB blocks cut at document boundaries in a process pool, and caches the counts in `data/cache/`.
+2. **An index from each pair to the words that contain it,** so a merge rewrites only those words. Integer pair keys and a lazily repaired heap keep the spec's tie-break.
+3. **A per-word cache in `encode`.**
+
+The state and its invariants are described in `bpe.py`'s docstring. `train` can check them with `debug=N`, write checkpoints and resume from one.
+
+```bash
+python analysis/equivalence_1mb.py      # fast vs tokenizer/reference_1mb_3000.json on train_1mb.txt -> docs/equivalence_1mb.md
+python analysis/scaling.py              # 10 MB and 100 MB prefixes of train.txt, 49,743 merges each -> docs/scaling.md
+python train_tokenizer.py --name urdu_bpe_50k   # fast trainer on train.txt to 50,000 tokens (Step 9)
+```
+
 ## Rebuild the tokenizer from train.txt
 
 Not written yet. The commands go here once Part B is done.

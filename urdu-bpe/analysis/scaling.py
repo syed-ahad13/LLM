@@ -1,0 +1,215 @@
+"""Part B: scaling dry run of the fast trainer on prefixes of train.txt, and an estimate for the full corpus.
+
+    python analysis/scaling.py                          # 10 MB and 100 MB prefixes -> docs/scaling.md
+    python analysis/scaling.py --sizes 10 100 300 --merges 49743 --input data/final/train.txt
+
+For each size: write the prefix (whole documents, data/samples/train_<N>mb.txt),
+then, in a fresh process so peak memory is per run, run count_words (process
+pool) and BPETokenizer.train to --merges merges or until pairs run out. Reports
+time per phase, merges per second at merges 1k, 10k, 30k and 49k (rates over
+the preceding 1,000 merges), and peak RSS of the trainer process and of the
+counting workers. The largest size is then trained once more under cProfile
+(word counts loaded from the cache) for the top 10 functions by own time.
+
+The estimate fits power laws through the two largest sizes: distinct words
+against bytes, then training time and peak memory against distinct words, and
+extrapolates to the size of --input. An exponent clearly above 1 is flagged as
+super-linear.
+"""
+
+import argparse
+import cProfile
+import io
+import json
+import math
+import pstats
+import resource
+import subprocess
+import sys
+import time
+from collections.abc import Sequence
+from pathlib import Path
+from typing import Any
+
+ROOT = Path(__file__).resolve().parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from bpe import BPETokenizer, count_words  # noqa: E402
+from clean.sample_1mb import prefix_at_boundary  # noqa: E402
+from common import machine_info, setup_logging  # noqa: E402
+
+DEFAULT_INPUT = ROOT / "data" / "final" / "train.txt"
+SAMPLES = ROOT / "data" / "samples"
+CACHE = ROOT / "data" / "cache"
+DEFAULT_OUT = ROOT / "docs" / "scaling.md"
+RATE_AT = (1000, 10000, 30000, 49000)
+SUPERLINEAR = 1.15
+
+
+def rss_mb(who: int) -> float:
+    peak = resource.getrusage(who).ru_maxrss
+    return peak / 1e6 if sys.platform == "darwin" else peak * 1024 / 1e6
+
+
+def run_one(path: Path, merges: int, workers: int | None, cache_dir: Path, profile: bool) -> dict[str, Any]:
+    """count_words + train on one file, in this process."""
+    t0 = time.perf_counter()
+    counts = count_words(path, workers, cache_dir=cache_dir)
+    t1 = time.perf_counter()
+    tok = BPETokenizer()
+    out: dict[str, Any] = {"bytes": path.stat().st_size, "count_seconds": round(t1 - t0, 2),
+                           "distinct_words": len(counts), "words": sum(counts.values())}
+    if profile:
+        prof = cProfile.Profile()
+        prof.enable()
+        summary = tok.train(counts, 257 + merges, log_every=1000)
+        prof.disable()
+        stream = io.StringIO()
+        pstats.Stats(prof, stream=stream).sort_stats("tottime").print_stats(10)
+        out["profile"] = stream.getvalue()
+    else:
+        summary = tok.train(counts, 257 + merges, log_every=1000)
+    out.update(train=summary, train_log=tok.train_log, peak_rss_mb=round(rss_mb(resource.RUSAGE_SELF), 1),
+               workers_peak_rss_mb=round(rss_mb(resource.RUSAGE_CHILDREN), 1))
+    return out
+
+
+def child(path: Path, merges: int, workers: int | None, cache_dir: Path, profile: bool, out: Path) -> dict[str, Any]:
+    cmd = [sys.executable, str(Path(__file__).resolve()), "--one", str(path), "--merges", str(merges),
+           "--cache-dir", str(cache_dir), "--json-out", str(out)]
+    if workers:
+        cmd += ["--workers", str(workers)]
+    if profile:
+        cmd.append("--profile")
+    subprocess.run(cmd, check=True)
+    return json.loads(out.read_text(encoding="utf-8"))
+
+
+def rate_at(result: dict[str, Any], merge: int) -> str:
+    for entry in result["train_log"]:
+        if entry["merge"] == merge:
+            return f"{entry['merges_per_s']:,.0f}"
+    return "-"
+
+
+def exponent(x1: float, y1: float, x2: float, y2: float) -> float:
+    return math.log(y2 / y1) / math.log(x2 / x1) if x1 > 0 and y1 > 0 and x2 != x1 else float("nan")
+
+
+def report(results: dict[int, dict[str, Any]], full_bytes: int, merges: int, input_path: Path) -> str:
+    sizes = sorted(results)
+    rows = ["| Prefix | Words | Distinct words | count_words s | Setup s | Merges s | Total s | Merges | "
+            + " | ".join(f"Merges/s at {m // 1000}k" for m in RATE_AT) + " | Heap rebuilds | Peak RSS MB (trainer / "
+            "count worker) |",
+            "|" + "---:|" * (10 + len(RATE_AT))]
+    for size in sizes:
+        r = results[size]
+        t = r["train"]
+        total = r["count_seconds"] + t["seconds"]
+        rows.append(f"| {r['bytes'] / 1e6:,.0f} MB | {r['words']:,} | {r['distinct_words']:,} | {r['count_seconds']:,.1f}"
+                    f" | {t['setup_seconds']:,.1f} | {t['merge_seconds']:,.1f} | {total:,.1f} | {t['merges']:,} | "
+                    + " | ".join(rate_at(r, m) for m in RATE_AT)
+                    + f" | {t['heap_compactions']} | {r['peak_rss_mb']:,.0f} / {r['workers_peak_rss_mb']:,.0f} |")
+    lines = ["# Fast trainer: scaling dry run", "",
+             f"Generated by `python analysis/scaling.py` on {time.strftime('%Y-%m-%d %H:%M %Z')}: prefixes of "
+             f"`{input_path}` (whole documents), {merges:,} merges each. Machine: {machine_info()['cpu_model']}, "
+             f"{machine_info()['physical_cores']} cores, {machine_info()['ram_bytes'] / 2**30:.0f} GiB RAM, Python "
+             f"{machine_info()['python_version']}.", "", *rows, "",
+             "Merges/s is the rate over the 1,000 merges before that point. count_words runs in a process pool; "
+             "Setup turns the distinct words into byte IDs and builds the pair counts, index and heap.", ""]
+    if len(sizes) >= 2:
+        a, b = results[sizes[-2]], results[sizes[-1]]
+        beta = exponent(a["bytes"], a["distinct_words"], b["bytes"], b["distinct_words"])
+        gamma = exponent(a["distinct_words"], a["train"]["seconds"], b["distinct_words"], b["train"]["seconds"])
+        delta = exponent(a["distinct_words"], a["peak_rss_mb"], b["distinct_words"], b["peak_rss_mb"])
+        count_rate = b["count_seconds"] / b["bytes"]
+        d_full = b["distinct_words"] * (full_bytes / b["bytes"]) ** beta
+        t_train = b["train"]["seconds"] * (d_full / b["distinct_words"]) ** gamma
+        t_count = count_rate * full_bytes
+        rss = b["peak_rss_mb"] * (d_full / b["distinct_words"]) ** delta
+        lines += [
+            "## Estimate for the full train.txt", "",
+            f"Fitted on the {sizes[-2]} MB and {sizes[-1]} MB runs, extrapolated to {full_bytes / 1e6:,.0f} MB:", "",
+            "| Quantity | Fit | Estimate |", "|---|---|---:|",
+            f"| Distinct words | bytes^{beta:.2f} | {d_full:,.0f} |",
+            f"| count_words | linear in bytes ({count_rate * 1e9:.1f} s per GB) | {t_count / 60:,.1f} min |",
+            f"| train (setup + merges) | distinct words^{gamma:.2f} | {t_train / 60:,.1f} min |",
+            f"| Total | | {(t_count + t_train) / 60:,.1f} min |",
+            f"| Peak RSS of the trainer | distinct words^{delta:.2f} | {rss / 1000:,.1f} GB |",
+            "",
+        ]
+        flags = []
+        if gamma > SUPERLINEAR:
+            flags.append(f"training time grows as distinct words^{gamma:.2f}: super-linear")
+        if delta > SUPERLINEAR:
+            flags.append(f"peak memory grows as distinct words^{delta:.2f}: super-linear")
+        a_rate, b_rate = a["count_seconds"] / a["bytes"], count_rate
+        if b_rate > 1.3 * a_rate and b["count_seconds"] > 5:
+            flags.append(f"count_words time per byte grew {b_rate / a_rate:.1f}x from {sizes[-2]} to {sizes[-1]} MB")
+        lines.append("**Super-linear?** " + ("; ".join(flags) + "." if flags else
+                     f"No: time grows as distinct words^{gamma:.2f} and memory as distinct words^{delta:.2f}, and "
+                     "distinct words grow more slowly than bytes."))
+        lines.append("")
+    prof = results[sizes[-1]].get("profile")
+    if prof:
+        body = prof.strip().splitlines()
+        start = next((i for i, line in enumerate(body) if line.strip().startswith("ncalls")), 0)
+        lines += [f"## cProfile, {sizes[-1]} MB training (top 10 by own time)", "",
+                  "A second training run under cProfile, with the word counts loaded from the cache; cProfile "
+                  "slows the run down, so its times are not the ones in the table.", "", "```",
+                  *body[start:start + 11], "```", ""]
+    return "\n".join(lines)
+
+
+def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
+    p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    p.add_argument("--input", type=Path, default=DEFAULT_INPUT)
+    p.add_argument("--sizes", type=int, nargs="+", default=[10, 100], help="prefix sizes in MB")
+    p.add_argument("--merges", type=int, default=49_743)
+    p.add_argument("--workers", type=int, default=None)
+    p.add_argument("--cache-dir", type=Path, default=CACHE)
+    p.add_argument("--samples-dir", type=Path, default=SAMPLES)
+    p.add_argument("--out", type=Path, default=DEFAULT_OUT)
+    p.add_argument("--no-profile", action="store_true")
+    p.add_argument("--one", type=Path, help=argparse.SUPPRESS)
+    p.add_argument("--profile", action="store_true", help=argparse.SUPPRESS)
+    p.add_argument("--json-out", type=Path, help=argparse.SUPPRESS)
+    return p.parse_args(argv)
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    args = parse_args(argv)
+    log = setup_logging("scaling")
+    if args.one:
+        args.json_out.write_text(json.dumps(run_one(args.one, args.merges, args.workers, args.cache_dir,
+                                                    args.profile)), encoding="utf-8")
+        return 0
+    if not args.input.exists():
+        raise SystemExit(f"no {args.input}; run Step 6 first")
+    results: dict[int, dict[str, Any]] = {}
+    args.samples_dir.mkdir(parents=True, exist_ok=True)
+    for size in sorted(args.sizes):
+        path = args.samples_dir / f"train_{size}mb.txt"
+        path.write_bytes(prefix_at_boundary(args.input, size * 1_000_000))
+        log.info("prefix %s: %d bytes", path, path.stat().st_size)
+        results[size] = child(path, args.merges, args.workers, args.cache_dir, False,
+                              args.samples_dir / f".scaling_{size}mb.json")
+        r = results[size]
+        log.info("%d MB: count %.1f s, train %.1f s, %d merges, peak RSS %.0f MB", size, r["count_seconds"],
+                 r["train"]["seconds"], r["train"]["merges"], r["peak_rss_mb"])
+    if not args.no_profile:
+        size = max(args.sizes)
+        prof = child(args.samples_dir / f"train_{size}mb.txt", args.merges, args.workers, args.cache_dir, True,
+                     args.samples_dir / f".scaling_{size}mb_profile.json")
+        results[size]["profile"] = prof["profile"]
+    text = report(results, args.input.stat().st_size, args.merges, args.input)
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    args.out.write_text(text, encoding="utf-8")
+    print(text)
+    print(f"wrote {args.out}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -20,20 +20,54 @@ Spec (CLAUDE.md, "Tokenizer spec"; docs/assignment.md, Part B):
 
 train_reference() is the reference trainer: every occurrence of every word is
 kept as its own list of byte IDs and all pairs are recounted after every merge.
-It is slow on purpose; the fast trainer (Step 8) must learn identical merges
-on the 1 MB sample.
+It is slow on purpose.
+
+train() is the fast trainer and learns exactly the same merges (Step 8,
+tests/test_bpe_fast.py, docs/equivalence_1mb.md). It uses the handout's three
+optimizations:
+1. count_words() counts each distinct word once (in a process pool, cached on
+   disk), and its pairs are weighted by its frequency;
+2. after a merge only the words that contained the pair are updated, found
+   through an index from each pair to the words that contain it;
+3. encode() caches the token IDs of every word already encoded.
+
+The fast trainer's state, and what stays true after every merge:
+- words[i]: the token IDs of distinct word i; freqs[i]: its count.
+- pair_counts[pk], pk = (a << 16) | b (every ID is below 65,536): the sum,
+  over the words, of freq times the number of adjacent (a, b) positions,
+  overlaps counted. That is exactly the reference trainer's recount. A pair
+  with count 0 is deleted, and the pair just merged always reaches 0.
+- where[pk]: the IDs of the words that contain (a, b) or once did. A new
+  adjacency always involves the token just created, which is created once, so
+  each word is appended to a pair's list at most once. Entries go stale when
+  later merges destroy the pair, and are skipped when the list is used.
+- heap: entries (-count, rk[a], rk[b], -pk). rk reverses byte order (see
+  reverse_key), so the smallest entry is the highest count, then the greatest
+  (bytes of a, bytes of b): the spec's tie-break, compared as C-level bytes.
+  The last element, -pk, settles a tie between pairs with identical bytes the
+  way train_reference does: greater IDs win. Every live pair has an entry
+  whose count is at least its current count; an entry is used only when its
+  count equals the current one. A higher stored count is pushed again with
+  the current count; a lower one is dropped (a fresher entry exists). Only
+  increases push; decreases are repaired lazily when popped.
 
 Standard library and regex only (tests/test_forbidden_imports.py).
 """
 
+import hashlib
+import heapq
 import json
 import logging
+import multiprocessing
 import os
+import pickle
 import re
+import resource
+import sys
 import time
 import unicodedata
-from collections import Counter
-from collections.abc import Iterable, Sequence
+from collections import Counter, deque
+from collections.abc import Iterable, Iterator, Mapping, Sequence
 from collections.abc import Set as AbstractSet
 from pathlib import Path
 from typing import Any, Literal
@@ -105,6 +139,139 @@ def token_display(token: bytes) -> str:
     return "".join(out)
 
 
+def reverse_key(token: bytes) -> bytes:
+    """A key that sorts byte strings in reverse: for x != y, x < y exactly when reverse_key(x) > reverse_key(y).
+
+    Each byte c becomes (0, 255 - c), which reverses the order at the first differing byte, and the end of
+    the string becomes (1, 0), which sorts after every byte, so a proper prefix (the smaller string) gets
+    the greater key.
+    """
+    return b"".join(bytes((0, 255 - c)) for c in token) + b"\x01\x00"
+
+
+def _peak_rss_mb() -> float:
+    peak = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+    return peak / 1e6 if sys.platform == "darwin" else peak * 1024 / 1e6  # bytes on macOS, KiB on Linux
+
+
+# ---------------------------------------------------------------------------
+# Word counting (optimization 1)
+# ---------------------------------------------------------------------------
+
+COUNT_BLOCK_BYTES = 16 * 1024 * 1024
+HEAP_SLACK = 1_000_000  # rebuild the heap when it holds more than 3 x live pairs + this many entries
+WORD_COUNTS_VERSION = 1
+_COMPILED: dict[str, Any] = {}
+
+
+def _count_text(text: str, pattern: str, special_tokens: Sequence[str]) -> Counter[str]:
+    """Pre-tokenized words of text and their counts; the special tokens are separators, not words."""
+    compiled = _COMPILED.get(pattern)
+    if compiled is None:
+        compiled = _COMPILED[pattern] = regex.compile(pattern)
+    counts: Counter[str] = Counter()
+    pieces = (re.split("|".join(re.escape(t) for t in sorted(special_tokens, key=len, reverse=True)), text)
+              if special_tokens else [text])
+    for piece in pieces:
+        if piece:
+            counts.update(compiled.findall(piece))
+    return counts
+
+
+def _count_chunk(item: tuple[bytes, str, tuple[str, ...]]) -> Counter[str]:
+    chunk, pattern, special_tokens = item
+    return _count_text(chunk.decode("utf-8"), pattern, special_tokens)
+
+
+def _iter_chunks(path: Path, block_bytes: int, separators: Sequence[bytes]) -> Iterator[bytes]:
+    """Blocks of the file, each cut just after its last separator; the rest is carried into the next block."""
+    carry = b""
+    with open(path, "rb") as f:
+        while block := f.read(block_bytes):
+            data = carry + block
+            ends = [i + len(s) for s in separators if (i := data.rfind(s)) != -1]
+            cut = max(ends, default=0)
+            if cut:
+                yield data[:cut]
+                carry = data[cut:]
+            else:
+                carry = data  # no separator yet: a long document; keep reading
+    if carry:
+        yield carry
+
+
+def _file_sha256(path: Path) -> str:
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        while block := f.read(COUNT_BLOCK_BYTES):
+            h.update(block)
+    return h.hexdigest()
+
+
+def count_words(source: str | os.PathLike[str], workers: int | None = None, *, pattern: str = URDU_PATTERN,
+                special_tokens: Sequence[str] = (ENDOFTEXT,), cache_dir: str | os.PathLike[str] | None = None,
+                block_bytes: int = COUNT_BLOCK_BYTES) -> dict[str, int]:
+    """Count the pre-tokenized words of a text (str) or of a file (a path object): {word: occurrences}.
+
+    The special tokens split the text and are not counted. A file is read in blocks of block_bytes, each cut
+    after its last special token so no document is split, and the blocks are counted in a pool of workers
+    (default: all cores but one). With cache_dir, the counts of a file are pickled under a key made of the
+    file's sha256, the pattern and the special tokens, and a rerun loads them instead of counting again.
+    """
+    specials = tuple(special_tokens)
+    if not isinstance(source, os.PathLike):
+        return dict(_count_text(source, pattern, specials))
+    path = Path(source)
+    cache_path = None
+    if cache_dir is not None:
+        config = hashlib.sha256(json.dumps([pattern, sorted(specials)]).encode("utf-8")).hexdigest()
+        file_sha = _file_sha256(path)
+        cache_path = Path(cache_dir) / f"word_counts_{file_sha[:16]}_{config[:12]}.pkl"
+        if cache_path.exists():
+            with open(cache_path, "rb") as f:
+                cached = pickle.load(f)
+            if (cached.get("version"), cached.get("file_sha256"), cached.get("pattern"),
+                    cached.get("special_tokens")) == (WORD_COUNTS_VERSION, file_sha, pattern, list(specials)):
+                log.info("word counts of %s loaded from %s", path, cache_path)
+                return cached["counts"]
+    start = time.perf_counter()
+    workers = workers or max(1, (os.cpu_count() or 2) - 1)
+    total: Counter[str] = Counter()
+    separators = [t.encode("utf-8") for t in specials]
+    chunks = ((chunk, pattern, specials) for chunk in _iter_chunks(path, block_bytes, separators))
+    n_chunks = 0
+    if workers == 1:
+        for item in chunks:
+            total.update(_count_chunk(item))
+            n_chunks += 1
+    else:
+        with multiprocessing.Pool(workers) as pool:
+            pending: deque[Any] = deque()
+            for item in chunks:  # at most 2 x workers blocks in flight, so the file is never all in memory
+                pending.append(pool.apply_async(_count_chunk, (item,)))
+                if len(pending) >= 2 * workers:
+                    total.update(pending.popleft().get())
+                    n_chunks += 1
+            while pending:
+                total.update(pending.popleft().get())
+                n_chunks += 1
+    counts = dict(total)
+    log.info("counted %s: %d blocks, %d distinct words, %d words in %.1f s", path, n_chunks, len(counts),
+             sum(counts.values()), time.perf_counter() - start)
+    if cache_path is not None:
+        cache_path.parent.mkdir(parents=True, exist_ok=True)
+        tmp = cache_path.with_name(f".{cache_path.name}.tmp-{os.getpid()}")
+        try:
+            with open(tmp, "wb") as f:
+                pickle.dump({"version": WORD_COUNTS_VERSION, "file_sha256": file_sha, "pattern": pattern,
+                             "special_tokens": list(specials), "counts": counts}, f,
+                            protocol=pickle.HIGHEST_PROTOCOL)
+            os.replace(tmp, cache_path)
+        finally:
+            tmp.unlink(missing_ok=True)
+    return counts
+
+
 class BPETokenizer:
     """Byte-level BPE with one special token, <|endoftext|> = 256, by default."""
 
@@ -126,6 +293,7 @@ class BPETokenizer:
         self.merges: list[Pair] = []
         self.merge_ranks: dict[Pair, int] = {}
         self.merge_counts: list[int] = []
+        self.train_log: list[dict[str, Any]] = []
         self._cache: dict[str, tuple[int, ...]] = {}
 
     @property
@@ -215,11 +383,210 @@ class BPETokenizer:
                 "seconds": round(time.perf_counter() - start, 3)}
 
     # ------------------------------------------------------------------
+    # Fast trainer (optimizations 1 and 2; state and invariants in the module docstring)
+    # ------------------------------------------------------------------
+
+    def train(self, word_counts: Mapping[str, int], vocab_size: int, *, log_every: int = 1000,
+              checkpoint_every: int = 5000, checkpoint_path: str | os.PathLike[str] | None = None,
+              resume: bool = False, debug: int = 0) -> dict[str, Any]:
+        """Learn vocab_size - 257 merges from {word: count} (see count_words), exactly as train_reference would
+        from the text those words came from.
+
+        log_every: log progress (and append to self.train_log) every this many merges; 0 turns it off.
+        checkpoint_every / checkpoint_path: save the merges so far every this many merges.
+        resume: start from the merges in checkpoint_path; each word is re-encoded by replaying them.
+        debug: if > 0, check the invariants: the merged pair is gone after every merge, no word is appended
+            twice to a pair's list, and every debug merges pair_counts equals a full recount (small inputs).
+        """
+        n_target = vocab_size - self.first_merge_id
+        if n_target < 0:
+            raise ValueError(f"vocab_size must be at least {self.first_merge_id}, got {vocab_size}")
+        if vocab_size > 1 << 16:
+            raise ValueError(f"vocab_size {vocab_size} does not fit the 16-bit IDs of the pair keys")
+        start = time.perf_counter()
+        self._reset()
+        if resume:
+            if checkpoint_path is None or not Path(checkpoint_path).exists():
+                raise FileNotFoundError(f"no checkpoint to resume from: {checkpoint_path}")
+            done = BPETokenizer.load(checkpoint_path)
+            if (done.pattern, done.special_tokens) != (self.pattern, self.special_tokens):
+                raise ValueError(f"{checkpoint_path} was trained with another pattern or other special tokens")
+            if len(done.merge_counts) != len(done.merges) or len(done.merges) > n_target:
+                raise ValueError(f"{checkpoint_path}: {len(done.merges)} merges with {len(done.merge_counts)} "
+                                 f"counts; cannot resume towards {n_target} merges")
+            for a, b in done.merges:
+                self._add_merge(a, b)
+            self.merge_counts = list(done.merge_counts)
+            log.info("resuming from %s after %d merges", checkpoint_path, len(self.merges))
+        resumed = len(self.merges)
+        vocab, merges, merge_counts = self.vocab, self.merges, self.merge_counts
+        rk = [reverse_key(vocab[i]) for i in range(self.first_merge_id + resumed)]
+
+        # Distinct words as token IDs (replaying the checkpoint's merges when resuming), then the pair counts,
+        # the pair -> words index and the heap.
+        words: list[list[int]] = []
+        freqs: list[int] = []
+        encode_bytes = self._encode_bytes
+        for word, f in word_counts.items():
+            if f <= 0:
+                continue
+            data = word.encode("utf-8", "surrogatepass")
+            ids = list(encode_bytes(data)) if resumed and len(data) > 1 else list(data)
+            if len(ids) > 1:
+                words.append(ids)
+                freqs.append(f)
+        pair_counts: dict[int, int] = {}
+        where: dict[int, list[int]] = {}
+        for wid, w in enumerate(words):
+            f = freqs[wid]
+            for i in range(len(w) - 1):
+                k = (w[i] << 16) | w[i + 1]
+                pair_counts[k] = pair_counts.get(k, 0) + f
+                lst = where.get(k)
+                if lst is None:
+                    where[k] = [wid]
+                elif lst[-1] != wid:
+                    lst.append(wid)
+        heap = [(-c, rk[k >> 16], rk[k & 0xFFFF], -k) for k, c in pair_counts.items()]
+        heapq.heapify(heap)
+        setup_seconds = time.perf_counter() - start
+        log.info("fast trainer: %d distinct words, %d pairs, set up in %.1f s", len(words), len(pair_counts),
+                 setup_seconds)
+
+        heappush, heappop, add_merge = heapq.heappush, heapq.heappop, self._add_merge
+        self.train_log = []
+        compactions = 0
+        t_last, m_last = time.perf_counter(), len(merges)
+        while len(merges) < n_target:
+            # Pop until an entry's count is the pair's current count.
+            pk = -1
+            while heap:
+                negc, rka, rkb, negk = heappop(heap)
+                cur = pair_counts.get(-negk)
+                if cur is None:
+                    continue  # the pair is gone
+                if -negc == cur:
+                    pk, count = -negk, cur
+                    break
+                if -negc > cur:
+                    heappush(heap, (-cur, rka, rkb, negk))  # the count went down since this entry was pushed
+                # a lower stored count: a fresher entry is in the heap
+            if pk < 0:
+                log.warning("no pair left after %d merges; %d were asked for", len(merges), n_target)
+                break
+            if heap and heap[0][1] == rka and heap[0][2] == rkb and -heap[0][0] == count \
+                    and pair_counts.get(-heap[0][3]) == count:
+                log.warning("merge %d: pairs %s and %s have the same bytes; the greater IDs win", len(merges) + 1,
+                            (pk >> 16, pk & 0xFFFF), (-heap[0][3] >> 16, -heap[0][3] & 0xFFFF))
+            a, b = pk >> 16, pk & 0xFFFF
+            z = add_merge(a, b)
+            rk.append(reverse_key(vocab[z]))
+            merge_counts.append(count)
+
+            # Rewrite only the words that contained (a, b); collect the pair count changes.
+            delta: dict[int, int] = {}
+            created: set[int] = set()
+            for wid in where.pop(pk, ()):
+                w = words[wid]
+                if a not in w:
+                    continue  # stale: an earlier merge took a
+                n = len(w)
+                out: list[int] = []
+                i = 0
+                hit = False
+                while i < n:
+                    t = w[i]
+                    if t == a and i + 1 < n and w[i + 1] == b:
+                        out.append(z)
+                        i += 2
+                        hit = True
+                    else:
+                        out.append(t)
+                        i += 1
+                if not hit:
+                    continue  # stale: (a, b) is no longer adjacent here
+                f = freqs[wid]
+                for i in range(n - 1):
+                    k = (w[i] << 16) | w[i + 1]
+                    delta[k] = delta.get(k, 0) - f
+                prev = out[0]
+                for i in range(1, len(out)):
+                    t = out[i]
+                    k = (prev << 16) | t
+                    delta[k] = delta.get(k, 0) + f
+                    if prev == z or t == z:
+                        lst = where.get(k)
+                        if lst is None:
+                            where[k] = [wid]
+                            if debug:
+                                created.add(k)
+                        elif lst[-1] != wid:
+                            if debug and k not in created:
+                                raise AssertionError(f"merge {len(merges)}: pair {(prev, t)} indexed before z={z}")
+                            lst.append(wid)
+                    prev = t
+                words[wid] = out
+
+            for k, d in delta.items():
+                if d == 0:
+                    continue
+                c = pair_counts.get(k, 0) + d
+                if c > 0:
+                    pair_counts[k] = c
+                    if d > 0:
+                        heappush(heap, (-c, rk[k >> 16], rk[k & 0xFFFF], -k))
+                elif c == 0:
+                    del pair_counts[k]
+                    where.pop(k, None)  # no new adjacency can recreate it: every new pair holds a new token
+                else:
+                    raise AssertionError(f"merge {len(merges)}: pair {(k >> 16, k & 0xFFFF)} count went to {c}")
+
+            m = len(merges)
+            if debug:
+                if pk in pair_counts:
+                    raise AssertionError(f"merge {m}: merged pair {(a, b)} still has count {pair_counts[pk]}")
+                if m % debug == 0:
+                    recount: dict[int, int] = {}
+                    for wid, w in enumerate(words):
+                        for i in range(len(w) - 1):
+                            k = (w[i] << 16) | w[i + 1]
+                            recount[k] = recount.get(k, 0) + freqs[wid]
+                    if recount != pair_counts:
+                        raise AssertionError(f"merge {m}: pair_counts differ from a full recount")
+            if len(heap) > 3 * len(pair_counts) + HEAP_SLACK:
+                heap = [(-c, rk[k >> 16], rk[k & 0xFFFF], -k) for k, c in pair_counts.items()]
+                heapq.heapify(heap)
+                compactions += 1
+            if log_every and m % log_every == 0:
+                now = time.perf_counter()
+                entry = {"merge": m, "count": count, "token": token_display(vocab[z]),
+                         "seconds": round(now - start, 2),
+                         "merges_per_s": round((m - m_last) / (now - t_last), 1) if now > t_last else None,
+                         "heap": len(heap), "pairs": len(pair_counts), "peak_rss_mb": round(_peak_rss_mb(), 1)}
+                self.train_log.append(entry)
+                log.info("merge %d/%d count %d %s | %s merges/s | heap %d | pairs %d | peak RSS %.0f MB", m,
+                         n_target, count, entry["token"], entry["merges_per_s"], len(heap), len(pair_counts),
+                         entry["peak_rss_mb"])
+                t_last, m_last = now, m
+            if checkpoint_path and checkpoint_every and m % checkpoint_every == 0 and m < n_target:
+                self.save(checkpoint_path, meta={"checkpoint": True, "merges_done": m})
+
+        self._cache.clear()
+        seconds = time.perf_counter() - start
+        return {"trainer": "fast", "merges": len(merges), "resumed_from": resumed, "distinct_words": len(words),
+                "setup_seconds": round(setup_seconds, 2), "merge_seconds": round(seconds - setup_seconds, 2),
+                "seconds": round(seconds, 2), "heap_compactions": compactions, "peak_rss_mb": round(_peak_rss_mb(), 1)}
+
+    # ------------------------------------------------------------------
     # Encoding and decoding
     # ------------------------------------------------------------------
 
     def _encode_word(self, word: str) -> tuple[int, ...]:
-        ids = list(word.encode("utf-8", "surrogatepass"))
+        return self._encode_bytes(word.encode("utf-8", "surrogatepass"))
+
+    def _encode_bytes(self, data: bytes) -> tuple[int, ...]:
+        """Merge the present pair with the lowest merge ID until none is left (= replaying the merges in order)."""
+        ids = list(data)
         ranks = self.merge_ranks
         while len(ids) > 1:
             best_id = None
